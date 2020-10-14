@@ -16,6 +16,7 @@ let knownImportsToIgnore = [
 
 let packageNameForDependency = [
     "ArgumentParser": "swift-argument-parser",
+    "AtomicModels": "GraphiteClient",
 ]
 
 let jsonEncoder = JSONEncoder()
@@ -30,7 +31,8 @@ struct ModuleDescription {
     let name: String
     let deps: [String]
     let path: String
-    let isTest: Bool
+    let isTestTarget: Bool
+    let isTestHelper: Bool
 }
 
 func generate(at url: URL, isTestTarget: Bool) throws -> [ModuleDescription] {
@@ -85,19 +87,31 @@ func generate(at url: URL, isTestTarget: Bool) throws -> [ModuleDescription] {
         let isTestHelper = moduleFolderUrl.path.hasSuffix("TestHelpers")
         
         result.append(
-            ModuleDescription(name: moduleName, deps: dependencies, path: String(path), isTest: isTestTarget && !isTestHelper)
+            ModuleDescription(name: moduleName, deps: dependencies, path: String(path), isTestTarget: isTestTarget, isTestHelper: isTestHelper)
         )
     }
     
     return result
 }
 
-func generatePackageSwift(raplacementForTargets: [String]) throws {
+func generatePackageSwift(
+    raplacementForTargets: [String],
+    replacementForTargetNames: [String],
+    replacementForTestHelpers: [String]
+) throws {
     log("Loading template")
     var templateContents = try String(contentsOf: URL(fileURLWithPath: "PackageTemplate.swift.txt"))
     templateContents = templateContents.replacingOccurrences(
         of: "<__TARGETS__>",
         with: raplacementForTargets.map { "        \($0)" }.joined(separator: "\n")
+    )
+    templateContents = templateContents.replacingOccurrences(
+        of: "<__TARGET_NAMES__>",
+        with: replacementForTargetNames.map { "                \"\($0)\"," }.joined(separator: "\n")
+    )
+    templateContents = templateContents.replacingOccurrences(
+        of: "<__TEST_HELPER_NAMES__>",
+        with: replacementForTestHelpers.map { "                \"\($0)\"," }.joined(separator: "\n")
     )
     
     let packageSwiftPath = URL(fileURLWithPath: "Package.swift")
@@ -127,8 +141,7 @@ func main() throws {
     var generatedTargetStatements = [String]()
     let sortedModuleDescriptions: [ModuleDescription] = moduleDescriptions.sorted { $0.name < $1.name }
     for moduleDescription in sortedModuleDescriptions {
-        generatedTargetStatements.append(".\(!moduleDescription.isTest ? "target" : "testTarget")(")
-        generatedTargetStatements.append("    // MARK: \(moduleDescription.name)")
+        generatedTargetStatements.append(".\(!(moduleDescription.isTestTarget && !moduleDescription.isTestHelper) ? "target" : "testTarget")(")
         generatedTargetStatements.append("    name: " + "\"\(moduleDescription.name)\"" + ",")
         generatedTargetStatements.append("    dependencies: [")
         for dependency in moduleDescription.deps {
@@ -142,7 +155,11 @@ func main() throws {
         generatedTargetStatements.append("    path: " + "\"" + moduleDescription.path + "\"")
         generatedTargetStatements.append("),")
     }
-    try generatePackageSwift(raplacementForTargets: generatedTargetStatements)
+    try generatePackageSwift(
+        raplacementForTargets: generatedTargetStatements,
+        replacementForTargetNames: sortedModuleDescriptions.filter { !$0.isTestTarget }.map { $0.name },
+        replacementForTestHelpers: sortedModuleDescriptions.filter { $0.isTestHelper }.map { $0.name }
+    )
 }
 
 try main()
