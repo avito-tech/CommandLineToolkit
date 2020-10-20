@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 set -xueo pipefail
 
 function generate_package() {
-    swift "PackageGenerator.swift"
+    swift run --package-path "$(pwd)/PackageGenerator/" package-gen $(pwd)
 }
 
 function open_xcodeproj() {

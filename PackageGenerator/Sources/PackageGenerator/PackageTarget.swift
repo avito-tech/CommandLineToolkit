@@ -1,0 +1,24 @@
+import Foundation
+
+/// Package target
+public struct PackageTarget: Codable, Hashable {
+    
+    /// Name of the target
+    public let name: String
+    
+    /// Target dependencies (other target names)
+    public let dependencies: Set<String>
+    
+    /// Path to source files
+    public let path: String
+    
+    /// Is this target is test target
+    public let isTest: Bool
+    
+    public init(name: String, dependencies: Set<String>, path: String, isTest: Bool) {
+        self.name = name
+        self.dependencies = dependencies
+        self.path = path
+        self.isTest = isTest
+    }
+}

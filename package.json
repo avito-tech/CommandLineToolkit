@@ -1,0 +1,20 @@
+{
+  "dependencies" : {
+    "external" : {},
+    "implicitSystemModules" : [
+      "Darwin",
+      "Foundation",
+      "XCTest"
+    ]
+  },
+  "name" : "CommandLineToolkit",
+  "platforms" : [
+    {
+      "name" : "macOS",
+      "version" : "10.15"
+    }
+  ],
+  "products" : "productForEachTarget",
+  "swiftToolsVersion" : "5.2",
+  "targets" : "discoverAutomatically"
+}

@@ -1,35 +1,29 @@
 // swift-tools-version:5.2
-
 import PackageDescription
-
 let package = Package(
     name: "CommandLineToolkit",
     platforms: [
         .macOS(.v10_15),
     ],
     products: [
-        .library(
-            name: "CommandLineToolkit",
-            targets: [
-                "DateProvider",
-                "FileSystem",
-                "PathLib",
-                "PlistLib",
-                "Tmp",
-                "Types",
-                "XcodeLocator",
-                "XcodeLocatorModels",
-            ]
-        ),
-        .library(
-            name: "CommandLineToolkitTestHelpers",
-            targets: [
-                "DateProviderTestHelpers",
-                "FileSystemTestHelpers",
-                "TestHelpers",
-                "TmpTestHelpers",
-            ]
-        ),
+        .library(name: "DateProvider", targets: ["DateProvider"]),
+        .library(name: "DateProviderTestHelpers", targets: ["DateProviderTestHelpers"]),
+        .library(name: "FileSystem", targets: ["FileSystem"]),
+        .library(name: "FileSystemTestHelpers", targets: ["FileSystemTestHelpers"]),
+        .library(name: "FileSystemTests", targets: ["FileSystemTests"]),
+        .library(name: "PathLib", targets: ["PathLib"]),
+        .library(name: "PathLibTests", targets: ["PathLibTests"]),
+        .library(name: "PlistLib", targets: ["PlistLib"]),
+        .library(name: "PlistLibTests", targets: ["PlistLibTests"]),
+        .library(name: "TemporaryStuffTests", targets: ["TemporaryStuffTests"]),
+        .library(name: "TestHelpers", targets: ["TestHelpers"]),
+        .library(name: "Tmp", targets: ["Tmp"]),
+        .library(name: "TmpTestHelpers", targets: ["TmpTestHelpers"]),
+        .library(name: "Types", targets: ["Types"]),
+        .library(name: "TypesTests", targets: ["TypesTests"]),
+        .library(name: "XcodeLocator", targets: ["XcodeLocator"]),
+        .library(name: "XcodeLocatorModels", targets: ["XcodeLocatorModels"]),
+        .library(name: "XcodeLocatorTests", targets: ["XcodeLocatorTests"]),
     ],
     dependencies: [
     ],
