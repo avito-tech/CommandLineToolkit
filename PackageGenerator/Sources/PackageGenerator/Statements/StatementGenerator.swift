@@ -68,7 +68,14 @@ public struct StatementGenerator {
                 }.sorted().map { IndentedStatement(level: 2, string: $0.statement + ",").statement }
             )
             statements.append("    ],")
-            statements.append("    path: \"\(target.path)\"")
+            statements.append("    path: \"\(target.path)\"" + (target.settings.linkerSettings.isDefined ? "," : ""))
+            
+            if target.settings.linkerSettings.isDefined {
+                statements.append("    linkerSettings: [")
+                statements.append(contentsOf: target.settings.linkerSettings.statements.map { "        " + $0 + "," })
+                statements.append("    ]")
+            }
+            
             statements.append("),")
             return statements
         }
@@ -98,7 +105,7 @@ public struct StatementGenerator {
             return products
         case .productForEachTarget:
             let packageTargets = try obtainPackageTargets(swiftPackage: swiftPackage, location: location)
-            return packageTargets.map { packageTarget in
+            return packageTargets.filter { !$0.isTest }.map { packageTarget in
                 PackageProduct(
                     name: packageTarget.name,
                     productType: .library,

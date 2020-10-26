@@ -34,15 +34,19 @@ public class FakeFileSystem: FileSystem {
         
     }
     
+    public var onMove: (AbsolutePath, AbsolutePath) throws -> () = { _, _ in }
+    
     public func move(source: AbsolutePath, destination: AbsolutePath) throws {
-        
+        try onMove(source, destination)
     }
+    
+    public var onDelete: (AbsolutePath) throws -> () = { _ in }
     
     public func delete(fileAtPath: AbsolutePath) throws {
-        
+        try onDelete(fileAtPath)
     }
     
-    public var propertiesProvider: (AbsolutePath) -> FilePropertiesContainer = { FakeFilePropertiesContainer(path: $0) }
+    public var propertiesProvider: (AbsolutePath) -> FilePropertiesContainer = { _ in FakeFilePropertiesContainer() }
     public func properties(forFileAtPath path: AbsolutePath) -> FilePropertiesContainer {
         propertiesProvider(path)
     }

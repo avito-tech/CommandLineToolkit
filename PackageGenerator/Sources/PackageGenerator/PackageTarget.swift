@@ -15,10 +15,20 @@ public struct PackageTarget: Codable, Hashable {
     /// Is this target is test target
     public let isTest: Bool
     
-    public init(name: String, dependencies: Set<String>, path: String, isTest: Bool) {
+    /// Various target specific settings
+    public let settings: TargetSpecificSettings
+    
+    public init(
+        name: String,
+        dependencies: Set<String>,
+        path: String,
+        isTest: Bool,
+        settings: TargetSpecificSettings
+    ) {
         self.name = name
         self.dependencies = dependencies
         self.path = path
         self.isTest = isTest
+        self.settings = settings
     }
 }

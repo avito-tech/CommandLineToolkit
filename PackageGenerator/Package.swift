@@ -14,7 +14,8 @@ let package = Package(
             dependencies: ["PackageGenerator"]
         ),
         .target(
-            name: "PackageGenerator"
+            name: "PackageGenerator",
+            linkerSettings: [.unsafeFlags([])]
         ),
         .testTarget(
             name: "PackageGeneratorTests",

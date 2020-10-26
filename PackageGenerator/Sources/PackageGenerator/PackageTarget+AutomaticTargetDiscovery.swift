@@ -6,15 +6,15 @@ public extension PackageTarget {
     static func discoverTargets(packageLocation: URL) throws -> [PackageTarget] {
         var packageTargets = [PackageTarget]()
         packageTargets.append(
-            contentsOf: try generate(at: packageLocation.appendingPathComponent("Sources", isDirectory: true), isTestTarget: false)
+            contentsOf: try generateTarget(at: packageLocation.appendingPathComponent("Sources", isDirectory: true), isTestTarget: false)
         )
         packageTargets.append(
-            contentsOf: try generate(at: packageLocation.appendingPathComponent("Tests", isDirectory: true), isTestTarget: true)
+            contentsOf: try generateTarget(at: packageLocation.appendingPathComponent("Tests", isDirectory: true), isTestTarget: true)
         )
         return packageTargets
     }
 
-    private static func generate(at url: URL, isTestTarget: Bool) throws -> [PackageTarget] {
+    private static func generateTarget(at url: URL, isTestTarget: Bool) throws -> [PackageTarget] {
         // `@testable import ModuleName // from package-name`, with optional `@testable ` and `// from package-name` parts
         let importStatementExpression = try NSRegularExpression(
             pattern: "^(@testable )?import (\\S+)$",
@@ -69,17 +69,27 @@ public extension PackageTarget {
             
             let isTestHelper = moduleFolderUrl.path.hasSuffix("TestHelpers")
             
+            let targetSettings = try loadTargetSpecificSettings(url: moduleFolderUrl)
+            
             result.append(
                 PackageTarget(
                     name: moduleName,
                     dependencies: importedDependencies,
                     path: String(path),
-                    isTest: isTestTarget && !isTestHelper
+                    isTest: isTestTarget && !isTestHelper,
+                    settings: targetSettings
                 )
             )
         }
         
         return result
     }
-
+    
+    private static func loadTargetSpecificSettings(url: URL) throws -> TargetSpecificSettings {
+        let file = url.appendingPathComponent("target.json", isDirectory: false)
+        guard FileManager().fileExists(atPath: file.path) else {
+            return TargetSpecificSettings(linkerSettings: LinkerSettings(unsafeFlags: []))
+        }
+        return try JSONDecoder().decode(TargetSpecificSettings.self, from: Data(contentsOf: file))
+    }
 }

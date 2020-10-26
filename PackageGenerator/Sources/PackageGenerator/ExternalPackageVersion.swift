@@ -5,24 +5,26 @@ public enum ExternalPackageVersion: Codable, Equatable {
     case upToNextMajor(String)
     case exact(String)
     case from(String)
+    case branch(String)
     
     private enum CodingKeys: CodingKey {
         case upToNextMajor
         case exact
         case from
+        case branch
     }
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        do {
-            self = .upToNextMajor(try container.decode(String.self, forKey: .upToNextMajor))
-        } catch {
-            do {
-                self = .exact(try container.decode(String.self, forKey: .exact))
-            } catch {
-                self = .from(try container.decode(String.self, forKey: .from))
-            }
-        }
+        self = try Throwable.perform({
+            .upToNextMajor(try container.decode(String.self, forKey: .upToNextMajor))
+        }, {
+            .exact(try container.decode(String.self, forKey: .exact))
+        }, {
+            .from(try container.decode(String.self, forKey: .from))
+        }, {
+            .branch(try container.decode(String.self, forKey: .branch))
+        })
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -34,6 +36,8 @@ public enum ExternalPackageVersion: Codable, Equatable {
             try container.encode(value, forKey: .upToNextMajor)
         case let .from(value):
             try container.encode(value, forKey: .from)
+        case let .branch(value):
+            try container.encode(value, forKey: .branch)
         }
     }
 }

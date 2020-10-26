@@ -8,7 +8,7 @@ public extension PackageDependencies {
         .map { (name: String, value: ExternalPackageLocation) -> String in
             switch value {
             case let .url(url, version, _):
-                return ".package(url: \"\(url)\", \(version.statement))"
+                return ".package(name: \"\(name)\", url: \"\(url)\", \(version.statement))"
             case let .local(path, _):
                 return ".package(name: \"\(name)\", path: \"\(path)\")"
             }

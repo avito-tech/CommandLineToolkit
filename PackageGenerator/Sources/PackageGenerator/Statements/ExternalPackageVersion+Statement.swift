@@ -9,6 +9,8 @@ public extension ExternalPackageVersion {
             return ".upToNextMajor(from: \"\(value)\")"
         case let .from(value):
             return "from: \"\(value)\""
+        case let .branch(value):
+            return ".branch(\"\(value)\")"
         }
     }
 }

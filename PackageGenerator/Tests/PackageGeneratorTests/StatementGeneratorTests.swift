@@ -28,7 +28,8 @@ final class StatementGeneratorTests: XCTestCase {
                         name: "TargetA",
                         dependencies: [],
                         path: "Sources/TargetA",
-                        isTest: false
+                        isTest: false,
+                        settings: TargetSpecificSettings(linkerSettings: LinkerSettings(unsafeFlags: []))
                     )
                 ])
             ),
@@ -47,7 +48,7 @@ final class StatementGeneratorTests: XCTestCase {
                 .library(name: \"TargetA\", targets: [\"TargetA\"]),
             ],
             dependencies: [
-                .package(url: "http://example.com/someexternalpackage", .exact("123")),
+                .package(name: "SomeExternalPackage", url: "http://example.com/someexternalpackage", .exact("123")),
             ],
             targets: [
                 .target(
@@ -55,6 +56,66 @@ final class StatementGeneratorTests: XCTestCase {
                     dependencies: [
                     ],
                     path: "Sources/TargetA"
+                ),
+            ]
+        )
+
+        """
+        
+        XCTAssertEqual(
+            statements.joined(separator: "\n"),
+            expectedContents
+        )
+    }
+    
+    func test___linker_settings() throws {
+        let statements = try StatementGenerator().generatePackageSwiftCode(
+            swiftPackage: SwiftPackage(
+                swiftToolsVersion: "1.2",
+                name: "TestPackage",
+                platforms: [],
+                products: PackageProducts.explicit([]),
+                dependencies: PackageDependencies(
+                    implicitSystemModules: [],
+                    external: [:]
+                ),
+                targets: PackageTargets.explicit([
+                    PackageTarget(
+                        name: "TargetA",
+                        dependencies: [],
+                        path: "Sources/TargetA",
+                        isTest: false,
+                        settings: TargetSpecificSettings(
+                            linkerSettings: LinkerSettings(
+                                unsafeFlags: ["some", "flags"]
+                            )
+                        )
+                    )
+                ])
+            ),
+            location: URL(fileURLWithPath: NSTemporaryDirectory())
+        )
+        
+        let expectedContents = """
+        // swift-tools-version:1.2
+        import PackageDescription
+        let package = Package(
+            name: "TestPackage",
+            platforms: [
+            ],
+            products: [
+            ],
+            dependencies: [
+            ],
+            targets: [
+                .target(
+                    name: "TargetA",
+                    dependencies: [
+                    ],
+                    path: "Sources/TargetA",
+                    linkerSettings: [
+                        .unsafeFlags(["some", "flags"]),
+                    ]
                 ),
             ]
         )

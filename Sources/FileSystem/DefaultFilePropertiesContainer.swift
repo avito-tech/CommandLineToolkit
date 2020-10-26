@@ -43,7 +43,7 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
         return value
     }
     
-    public func exists() throws -> Bool {
+    public func exists() -> Bool {
         fileManager.fileExists(atPath: path.pathString)
     }
     

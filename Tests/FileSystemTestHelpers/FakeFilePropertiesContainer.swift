@@ -3,10 +3,10 @@ import Foundation
 import PathLib
 
 public class FakeFilePropertiesContainer: FilePropertiesContainer {
-    public let path: AbsolutePath
-    
-    public init(path: AbsolutePath) {
-        self.path = path
+    public init(
+        pathExists: Bool = true
+    ) {
+        self.pathExists = pathExists
     }
     
     public var mdate = Date(timeIntervalSince1970: 500)
@@ -16,8 +16,8 @@ public class FakeFilePropertiesContainer: FilePropertiesContainer {
     public var executable = false
     public func isExecutable() throws -> Bool { executable }
     
-    public var pathExists = true
-    public func exists() throws -> Bool { pathExists }
+    public var pathExists: Bool
+    public func exists() -> Bool { pathExists }
     
     public var directory = false
     public func isDirectory() throws -> Bool { directory }
