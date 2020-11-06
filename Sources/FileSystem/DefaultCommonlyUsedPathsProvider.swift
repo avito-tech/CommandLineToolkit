@@ -40,6 +40,10 @@ public final class DefaultCommonlyUsedPathsProvider: CommonlyUsedPathsProvider {
             )
         )
     }
+    
+    public var currentWorkingDirectory: AbsolutePath {
+        AbsolutePath(fileManager.currentDirectoryPath)
+    }
 }
 
 extension SearchDomain {

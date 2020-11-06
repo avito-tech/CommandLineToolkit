@@ -55,12 +55,12 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
     
     func test___exists___when_exists() throws {
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
-        XCTAssertTrue(try properties.exists())
+        XCTAssertTrue(properties.exists())
     }
     
     func test___not_exists___when_not_exists() throws {
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath.appending(component: "nonexisting"))
-        XCTAssertFalse(try properties.exists())
+        XCTAssertFalse(properties.exists())
     }
     
     func test___is_directory___for_directory() throws {

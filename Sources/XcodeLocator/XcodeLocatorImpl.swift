@@ -24,7 +24,7 @@ public final class XcodeLocatorImpl: XcodeLocator {
                 return
             }
             let plistPath = path.appending(components: ["Contents", "Info.plist"])
-            guard try fileSystem.properties(forFileAtPath: plistPath).exists() else {
+            guard fileSystem.properties(forFileAtPath: plistPath).exists() else {
                 return
             }
             

@@ -7,7 +7,8 @@ public class FakeFileSystem: FileSystem {
         self.fakeCommonlyUsedPathsProvider = FakeCommonlyUsedPathsProvider(
             applicationsProvider: { _ in rootPath.appending(components: ["Applications"]) },
             cachesProvider: { _ in rootPath.appending(components: ["Library", "Caches"]) },
-            libraryProvider: { _ in rootPath.appending(component: "Library") }
+            libraryProvider: { _ in rootPath.appending(component: "Library") },
+            currentWorkingDirectoryProvider: { rootPath }
         )
     }
     

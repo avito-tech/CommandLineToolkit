@@ -76,4 +76,8 @@ public final class AbsolutePath: Path, Codable, Hashable {
     public static func == (left: AbsolutePath, right: AbsolutePath) -> Bool {
         return left.components == right.components
     }
+    
+    public var isRoot: Bool {
+        components.isEmpty
+    }
 }
