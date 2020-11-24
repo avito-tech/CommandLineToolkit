@@ -3,7 +3,9 @@
     "external" : {},
     "implicitSystemModules" : [
       "Darwin",
+      "Dispatch",
       "Foundation",
+      "Network",
       "XCTest"
     ]
   },
