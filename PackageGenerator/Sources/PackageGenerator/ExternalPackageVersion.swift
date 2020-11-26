@@ -6,12 +6,14 @@ public enum ExternalPackageVersion: Codable, Equatable {
     case exact(String)
     case from(String)
     case branch(String)
+    case revision(String)
     
     private enum CodingKeys: CodingKey {
         case upToNextMajor
         case exact
         case from
         case branch
+        case revision
     }
     
     public init(from decoder: Decoder) throws {
@@ -24,6 +26,8 @@ public enum ExternalPackageVersion: Codable, Equatable {
             .from(try container.decode(String.self, forKey: .from))
         }, {
             .branch(try container.decode(String.self, forKey: .branch))
+        }, {
+            .revision(try container.decode(String.self, forKey: .revision))
         })
     }
     
@@ -38,6 +42,8 @@ public enum ExternalPackageVersion: Codable, Equatable {
             try container.encode(value, forKey: .from)
         case let .branch(value):
             try container.encode(value, forKey: .branch)
+        case let .revision(value):
+            try container.encode(value, forKey: .revision)
         }
     }
 }

@@ -11,6 +11,8 @@ public extension ExternalPackageVersion {
             return "from: \"\(value)\""
         case let .branch(value):
             return ".branch(\"\(value)\")"
+        case let .revision(value):
+            return ".revision(\"\(value)\")"
         }
     }
 }
