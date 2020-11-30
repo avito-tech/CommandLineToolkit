@@ -36,6 +36,7 @@ function run_tests_parallel() {
 case "$1" in
     run_ci_tests)
         export ON_CI=true
+        export SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED=true
         run_tests_parallel
         ;;
     package)

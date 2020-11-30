@@ -17,8 +17,10 @@ func main() throws {
         swiftPackage: try package.loadSwiftPackage(),
         location: packageLocation
     ).joined(separator: "\n")
-        
-    if ProcessInfo.processInfo.environment["ON_CI"] == "true" {
+
+    // Note that Package.swift can be under `.gitignore`. For this case the check is not valid and makes no sense.
+    // Don't pass `VERIFY_PACKAGE_CONTENTS_ARE_UNCHANGED` if Package.swift is ignored.
+    if ProcessInfo.processInfo.environment["SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED"] == "true" {
         let currentContents = try Data(contentsOf: package.packageSwiftUrl)
         if currentContents != packageSwiftContents.data(using: .utf8) {
             fatalError("Contents of \(package.packageSwiftUrl.path) differs from expected. Please re-generate it and commit changes.")
