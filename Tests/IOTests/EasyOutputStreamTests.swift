@@ -91,7 +91,7 @@ final class EasyOutputStreamTests: XCTestCase {
         stream.close()
     }
     
-    func test___when_stream_error_occurs___invokes_stream_error_handler() {
+    func disabled_flaky_test___when_stream_error_occurs___invokes_stream_error_handler() {
         let outputStreamProvider = FakeBufferedOutputStreamProvider(capacity: 1)
         
         let streamErrorHandlerInvoked = expectation(description: "Invoked stream error handler")
