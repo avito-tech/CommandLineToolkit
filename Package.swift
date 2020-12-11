@@ -25,6 +25,8 @@ let package = Package(
         .library(name: "Tmp", targets: ["Tmp"]),
         .library(name: "TmpTestHelpers", targets: ["TmpTestHelpers"]),
         .library(name: "Types", targets: ["Types"]),
+        .library(name: "UserDefaultsLib", targets: ["UserDefaultsLib"]),
+        .library(name: "UserDefaultsLibTestHelpers", targets: ["UserDefaultsLibTestHelpers"]),
         .library(name: "Waitable", targets: ["Waitable"]),
         .library(name: "XcodeLocator", targets: ["XcodeLocator"]),
         .library(name: "XcodeLocatorModels", targets: ["XcodeLocatorModels"]),
@@ -252,6 +254,21 @@ let package = Package(
                 "Types",
             ],
             path: "Tests/TypesTests"
+        ),
+        .target(
+            name: "UserDefaultsLib",
+            dependencies: [
+                "PlistLib",
+            ],
+            path: "Sources/UserDefaultsLib"
+        ),
+        .target(
+            name: "UserDefaultsLibTestHelpers",
+            dependencies: [
+                "PlistLib",
+                "UserDefaultsLib",
+            ],
+            path: "Tests/UserDefaultsLibTestHelpers"
         ),
         .target(
             name: "Waitable",

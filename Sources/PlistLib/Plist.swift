@@ -10,7 +10,7 @@ public final class Plist {
     
     /// Returns a root object of this plist with all children elements. This can be an `Array` or `Dictionary`.
     /// This object can be serialized to a plist format using `PropertyListSerialization`.
-    public func rootObject() -> Any { root.plistEntry.dumpedValue() }
+    public func rootObject() -> Any { root.plistEntry.toPlistObject() }
     
     /// Creates a `Plist` obejct from given `Data`.
     public static func create(fromData data: Data) throws -> Plist {
@@ -61,12 +61,12 @@ public enum PlistReadError: Error {
 }
 
 extension PlistEntry {
-    func dumpedValue() -> Any {
+    public func toPlistObject() -> Any {
         switch self {
         case .array(let values):
-            return values.compactMap { $0?.dumpedValue() }
+            return values.compactMap { $0?.toPlistObject() }
         case .dict(let values):
-            return values.compactMapValues { $0?.dumpedValue() }
+            return values.compactMapValues { $0?.toPlistObject() }
         case .bool(let value):
             return value
         case .data(let value):
@@ -95,7 +95,7 @@ extension PlistEntry {
         }
     }
     
-    static func create(fromAny any: Any) throws -> PlistEntry {
+    public static func create(fromAny any: Any) throws -> PlistEntry {
         if let arrayElement = any as? NSArray {
             return .array(
                 try PlistEntry.create(array: arrayElement)
