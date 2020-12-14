@@ -19,9 +19,14 @@ let package = Package(
         .library(name: "MetricsUtils", targets: ["MetricsUtils"]),
         .library(name: "PathLib", targets: ["PathLib"]),
         .library(name: "PlistLib", targets: ["PlistLib"]),
+        .library(name: "ProcessController", targets: ["ProcessController"]),
+        .library(name: "ProcessControllerTestHelpers", targets: ["ProcessControllerTestHelpers"]),
+        .library(name: "SignalHandling", targets: ["SignalHandling"]),
         .library(name: "SocketModels", targets: ["SocketModels"]),
         .library(name: "Statsd", targets: ["Statsd"]),
+        .library(name: "SynchronousWaiter", targets: ["SynchronousWaiter"]),
         .library(name: "TestHelpers", targets: ["TestHelpers"]),
+        .library(name: "Timer", targets: ["Timer"]),
         .library(name: "Tmp", targets: ["Tmp"]),
         .library(name: "TmpTestHelpers", targets: ["TmpTestHelpers"]),
         .library(name: "Types", targets: ["Types"]),
@@ -32,6 +37,7 @@ let package = Package(
         .library(name: "XcodeLocatorModels", targets: ["XcodeLocatorModels"]),
     ],
     dependencies: [
+        .package(name: "Signals", url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.21")),
     ],
     targets: [
         .target(
@@ -187,6 +193,56 @@ let package = Package(
             path: "Tests/PlistLibTests"
         ),
         .target(
+            name: "ProcessController",
+            dependencies: [
+                "AtomicModels",
+                "DateProvider",
+                "FileSystem",
+                "PathLib",
+                "SignalHandling",
+                "Timer",
+            ],
+            path: "Sources/ProcessController"
+        ),
+        .target(
+            name: "ProcessControllerTestHelpers",
+            dependencies: [
+                "ProcessController",
+                "SynchronousWaiter",
+                "Tmp",
+            ],
+            path: "Tests/ProcessControllerTestHelpers"
+        ),
+        .testTarget(
+            name: "ProcessControllerTests",
+            dependencies: [
+                "DateProvider",
+                "FileSystem",
+                "PathLib",
+                "ProcessController",
+                "SignalHandling",
+                "TestHelpers",
+                "Tmp",
+            ],
+            path: "Tests/ProcessControllerTests"
+        ),
+        .target(
+            name: "SignalHandling",
+            dependencies: [
+                .product(name: "Signals", package: "Signals"),
+                "Types",
+            ],
+            path: "Sources/SignalHandling"
+        ),
+        .testTarget(
+            name: "SignalHandlingTests",
+            dependencies: [
+                "SignalHandling",
+                .product(name: "Signals", package: "Signals"),
+            ],
+            path: "Tests/SignalHandlingTests"
+        ),
+        .target(
             name: "SocketModels",
             dependencies: [
                 "Types",
@@ -212,6 +268,21 @@ let package = Package(
             ],
             path: "Tests/StatsdTests"
         ),
+        .target(
+            name: "SynchronousWaiter",
+            dependencies: [
+                "AtomicModels",
+            ],
+            path: "Sources/SynchronousWaiter"
+        ),
+        .testTarget(
+            name: "SynchronousWaiterTests",
+            dependencies: [
+                "SynchronousWaiter",
+                "TestHelpers",
+            ],
+            path: "Tests/SynchronousWaiterTests"
+        ),
         .testTarget(
             name: "TemporaryStuffTests",
             dependencies: [
@@ -226,6 +297,12 @@ let package = Package(
             dependencies: [
             ],
             path: "Tests/TestHelpers"
+        ),
+        .target(
+            name: "Timer",
+            dependencies: [
+            ],
+            path: "Sources/Timer"
         ),
         .target(
             name: "Tmp",

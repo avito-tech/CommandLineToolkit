@@ -1,6 +1,16 @@
 {
   "dependencies" : {
-    "external" : {},
+    "external" : {
+        "Signals": {
+            "url": "https://github.com/IBM-Swift/BlueSignals.git",
+            "version": {
+                "exact": "1.0.21"
+            },
+            "targetNames": [
+                "Signals"
+            ]
+        }
+    },
     "implicitSystemModules" : [
       "Darwin",
       "Dispatch",

@@ -22,7 +22,7 @@ public final class EasyOutputStream: NSObject, StreamDelegate {
     private let streamEndHandler: StreamEndHandler
     
     /// Queue used to call error handler.
-    private let handlerQueue = DispatchQueue(label: "ru.avito.emcee.EasyOutputStream.errorQueue")
+    private let handlerQueue = DispatchQueue(label: "EasyOutputStream.errorQueue")
     
     /// Indicator if stream is accepting new data or closing because of waitAndClose()
     private let acceptsNewData = AtomicValue<Bool>(false)
@@ -59,7 +59,7 @@ public final class EasyOutputStream: NSObject, StreamDelegate {
         
         let outputStream = try outputStreamProvider.createOutputStream()
         thread = Thread(target: self, selector: #selector(handleStream(outputStream:)), object: outputStream)
-        thread?.name = "ru.avito.emcee.EasyOutputStream"
+        thread?.name = "EasyOutputStream.thread"
         thread?.start()
         
         acceptsNewData.set(true)

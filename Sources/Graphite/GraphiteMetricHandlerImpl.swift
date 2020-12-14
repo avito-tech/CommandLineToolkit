@@ -42,15 +42,10 @@ public final class GraphiteMetricHandlerImpl: GraphiteMetricHandler {
                 value: metric.value,
                 timestamp: metric.timestamp
             )
-        } catch {
-//            Logger.warning("Failed to send metric \(metric) to graphite: \(error)")
-        }
+        } catch {}
     }
     
     public func tearDown(timeout: TimeInterval) {
-        let result = outputStream.waitAndClose(timeout: timeout)
-        if result == .flushTimeout {
-//            Logger.warning("Failed to tear down in time")
-        }
+        _ = outputStream.waitAndClose(timeout: timeout)
     }
 }

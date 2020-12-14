@@ -32,11 +32,9 @@ public class StreamReopener {
                 lastStreamOpenEventTimestamp = Date.timeIntervalSinceReferenceDate
                 try stream.open()
             } else {
-//                Logger.warning("Exceeded number of attempts to reopen stream to graphite.")
                 stream.close()
             }
         } catch {
-//            Logger.warning("Error re-opening previously closed stream to Graphite: \(error)")
         }
     }
 }
