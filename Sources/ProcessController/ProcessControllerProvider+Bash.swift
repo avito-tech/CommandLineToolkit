@@ -12,7 +12,7 @@ public extension ProcessControllerProvider {
         outputStreaming: OutputStreaming = .restream
     ) throws {
         let subprocess = Subprocess(
-            arguments: ["/bin/bash", "-c", command],
+            arguments: ["/bin/bash", "-l", "-c", command],
             environment: environment,
             automaticManagement: .noManagement,
             workingDirectory: currentWorkingDirectory
