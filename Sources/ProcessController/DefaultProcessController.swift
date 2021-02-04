@@ -29,8 +29,6 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     private var stdoutListeners = [ListenerWrapper<StdoutListener>]()
     private var terminationListeners = [ListenerWrapper<TerminationListener>]()
     
-    private weak var processControllerLogger: ProcessControllerLogger?
-    
     private final class ListenerWrapper<T> {
         let uuid: UUID
         let listener: T

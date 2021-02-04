@@ -220,6 +220,7 @@ let package = Package(
                 "FileSystem",
                 "PathLib",
                 "ProcessController",
+                "ProcessControllerTestHelpers",
                 "SignalHandling",
                 "TestHelpers",
                 "Tmp",
