@@ -9,12 +9,13 @@ public extension ProcessControllerProvider {
         _ command: String,
         environment: Environment = .current,
         currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
-        outputStreaming: OutputStreaming = .restream
+        outputStreaming: OutputStreaming = .restream,
+        automaticManagement: AutomaticManagement = .noManagement
     ) throws {
         let subprocess = Subprocess(
             arguments: ["/bin/bash", "-l", "-c", command],
             environment: environment,
-            automaticManagement: .noManagement,
+            automaticManagement: automaticManagement,
             workingDirectory: currentWorkingDirectory
         )
         let processController = try createProcessController(subprocess: subprocess)
