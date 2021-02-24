@@ -45,21 +45,12 @@ public final class StatsdClientImpl: StatsdClient {
         connection.cancel()
     }
     
-    public func send(content: Data) {
-        let completionQueue = DispatchQueue(label: "statsdClientCompletionQueue")
-        
-        let waitable = Waitable()
-        completionQueue.async { [connection] in
-            connection.send(
-                content: content,
-                completion: NWConnection.SendCompletion.contentProcessed { _ in
-                    completionQueue.async {
-                        waitable.signal()
-                    }
-                }
-            )
-        }
-        
-        waitable.wait()
+    public func send(content: Data, completion: @escaping (Error?) -> ()) {
+        connection.send(
+            content: content,
+            completion: NWConnection.SendCompletion.contentProcessed { error in
+                completion(error)
+            }
+        )
     }
 }

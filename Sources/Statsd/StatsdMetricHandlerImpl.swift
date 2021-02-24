@@ -10,11 +10,12 @@ public final class StatsdMetricHandlerImpl: StatsdMetricHandler {
     private let serialQueue: DispatchQueue
     
     private let metricsBuffer = AtomicCollection([StatsdMetric]())
+    private let metricsBeingSent = AtomicCollection([UUID]())
     
     public init(
         statsdDomain: [String],
         statsdClient: StatsdClient,
-        serialQueue: DispatchQueue = DispatchQueue(label: "StatsdMetricHandlerImpl.serialQueue", attributes: .concurrent)
+        serialQueue: DispatchQueue = DispatchQueue(label: "StatsdMetricHandlerImpl.serialQueue")
     ) throws {
         self.statsdDomain = statsdDomain
         self.statsdClient = statsdClient
@@ -64,17 +65,26 @@ public final class StatsdMetricHandlerImpl: StatsdMetricHandler {
     }
     
     public func tearDown(timeout: TimeInterval) {
-        _ = metricsBuffer.waitWhen(count: 0, before: Date().addingTimeInterval(timeout)) { _ in
-            // swiftlint:disable:next sync
-            serialQueue.sync {
-                statsdClient.cancel()
-            }
+        let tearDownRequestTimestamp = Date()
+        _ = metricsBuffer.waitWhen(count: 0, before: tearDownRequestTimestamp.addingTimeInterval(timeout))
+        
+        let timeoutRemainder = timeout - Date().timeIntervalSince(tearDownRequestTimestamp)
+        if timeoutRemainder > 0 {
+            _ = metricsBeingSent.waitWhen(count: 0, before: Date(timeIntervalSinceNow: timeoutRemainder))
         }
+        
+        statsdClient.cancel()
     }
     
     private func send(metric: StatsdMetric) {
-        statsdClient.send(
-            content: Data(metric.build(domain: statsdDomain).utf8)
-        )
+        let seed = UUID()
+        metricsBeingSent.withExclusiveAccess { $0.append(seed) }
+        self.statsdClient.send(
+            content: Data(metric.build(domain: self.statsdDomain).utf8)
+        ) { _ in
+            self.metricsBeingSent.withExclusiveAccess {
+                $0.removeAll(where: { $0 == seed })
+            }
+        }
     }
 }

@@ -8,5 +8,5 @@ public protocol StatsdClient: class {
     func start(queue: DispatchQueue)
     func cancel()
     
-    func send(content: Data)
+    func send(content: Data, completion: @escaping (Error?) -> ())
 }
