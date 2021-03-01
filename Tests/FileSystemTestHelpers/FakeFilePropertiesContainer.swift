@@ -19,6 +19,10 @@ public class FakeFilePropertiesContainer: FilePropertiesContainer {
     public var pathExists: Bool
     public func exists() -> Bool { pathExists }
     
+    public var posixPermissions: Int16 = 0o755
+    public func permissions() throws -> Int16 { posixPermissions }
+    public func set(permissions: Int16) throws { posixPermissions = permissions }
+    
     public var directory = false
     public func isDirectory() throws -> Bool { directory }
     

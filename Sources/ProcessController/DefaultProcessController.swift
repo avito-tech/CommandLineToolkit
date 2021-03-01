@@ -4,6 +4,7 @@ import FileSystem
 import Foundation
 import PathLib
 import Timer
+import ObjCExceptionCatcher
 
 // swiftlint:disable async
 // swiftlint:disable sync
@@ -94,13 +95,15 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     
     // MARK: - Launch and Kill
     
-    public func start() {
+    public func start() throws {
         if didStartProcess {
             return
         }
         
         didStartProcess = true
-        process.launch()
+        
+        try process.run()
+
         processTerminationHandlerGroup.enter()
         process.terminationHandler = { _ in
             self.processTerminated()

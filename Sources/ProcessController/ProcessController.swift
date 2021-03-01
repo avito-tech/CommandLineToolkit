@@ -5,7 +5,7 @@ public protocol ProcessController: class {
     var processName: String { get }
     var processId: Int32 { get }
     
-    func start()
+    func start() throws
     func waitForProcessToDie()
     func processStatus() -> ProcessStatus
     func send(signal: Int32)
@@ -32,8 +32,8 @@ public enum ProcessTerminationError: Error, CustomStringConvertible {
 }
 
 public extension ProcessController {
-    func startAndListenUntilProcessDies() {
-        start()
+    func startAndListenUntilProcessDies() throws {
+        try start()
         waitForProcessToDie()
     }
     
@@ -46,7 +46,7 @@ public extension ProcessController {
     }
     
     func startAndWaitForSuccessfulTermination() throws {
-        startAndListenUntilProcessDies()
+        try startAndListenUntilProcessDies()
         let status = processStatus()
         guard status == .terminated(exitCode: 0) else {
             throw ProcessTerminationError.unexpectedProcessStatus(name: processName, pid: processId, processStatus: status)

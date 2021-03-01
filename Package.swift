@@ -17,6 +17,8 @@ let package = Package(
         .library(name: "Metrics", targets: ["Metrics"]),
         .library(name: "MetricsTestHelpers", targets: ["MetricsTestHelpers"]),
         .library(name: "MetricsUtils", targets: ["MetricsUtils"]),
+        .library(name: "ObjCExceptionCatcher", targets: ["ObjCExceptionCatcher"]),
+        .library(name: "ObjCExceptionCatcherHelper", targets: ["ObjCExceptionCatcherHelper"]),
         .library(name: "PathLib", targets: ["PathLib"]),
         .library(name: "PlistLib", targets: ["PlistLib"]),
         .library(name: "ProcessController", targets: ["ProcessController"]),
@@ -166,6 +168,19 @@ let package = Package(
             path: "Sources/MetricsUtils"
         ),
         .target(
+            name: "ObjCExceptionCatcher",
+            dependencies: [
+                "ObjCExceptionCatcherHelper",
+            ],
+            path: "Sources/ObjCExceptionCatcher"
+        ),
+        .target(
+            name: "ObjCExceptionCatcherHelper",
+            dependencies: [
+            ],
+            path: "Sources/ObjCExceptionCatcherHelper"
+        ),
+        .target(
             name: "PathLib",
             dependencies: [
             ],
@@ -198,6 +213,7 @@ let package = Package(
                 "AtomicModels",
                 "DateProvider",
                 "FileSystem",
+                "ObjCExceptionCatcher",
                 "PathLib",
                 "SignalHandling",
                 "Timer",

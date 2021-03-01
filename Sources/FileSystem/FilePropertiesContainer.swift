@@ -5,6 +5,8 @@ public protocol FilePropertiesContainer {
     func set(modificationDate: Date) throws
     
     func isExecutable() throws -> Bool
+    func permissions() throws -> Int16
+    func set(permissions: Int16) throws
     func exists() -> Bool
     func isDirectory() throws -> Bool
     func isRegularFile() throws -> Bool

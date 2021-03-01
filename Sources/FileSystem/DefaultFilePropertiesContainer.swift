@@ -11,11 +11,14 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     
     public enum DefaultFilePropertiesContainerError: Error, CustomStringConvertible {
         case emptyValue(AbsolutePath, URLResourceKey)
+        case emptyFileAttributeValue(AbsolutePath, FileAttributeKey)
         
         public var description: String {
             switch self {
             case let .emptyValue(path, property):
                 return "File at path \(path) does not have a value for property \(property)"
+            case let .emptyFileAttributeValue(path, key):
+                return "File at path \(path) does not have a value for key \(key)"
             }
         }
     }
@@ -41,6 +44,18 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
             throw DefaultFilePropertiesContainerError.emptyValue(path, .isExecutableKey)
         }
         return value
+    }
+    
+    public func permissions() throws -> Int16 {
+        let attributes = try fileManager.attributesOfItem(atPath: path.pathString)
+        guard let value = attributes[.posixPermissions], let number = value as? NSNumber else {
+            throw DefaultFilePropertiesContainerError.emptyFileAttributeValue(path, .posixPermissions)
+        }
+        return number.int16Value
+    }
+    
+    public func set(permissions: Int16) throws {
+        try fileManager.setAttributes([.posixPermissions: permissions], ofItemAtPath: path.pathString)
     }
     
     public func exists() -> Bool {

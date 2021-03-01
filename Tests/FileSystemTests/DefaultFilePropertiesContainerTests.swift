@@ -53,6 +53,18 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
         XCTAssertTrue(try properties.isExecutable())
     }
     
+    func test___modifying_permissions() throws {
+        let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
+        
+        let originalPermissions = try properties.permissions()
+        
+        try properties.set(permissions: 0o707)
+        XCTAssertEqual(try properties.permissions(), 0o707)
+        
+        try properties.set(permissions: originalPermissions)
+        XCTAssertEqual(try properties.permissions(), originalPermissions)
+    }
+    
     func test___exists___when_exists() throws {
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
         XCTAssertTrue(properties.exists())
