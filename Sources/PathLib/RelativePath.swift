@@ -1,6 +1,8 @@
 import Foundation
 
-public final class RelativePath: Path, Codable, Hashable {
+public final class RelativePath: Path, Codable, Hashable, ExpressibleByStringLiteral {
+    public typealias StringLiteralType = String
+    
     public let components: [String]
     
     public static let current = RelativePath(components: [])

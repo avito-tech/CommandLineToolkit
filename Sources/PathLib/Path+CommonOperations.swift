@@ -9,6 +9,10 @@ public extension Path {
         self.init(components: StringPathParsing.components(path: path))
     }
     
+    init(stringLiteral: String) {
+        self.init(components: StringPathParsing.components(path: stringLiteral))
+    }
+    
     func appending(components: [String]) -> Self {
         return Self(components: self.components + components)
     }

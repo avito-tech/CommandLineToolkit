@@ -1,6 +1,8 @@
 import Foundation
 
-public final class AbsolutePath: Path, Codable, Hashable {
+public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLiteral {
+    public typealias StringLiteralType = String
+    
     public let components: [String]
     
     public static let root = AbsolutePath(components: [])
