@@ -199,11 +199,6 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     private func forceKillProcess() {
         if isProcessRunning {
             send(signal: SIGKILL)
-            
-            signalListeners.removeAll()
-            startListeners.removeAll()
-            stderrListeners.removeAll()
-            stdoutListeners.removeAll()
         }
     }
     
@@ -222,6 +217,12 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
         listenerQueue.async(flags: .barrier) {
             self.processTerminationHandlerGroup.leave()
         }
+        
+        signalListeners.removeAll()
+        startListeners.removeAll()
+        stderrListeners.removeAll()
+        stdoutListeners.removeAll()
+        terminationListeners.removeAll()
     }
     
     // MARK: - Hang Monitoring

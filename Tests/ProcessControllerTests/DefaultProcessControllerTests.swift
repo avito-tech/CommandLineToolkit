@@ -459,4 +459,32 @@ final class DefaultProcessControllerTests: XCTestCase {
             ).start()
         }
     }
+    
+    func test___listeners_freed_after_process_terminates() throws {
+        let controller = try DefaultProcessController(
+            dateProvider: dateProvider,
+            fileSystem: fileSystem,
+            subprocess: Subprocess(
+                arguments: ["/usr/bin/env"]
+            )
+        )
+        
+        var deallocated = false
+        do {
+            class ToDieSoon {
+                var onDeinit: () -> () = {}
+                
+                deinit { onDeinit() }
+            }
+            
+            let instanceToBeDeallocated = ToDieSoon()
+            controller.onTermination { _, _ in
+                instanceToBeDeallocated.onDeinit = { deallocated = true }
+            }
+        }
+        
+        try controller.startAndWaitForSuccessfulTermination()
+        
+        XCTAssertTrue(deallocated)
+    }
 }
