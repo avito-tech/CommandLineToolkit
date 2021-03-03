@@ -216,13 +216,13 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
         
         listenerQueue.async(flags: .barrier) {
             self.processTerminationHandlerGroup.leave()
+            
+            self.signalListeners.removeAll()
+            self.startListeners.removeAll()
+            self.stderrListeners.removeAll()
+            self.stdoutListeners.removeAll()
+            self.terminationListeners.removeAll()
         }
-        
-        signalListeners.removeAll()
-        startListeners.removeAll()
-        stderrListeners.removeAll()
-        stdoutListeners.removeAll()
-        terminationListeners.removeAll()
     }
     
     // MARK: - Hang Monitoring
