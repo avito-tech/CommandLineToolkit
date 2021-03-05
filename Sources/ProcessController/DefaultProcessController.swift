@@ -111,10 +111,14 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
         processId = process.processIdentifier
         startAutomaticManagement()
 
-        listenerQueue.async {
+        listenerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
             for listenerWrapper in self.startListeners {
                 let unsubscriber: Unsubscribe = {
-                    self.listenerQueue.async {
+                    self.listenerQueue.async { [weak self] in
+                        guard let self = self else { return }
+                        
                         self.startListeners.removeAll { $0.uuid == listenerWrapper.uuid }
                     }
                 }
@@ -124,7 +128,6 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     }
     
     public func waitForProcessToDie() {
-        process.waitUntilExit()
         openPipeFileHandleGroup.wait()
         processTerminationHandlerGroup.wait()
     }
@@ -140,10 +143,13 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     }
     
     public func send(signal: Int32) {
-        listenerQueue.async {
+        listenerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
             for listenerWrapper in self.signalListeners {
                 let unsubscriber: Unsubscribe = {
-                    self.listenerQueue.async {
+                    self.listenerQueue.async { [weak self] in
+                        guard let self = self else { return }
                         self.signalListeners.removeAll { $0.uuid == listenerWrapper.uuid }
                     }
                 }
@@ -203,10 +209,13 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     }
     
     private func processTerminated() {
-        listenerQueue.async {
+        listenerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
             for listenerWrapper in self.terminationListeners {
                 let unsubscriber: Unsubscribe = {
-                    self.listenerQueue.async {
+                    self.listenerQueue.async { [weak self] in
+                        guard let self = self else { return }
                         self.signalListeners.removeAll { $0.uuid == listenerWrapper.uuid }
                     }
                 }
@@ -214,14 +223,9 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
             }
         }
         
-        listenerQueue.async(flags: .barrier) {
+        listenerQueue.async(flags: .barrier) { [weak self] in
+            guard let self = self else { return }
             self.processTerminationHandlerGroup.leave()
-            
-            self.signalListeners.removeAll()
-            self.startListeners.removeAll()
-            self.stderrListeners.removeAll()
-            self.stdoutListeners.removeAll()
-            self.terminationListeners.removeAll()
         }
     }
     
@@ -239,13 +243,13 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     private func streamFromPipeIntoHandle(
         pipe: Pipe,
         onNewData: @escaping (Data) -> (),
-        onEndOfData: @escaping () -> ()
+        onEndOfData: @escaping (Pipe) -> ()
     ) {
         pipe.fileHandleForReading.readabilityHandler = { handle in
             let data = handle.availableData
             if data.isEmpty {
                 handle.readabilityHandler = nil
-                onEndOfData()
+                onEndOfData(pipe)
             } else {
                 onNewData(data)
             }
@@ -259,8 +263,11 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
                 self.openPipeFileHandleGroup.enter()
             },
             onNewData: didReceiveStdout,
-            onEndOfData: {
-                self.listenerQueue.async {
+            onEndOfData: { pipe in
+                self.listenerQueue.async { [weak self] in
+                    guard let self = self else { return }
+                    
+                    pipe.fileHandleForReading.closeFile()
                     self.openPipeFileHandleGroup.leave()
                 }
             }
@@ -272,8 +279,11 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
                 self.openPipeFileHandleGroup.enter()
             },
             onNewData: didReceiveStderr,
-            onEndOfData: {
-                self.listenerQueue.async {
+            onEndOfData: { pipe in
+                self.listenerQueue.async { [weak self] in
+                    guard let self = self else { return }
+                    
+                    pipe.fileHandleForReading.closeFile()
                     self.openPipeFileHandleGroup.leave()
                 }
             }
@@ -283,7 +293,7 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     private func processStdForProcess(
         pipeAssigningClosure: (Pipe) -> (),
         onNewData: @escaping (Data) -> (),
-        onEndOfData: @escaping () -> ()
+        onEndOfData: @escaping (Pipe) -> ()
     ) {
         let pipe = Pipe()
         pipeAssigningClosure(pipe)
@@ -293,17 +303,19 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
                 self.didProcessDataFromProcess()
                 onNewData(data)
             },
-            onEndOfData: {
-                onEndOfData()
-            }
+            onEndOfData: onEndOfData
         )
     }
     
     private func didReceiveStdout(data: Data) {
-        listenerQueue.async {
+        listenerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
             for listenerWrapper in self.stdoutListeners {
                 let unsubscriber: Unsubscribe = {
-                    self.listenerQueue.async {
+                    self.listenerQueue.async { [weak self] in
+                        guard let self = self else { return }
+                        
                         self.stdoutListeners.removeAll { $0.uuid == listenerWrapper.uuid }
                     }
                 }
@@ -313,10 +325,14 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     }
     
     private func didReceiveStderr(data: Data) {
-        listenerQueue.async {
+        listenerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
             for listenerWrapper in self.stderrListeners {
                 let unsubscriber: Unsubscribe = {
-                    self.listenerQueue.async {
+                    self.listenerQueue.async { [weak self] in
+                        guard let self = self else { return }
+                        
                         self.stderrListeners.removeAll { $0.uuid == listenerWrapper.uuid }
                     }
                 }

@@ -186,13 +186,24 @@ final class DefaultProcessControllerTests: XCTestCase {
         )
     }
     
-    func test___stdout_listener() throws {
+    func test___capturing_stdout_from_multiple_processes() throws {
+        let queue = OperationQueue()
+        
+        for _ in 0...500 {
+            queue.addOperation {
+                try? self.run_test___stdout_listener()
+            }
+        }
+        
+        queue.waitUntilAllOperationsAreFinished()
+    }
+    
+    func run_test___stdout_listener() throws {
         let controller = try DefaultProcessController(
             dateProvider: dateProvider,
             fileSystem: fileSystem,
             subprocess: Subprocess(
-                arguments: ["/bin/ls", "/bin/ls"],
-                environment: ["NSUnbufferedIO": "YES"]
+                arguments: ["/bin/ls", "/bin/ls"]
             )
         )
         
@@ -203,7 +214,10 @@ final class DefaultProcessControllerTests: XCTestCase {
         guard let string = String(data: stdoutData, encoding: .utf8) else {
             return XCTFail("Unable to get stdout string")
         }
-        XCTAssertEqual(string, "/bin/ls\n")
+        
+        if string != "/bin/ls\n" {
+            fatalError("Unexpected output: '\(string)'")
+        }
     }
     
     func test___stderr_listener() throws {
@@ -460,31 +474,34 @@ final class DefaultProcessControllerTests: XCTestCase {
         }
     }
     
-    func test___listeners_freed_after_process_terminates() throws {
-        let controller = try DefaultProcessController(
-            dateProvider: dateProvider,
-            fileSystem: fileSystem,
-            subprocess: Subprocess(
-                arguments: ["/usr/bin/env"]
-            )
-        )
-        
-        var deallocated = false
+    func test___listeners_freed_after_all_complete_and_process_terminates() throws {
+        let stdoutProcessed = XCTestExpectation(description: "stdout processing completed")
+        let deallocated = XCTestExpectation(description: "listener deallocated")
+    
         do {
-            class ToDieSoon {
-                var onDeinit: () -> () = {}
-                
-                deinit { onDeinit() }
+            let controller = try DefaultProcessController(
+                dateProvider: dateProvider,
+                fileSystem: fileSystem,
+                subprocess: Subprocess(
+                    arguments: ["/bin/ls"]
+                )
+            )
+            controller.onStdout { _, _, _ in
+                stdoutProcessed.fulfill()
             }
             
             let instanceToBeDeallocated = ToDieSoon()
             controller.onTermination { _, _ in
-                instanceToBeDeallocated.onDeinit = { deallocated = true }
+                instanceToBeDeallocated.onDeinit = { deallocated.fulfill() }
             }
+            try controller.startAndWaitForSuccessfulTermination()
         }
         
-        try controller.startAndWaitForSuccessfulTermination()
-        
-        XCTAssertTrue(deallocated)
+        wait(for: [stdoutProcessed, deallocated], timeout: 0)
     }
+}
+
+private class ToDieSoon {
+    var onDeinit: () -> () = {}
+    deinit { onDeinit() }
 }
