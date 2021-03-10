@@ -499,6 +499,30 @@ final class DefaultProcessControllerTests: XCTestCase {
         
         wait(for: [stdoutProcessed, deallocated], timeout: 0)
     }
+    
+    func test___listeners_freed___when_process_controller_instance_not_captured() throws {
+        let deallocated = XCTestExpectation(description: "listener deallocated")
+    
+        do {
+            let controller = try DefaultProcessController(
+                dateProvider: dateProvider,
+                fileSystem: fileSystem,
+                subprocess: Subprocess(
+                    arguments: ["/bin/sleep", "30"]
+                )
+            )
+            
+            let instanceToBeDeallocated = ToDieSoon()
+            instanceToBeDeallocated.onDeinit = deallocated.fulfill
+            
+            controller.onTermination { _, _ in
+                _ = instanceToBeDeallocated.self
+            }
+            try controller.start()
+        }
+        
+        wait(for: [deallocated], timeout: 0)
+    }
 }
 
 private class ToDieSoon {
