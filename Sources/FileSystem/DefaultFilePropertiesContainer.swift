@@ -9,24 +9,10 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
         self.path = path
     }
     
-    public enum DefaultFilePropertiesContainerError: Error, CustomStringConvertible {
-        case emptyValue(AbsolutePath, URLResourceKey)
-        case emptyFileAttributeValue(AbsolutePath, FileAttributeKey)
-        
-        public var description: String {
-            switch self {
-            case let .emptyValue(path, property):
-                return "File at path \(path) does not have a value for property \(property)"
-            case let .emptyFileAttributeValue(path, key):
-                return "File at path \(path) does not have a value for key \(key)"
-            }
-        }
-    }
-    
     public func modificationDate() throws -> Date {
         let values = try path.fileUrl.resourceValues(forKeys: [.contentModificationDateKey])
         guard let value = values.contentModificationDate else {
-            throw DefaultFilePropertiesContainerError.emptyValue(path, .contentModificationDateKey)
+            throw FilePropertiesContainerError.emptyValue(path, .contentModificationDateKey)
         }
         return value
     }
@@ -41,7 +27,7 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     public func isExecutable() throws -> Bool {
         let values = try path.fileUrl.resourceValues(forKeys: [.isExecutableKey])
         guard let value = values.isExecutable else {
-            throw DefaultFilePropertiesContainerError.emptyValue(path, .isExecutableKey)
+            throw FilePropertiesContainerError.emptyValue(path, .isExecutableKey)
         }
         return value
     }
@@ -49,7 +35,7 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     public func permissions() throws -> Int16 {
         let attributes = try fileManager.attributesOfItem(atPath: path.pathString)
         guard let value = attributes[.posixPermissions], let number = value as? NSNumber else {
-            throw DefaultFilePropertiesContainerError.emptyFileAttributeValue(path, .posixPermissions)
+            throw FilePropertiesContainerError.emptyFileAttributeValue(path, .posixPermissions)
         }
         return number.int16Value
     }
@@ -65,7 +51,7 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     public func isDirectory() throws -> Bool {
         let values = try path.fileUrl.resourceValues(forKeys: [.isDirectoryKey])
         guard let value = values.isDirectory else {
-            throw DefaultFilePropertiesContainerError.emptyValue(path, .isDirectoryKey)
+            throw FilePropertiesContainerError.emptyValue(path, .isDirectoryKey)
         }
         return value
     }
@@ -73,7 +59,7 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     public func isRegularFile() throws -> Bool {
         let values = try path.fileUrl.resourceValues(forKeys: [.isRegularFileKey])
         guard let value = values.isRegularFile else {
-            throw DefaultFilePropertiesContainerError.emptyValue(path, .isRegularFileKey)
+            throw FilePropertiesContainerError.emptyValue(path, .isRegularFileKey)
         }
         return value
     }
@@ -81,7 +67,7 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     public func size() throws -> Int {
         let values = try path.fileUrl.resourceValues(forKeys: [.fileSizeKey])
         guard let value = values.fileSize else {
-            throw DefaultFilePropertiesContainerError.emptyValue(path, .fileSizeKey)
+            throw FilePropertiesContainerError.emptyValue(path, .fileSizeKey)
         }
         return value
     }

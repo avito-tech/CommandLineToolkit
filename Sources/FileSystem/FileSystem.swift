@@ -18,4 +18,6 @@ public protocol FileSystem {
     
     func properties(forFileAtPath: AbsolutePath) -> FilePropertiesContainer
     var commonlyUsedPathsProvider: CommonlyUsedPathsProvider { get }
+    
+    func fileSystemProperties(forFileAtPath: AbsolutePath) -> FileSystemPropertiesContainer
 }

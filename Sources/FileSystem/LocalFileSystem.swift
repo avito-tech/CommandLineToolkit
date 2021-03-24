@@ -52,4 +52,8 @@ public final class LocalFileSystem: FileSystem {
     public var commonlyUsedPathsProvider: CommonlyUsedPathsProvider {
         return DefaultCommonlyUsedPathsProvider(fileManager: fileManager)
     }
+    
+    public func fileSystemProperties(forFileAtPath path: AbsolutePath) -> FileSystemPropertiesContainer {
+        return DefaultFileSystemPropertiesContainer(path: path)
+    }
 }
