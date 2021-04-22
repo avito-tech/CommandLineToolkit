@@ -4,7 +4,7 @@ import XCTest
 public extension XCTestCase {
     @discardableResult
     func assertCast<T>(
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line,
         provider: () throws -> Any
     ) rethrows -> T {

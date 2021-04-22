@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 
 public func assert<T: Equatable>(
-    file: StaticString = #file,
+    file: StaticString = #filePath,
     line: UInt = #line,
     left: () throws -> T,
     equals right: () throws -> T

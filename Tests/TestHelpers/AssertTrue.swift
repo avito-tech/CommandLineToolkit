@@ -4,7 +4,7 @@ import XCTest
 public extension XCTestCase {
     func assertTrue(
         message: () -> String = { "Unexpected result: got false instead of true" },
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line,
         work: () throws -> Bool
     ) {

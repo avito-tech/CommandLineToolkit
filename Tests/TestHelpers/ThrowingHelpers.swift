@@ -5,7 +5,7 @@ public extension XCTestCase {
     @discardableResult
     func assertDoesNotThrow<T>(
         message: (Error) -> String = { "Unexpected error thrown: \($0)" },
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line,
         work: () throws -> T
     ) -> T {
@@ -19,7 +19,7 @@ public extension XCTestCase {
     }
     
     func assertThrows<T>(
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line,
         work: () throws -> (T)
     ) {

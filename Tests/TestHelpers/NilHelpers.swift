@@ -4,7 +4,7 @@ import XCTest
 public extension XCTestCase {
     @discardableResult
     func assertNotNil<T>(
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line,
         work: () throws -> T?
     ) rethrows -> T {

@@ -4,7 +4,7 @@ import XCTest
 public extension XCTestCase {
     func failTest(
         _ message: String,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) -> Never {
         withoutContinuingTestAfterFailure {
