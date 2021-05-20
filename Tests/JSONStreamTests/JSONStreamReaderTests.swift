@@ -43,19 +43,19 @@ class JSONReaderTests: XCTestCase {
     func testBrokenArrayWithSingleComma() throws {
         let jsonStream = FakeJSONStream(string: "[\"value\",]")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
-        XCTAssertThrowsError(try reader.start())
+        assertThrows { try reader.start() }
     }
     
     func testBrokenArrayWithDoubleComma() throws {
         let jsonStream = FakeJSONStream(string: "[\"value\",,]")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
-        XCTAssertThrowsError(try reader.start())
+        assertThrows { try reader.start() }
     }
     
     func testBrokenArrayWithOnlyComma() throws {
         let jsonStream = FakeJSONStream(string: "[,]")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
-        XCTAssertThrowsError(try reader.start())
+        assertThrows { try reader.start() }
     }
     
     func testSimpleArrayWithMultipleStrings() throws {
@@ -85,13 +85,13 @@ class JSONReaderTests: XCTestCase {
     func testMultipleCommasInObject() throws {
         let jsonStream = FakeJSONStream(string: "{\"one\": \"1\",, \"two\": \"2\"}")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
-        XCTAssertThrowsError(try reader.start())
+        assertThrows { try reader.start() }
     }
     
     func testObjectWithTailingComma() throws {
         let jsonStream = FakeJSONStream(string: "{\"one\": \"1\",}")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
-        XCTAssertThrowsError(try reader.start())
+        assertThrows { try reader.start() }
     }
     
     func testEmptyValue() throws {
@@ -130,7 +130,7 @@ class JSONReaderTests: XCTestCase {
     func testObjectWithNullKeyFails() throws {
         let jsonStream = FakeJSONStream(string: "{null: \"value\"}")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
-        XCTAssertThrowsError(try reader.start())
+        assertThrows { try reader.start() }
     }
     
     func testArrayWithTrue() throws {
@@ -152,7 +152,7 @@ class JSONReaderTests: XCTestCase {
     func testObjectWithTrueKeyFails() throws {
         let jsonStream = FakeJSONStream(string: "{true: \"value\"}")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
-        XCTAssertThrowsError(try reader.start())
+        assertThrows { try reader.start() }
     }
     
     func testArrayWithFalse() throws {
@@ -161,6 +161,15 @@ class JSONReaderTests: XCTestCase {
         try reader.start()
         
         XCTAssertEqual(eventStream.allArrays[0], [false])
+    }
+    
+    func testArrayWithUnparsableFalse() throws {
+        let jsonStream = FakeJSONStream(string: "[fulse]")
+        let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
+        
+        assertThrows {
+            try reader.start()
+        }
     }
     
     func testObjectWithFalseValue() throws {
@@ -174,7 +183,7 @@ class JSONReaderTests: XCTestCase {
     func testObjectWithFalseKeyFails() throws {
         let jsonStream = FakeJSONStream(string: "{false: \"value\"}")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
-        XCTAssertThrowsError(try reader.start())
+        assertThrows { try reader.start() }
     }
     
     func testArrayWithNullTrueFalseObjectAndString() throws {
@@ -236,13 +245,13 @@ class JSONReaderTests: XCTestCase {
     func testArrayWithIncorrectNumber() throws {
         let jsonStream = FakeJSONStream(string: "[-12ABA]")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
-        XCTAssertThrowsError(try reader.start())
+        assertThrows { try reader.start() }
     }
     
     func testObjectWithIncorrectNumberValue() throws {
         let jsonStream = FakeJSONStream(string: "{\"key\": -12.bad-number}")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
-        XCTAssertThrowsError(try reader.start())
+        assertThrows { try reader.start() }
     }
     
     func testObjectWithArrayValue() throws {

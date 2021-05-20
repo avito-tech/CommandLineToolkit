@@ -1,33 +1,17 @@
 import Foundation
 
-/**
- * JSON reader that utilizes JSONStream to parse the JSON stream on the fly.
- */
+/// JSON reader that utilizes JSONStream to parse the JSON stream on the fly.
 public final class JSONReader {
-    let inputStream: JSONStream
-    let eventStream: JSONReaderEventStream
-    var context = [ParsingContext.root]
+    private let inputStream: JSONStream
+    private let eventStream: JSONReaderEventStream
+    private var context = [ParsingContext.root]
     
-    let anyCharacterSet = CharacterSet([]).inverted
-    let numberChars = CharacterSet(charactersIn: "-1234567890")
-    let whiteCharacters = CharacterSet.whitespacesAndNewlines
+    private let anyCharacterSet = CharacterSet([]).inverted
+    private let numberChars = CharacterSet(charactersIn: "-1234567890")
+    private let whiteCharacters = CharacterSet.whitespacesAndNewlines
     public private(set) var collectedBytes = [UInt8]()
     
-    enum `Error`: Swift.Error {
-        case unexpectedCharacter(UInt8)
-        case unexpectedCharacters([UInt8], expected: [UInt8])
-        case streamHasNoData
-        case streamEndedAtRootContext
-        case unexpectedEndOfStream
-        case invalidData
-        case invalidStringData(Data)
-        case invalidNumberValue(Data)
-        case arrayCannotHaveKeys(parent: ParsingContext, child: ParsingContext)
-        case objectMustHaveKey(parent: ParsingContext, child: ParsingContext)
-        case unhandledContextCombination(parent: ParsingContext, child: ParsingContext)
-    }
-    
-    enum SpecialSymbols {
+    private enum SpecialSymbols {
         static let quotationMark: UInt8 = 0x22 // "
         static let leftSquareBracket: UInt8 = 0x5b // [
         static let leftCurlyBracket: UInt8 = 0x7b // {
@@ -45,6 +29,10 @@ public final class JSONReader {
         self.eventStream = eventStream
     }
     
+    /// Starts a continous and blocking parse operation.
+    /// It runs it until error occurs, or stream is closed and all non-root objects are parsed successfully.
+    /// - Throws: `JSONReaderError` if reader detects an error in the incoming byte stream.
+    /// It will NOT throw an error only when stream is closed at the root context.
     public func start() throws {
         try readAndThrowErrorOnFailure()
     }
@@ -53,7 +41,7 @@ public final class JSONReader {
         do {
             try readRecursively()
         } catch {
-            if let readerError = error as? Error, case Error.streamEndedAtRootContext = readerError {
+            if let readerError = error as? JSONReaderError, case JSONReaderError.streamEndedAtRootContext = readerError {
                 return
             } else {
                 throw error
@@ -92,7 +80,7 @@ public final class JSONReader {
     
     private func validateRootContext() throws {
         let readResult = read(untilAnyCharacterFrom: anyCharacterSet, ignoreCharacters: whiteCharacters)
-        guard let byte = readResult.matchingByte else { throw Error.streamEndedAtRootContext }
+        guard let byte = readResult.matchingByte else { throw JSONReaderError.streamEndedAtRootContext }
         
         switch byte {
         case SpecialSymbols.leftSquareBracket:
@@ -100,7 +88,7 @@ public final class JSONReader {
         case SpecialSymbols.leftCurlyBracket:
             pushContext(.inObject(key: nil, storage: NSMutableDictionary()))
         default:
-            throw Error.unexpectedCharacter(byte)
+            throw JSONReaderError.unexpectedCharacter(byte)
         }
     }
     
@@ -111,25 +99,25 @@ public final class JSONReader {
         // {  "key": "value"}, {"key": []}, {"key": {}  }
         //  ^
         let readResult = read(untilAnyCharacterFrom: anyCharacterSet, ignoreCharacters: whiteCharacters)
-        guard let byte = readResult.matchingByte else { throw Error.streamHasNoData }
+        guard let byte = readResult.matchingByte else { throw JSONReaderError.streamHasNoData }
         
         switch byte {
         case SpecialSymbols.rightCurlyBracket:
             if !expectingAnotherKeyValue {
                 try popContext()
             } else {
-                throw Error.unexpectedCharacter(byte)
+                throw JSONReaderError.unexpectedCharacter(byte)
             }
         case SpecialSymbols.quotationMark:
             pushContext(.inKey(NSMutableData()))
         case SpecialSymbols.comma:
             // swiftlint:disable:next empty_count
             if storage.count == 0 || expectingAnotherKeyValue {
-                throw Error.unexpectedCharacter(byte)
+                throw JSONReaderError.unexpectedCharacter(byte)
             }
             try validateObjectContext(key, storage, expectingAnotherKeyValue: true)
         default:
-            throw Error.unexpectedCharacter(byte)
+            throw JSONReaderError.unexpectedCharacter(byte)
         }
     }
     
@@ -137,7 +125,7 @@ public final class JSONReader {
         // "key" :
         //  ^ we're here
         var readResult = read(untilAnyCharacterFrom: CharacterSet(["\""]))
-        guard readResult.matchingByte == SpecialSymbols.quotationMark else { throw Error.streamHasNoData }
+        guard readResult.matchingByte == SpecialSymbols.quotationMark else { throw JSONReaderError.streamHasNoData }
         
         var keyData = Data()
         keyData.append(contentsOf: readResult.passedBytes)
@@ -145,12 +133,12 @@ public final class JSONReader {
         // "key" :
         //      ^ we're here
         readResult = read(untilAnyCharacterFrom: CharacterSet([":"]), ignoreCharacters: whiteCharacters)
-        guard readResult.passedBytes.isEmpty else { throw Error.unexpectedCharacter(readResult.passedBytes[0]) }
-        guard let byte = readResult.matchingByte else { throw Error.streamHasNoData }
-        guard byte == SpecialSymbols.colon else { throw Error.unexpectedCharacter(byte) }
+        guard readResult.passedBytes.isEmpty else { throw JSONReaderError.unexpectedCharacter(readResult.passedBytes[0]) }
+        guard let byte = readResult.matchingByte else { throw JSONReaderError.streamHasNoData }
+        guard byte == SpecialSymbols.colon else { throw JSONReaderError.unexpectedCharacter(byte) }
         
         guard let key = String(data: keyData, encoding: .utf8) else {
-            throw Error.invalidStringData(keyData)
+            throw JSONReaderError.invalidStringData(keyData)
         }
         
         try popContext()
@@ -161,7 +149,7 @@ public final class JSONReader {
         // "key":  _____
         //       ^ we're here
         let readResult = read(untilAnyCharacterFrom: anyCharacterSet, ignoreCharacters: whiteCharacters)
-        guard let byte = readResult.matchingByte else { throw Error.streamHasNoData }
+        guard let byte = readResult.matchingByte else { throw JSONReaderError.streamHasNoData }
         
         try popContext()
         
@@ -181,7 +169,7 @@ public final class JSONReader {
         case SpecialSymbols.digits, SpecialSymbols.hypenMinus:
             pushContext(.inNumericValue(key: key, storage: NumericStorage(Data([byte]))))
         default:
-            throw Error.unexpectedCharacter(byte)
+            throw JSONReaderError.unexpectedCharacter(byte)
         }
     }
     
@@ -191,7 +179,7 @@ public final class JSONReader {
         var data = Data()
         var expectedEscapedValue = false
         while true {
-            guard let byte = readByte() else { throw Error.streamHasNoData }
+            guard let byte = readByte() else { throw JSONReaderError.streamHasNoData }
             
             if byte == SpecialSymbols.reverseSolidus && !expectedEscapedValue {
                 expectedEscapedValue = true
@@ -218,15 +206,15 @@ public final class JSONReader {
         expectedChars.formUnion(numberChars)
         
         let readResult = read(untilAnyCharacterFrom: expectedChars, ignoreCharacters: whiteCharacters)
-        guard readResult.passedBytes.isEmpty else { throw Error.unexpectedCharacter(readResult.passedBytes[0]) }
-        guard let byte = readResult.matchingByte else { throw Error.streamHasNoData }
+        guard readResult.passedBytes.isEmpty else { throw JSONReaderError.unexpectedCharacter(readResult.passedBytes[0]) }
+        guard let byte = readResult.matchingByte else { throw JSONReaderError.streamHasNoData }
         
         switch byte {
         case SpecialSymbols.rightSquareBracket:
             if !expectingAnotherObject {
                 try popContext()
             } else {
-                throw Error.unexpectedCharacter(byte)
+                throw JSONReaderError.unexpectedCharacter(byte)
             }
         case SpecialSymbols.quotationMark:
             pushContext(.inStringObject(storage: NSMutableData()))
@@ -237,7 +225,7 @@ public final class JSONReader {
         case SpecialSymbols.comma:
             // swiftlint:disable:next empty_count
             if storage.count == 0 || expectingAnotherObject {
-                throw Error.unexpectedCharacter(byte)
+                throw JSONReaderError.unexpectedCharacter(byte)
             }
             try validateArrayContext(key, storage, expectingAnotherObject: true)
         case 0x6E: // "n"
@@ -249,7 +237,7 @@ public final class JSONReader {
         case SpecialSymbols.digits, SpecialSymbols.hypenMinus:
             pushContext(.inNumericValue(key: nil, storage: NumericStorage(Data([byte]))))
         default:
-            throw Error.unexpectedCharacter(byte)
+            throw JSONReaderError.unexpectedCharacter(byte)
         }
     }
     
@@ -289,16 +277,16 @@ public final class JSONReader {
         let readBreakers = Set<Unicode.Scalar>([",", endOfContainerContextScalar])
         
         while true {
-            guard let nextByte = inputStream.touch() else { throw Error.streamHasNoData }
+            guard let nextByte = inputStream.touch() else { throw JSONReaderError.streamHasNoData }
             let nextScalar = Unicode.Scalar(nextByte)
             if readBreakers.contains(nextScalar) || whiteCharacters.contains(nextScalar) { break }
             
-            guard let byte = readByte() else { throw Error.streamHasNoData }
+            guard let byte = readByte() else { throw JSONReaderError.streamHasNoData }
             storage.bytes.append(byte)
         }
         
         guard let stringRepresentation = String(data: Data(storage.bytes), encoding: .utf8) else {
-            throw Error.invalidNumberValue(storage.bytes)
+            throw JSONReaderError.invalidNumberValue(storage.bytes)
         }
         storage.parsedNumber = try NumberValidator.validateStringRepresentationOfNumber(stringRepresentation)
         
@@ -308,7 +296,7 @@ public final class JSONReader {
     private func read(times: Int) throws -> [UInt8] {
         var result = [UInt8]()
         for _ in 0 ..< times {
-            guard let byte = readByte() else { throw Error.streamHasNoData }
+            guard let byte = readByte() else { throw JSONReaderError.streamHasNoData }
             result.append(byte)
         }
         return result
@@ -317,7 +305,7 @@ public final class JSONReader {
     private func readAndValidateBytes(_ expectedBytes: [UInt8]) throws {
         let actualBytes = try read(times: expectedBytes.count)
         guard actualBytes == expectedBytes else {
-            throw Error.unexpectedCharacters(actualBytes, expected: expectedBytes)
+            throw JSONReaderError.unexpectedCharacters(actualBytes, expected: expectedBytes)
         }
     }
     
@@ -378,71 +366,71 @@ public final class JSONReader {
             break
         case let (.inStringValue(key, data), .inObject(_, object)):
             // case: {"key": "stringValue"}
-            guard let key = key else { throw Error.objectMustHaveKey(parent: currentContext, child: popedContext) }
-            guard let stringValue = String(data: data as Data, encoding: .utf8) else { throw Error.invalidStringData(Data(data)) }
+            guard let key = key else { throw JSONReaderFatalError.objectMustHaveKey(parent: currentContext, child: popedContext) }
+            guard let stringValue = String(data: data as Data, encoding: .utf8) else { throw JSONReaderError.invalidStringData(Data(data)) }
             object[key] = stringValue
         case let (.inObject(key, objectValue), .inObject(_, object)):
             // case: {"key": {...}}
-            guard let key = key else { throw Error.objectMustHaveKey(parent: currentContext, child: popedContext) }
+            guard let key = key else { throw JSONReaderFatalError.objectMustHaveKey(parent: currentContext, child: popedContext) }
             object[key] = objectValue
         case let (.inArray(key, array), .inObject(_, object)):
             // case: {"key": []]}
-            guard let key = key else { throw Error.objectMustHaveKey(parent: currentContext, child: popedContext) }
+            guard let key = key else { throw JSONReaderFatalError.objectMustHaveKey(parent: currentContext, child: popedContext) }
             object[key] = array
         case let (.inNullValue(key), .inObject(_, object)):
             // case: {"key": null}
-            guard let key = key else { throw Error.objectMustHaveKey(parent: currentContext, child: popedContext) }
+            guard let key = key else { throw JSONReaderFatalError.objectMustHaveKey(parent: currentContext, child: popedContext) }
             object[key] = NSNull()
         case let (.inTrueValue(key), .inObject(_, object)):
             // case: {"key": true}
-            guard let key = key else { throw Error.objectMustHaveKey(parent: currentContext, child: popedContext) }
+            guard let key = key else { throw JSONReaderFatalError.objectMustHaveKey(parent: currentContext, child: popedContext) }
             object[key] = true
         case let (.inFalseValue(key), .inObject(_, object)):
             // case: {"key": false}
-            guard let key = key else { throw Error.objectMustHaveKey(parent: currentContext, child: popedContext) }
+            guard let key = key else { throw JSONReaderFatalError.objectMustHaveKey(parent: currentContext, child: popedContext) }
             object[key] = false
         case let (.inNumericValue(key, storage), .inObject(_, object)):
             // case: {"key": -123.45e-3}
-            guard let key = key else { throw Error.objectMustHaveKey(parent: currentContext, child: popedContext) }
-            guard let parsedNumber = storage.parsedNumber else { throw Error.invalidNumberValue(storage.bytes) }
+            guard let key = key else { throw JSONReaderFatalError.objectMustHaveKey(parent: currentContext, child: popedContext) }
+            guard let parsedNumber = storage.parsedNumber else { throw JSONReaderError.invalidNumberValue(storage.bytes) }
             object[key] = parsedNumber
             
             /**
              * When parent context is array
              */
         case let (.inStringObject(data), .inArray(_, array)):
-            guard let stringValue = String(data: data as Data, encoding: .utf8) else { throw Error.invalidStringData(Data(data)) }
+            guard let stringValue = String(data: data as Data, encoding: .utf8) else { throw JSONReaderError.invalidStringData(Data(data)) }
             // case: ["string"]
             array.add(stringValue)
         case let (.inObject(key, object), .inArray(_, array)):
             // case: [{}]
             // arrays do not have keys so key must be nil
-            guard key == nil else { throw Error.arrayCannotHaveKeys(parent: currentContext, child: popedContext) }
+            guard key == nil else { throw JSONReaderFatalError.arrayCannotHaveKeys(parent: currentContext, child: popedContext) }
             array.add(object)
         case let (.inArray(key, subarray), .inArray(_, array)):
             // case: [[]]
             // arrays do not have keys so key must be nil
-            guard key == nil else { throw Error.arrayCannotHaveKeys(parent: currentContext, child: popedContext) }
+            guard key == nil else { throw JSONReaderFatalError.arrayCannotHaveKeys(parent: currentContext, child: popedContext) }
             array.add(subarray)
         case let (.inNullValue(key), .inArray(_, array)):
             // case: [null]
             // arrays do not have keys so key must be nil
-            guard key == nil else { throw Error.arrayCannotHaveKeys(parent: currentContext, child: popedContext) }
+            guard key == nil else { throw JSONReaderFatalError.arrayCannotHaveKeys(parent: currentContext, child: popedContext) }
             array.add(NSNull())
         case let (.inTrueValue(key), .inArray(_, array)):
             // case: [true]
             // arrays do not have keys so key must be nil
-            guard key == nil else { throw Error.arrayCannotHaveKeys(parent: currentContext, child: popedContext) }
+            guard key == nil else { throw JSONReaderFatalError.arrayCannotHaveKeys(parent: currentContext, child: popedContext) }
             array.add(true)
         case let (.inFalseValue(key), .inArray(_, array)):
             // case: [false]
             // arrays do not have keys so key must be nil
-            guard key == nil else { throw Error.arrayCannotHaveKeys(parent: currentContext, child: popedContext) }
+            guard key == nil else { throw JSONReaderFatalError.arrayCannotHaveKeys(parent: currentContext, child: popedContext) }
             array.add(false)
         case let (.inNumericValue(key, storage), .inArray(_, array)):
             // case: [-123.45e-3]
             // arrays do not have keys so key must be nil
-            guard key == nil, let parsedNumber = storage.parsedNumber else { throw Error.invalidNumberValue(storage.bytes) }
+            guard key == nil, let parsedNumber = storage.parsedNumber else { throw JSONReaderError.invalidNumberValue(storage.bytes) }
             array.add(parsedNumber)
             
             /**
@@ -455,7 +443,7 @@ public final class JSONReader {
             eventStream.newArray(NSArray(array: array), data: Data(collectedBytes))
             collectedBytes.removeAll()
         default:
-            throw Error.unhandledContextCombination(parent: currentContext, child: popedContext)
+            throw JSONReaderFatalError.unhandledContextCombination(parent: currentContext, child: popedContext)
         }
     }
 }
