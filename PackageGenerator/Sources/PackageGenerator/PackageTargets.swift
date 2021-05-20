@@ -16,7 +16,7 @@ public enum PackageTargets: Codable, Equatable {
         do {
             let stringRep = try container.decode(String.self)
             guard stringRep == PackageTargets.discoverAutomaticallyStringRep else {
-                fatalError("Must be '\(PackageTargets.discoverAutomaticallyStringRep)'")
+                fatalError("The value must be '\(PackageTargets.discoverAutomaticallyStringRep)', but found '\(stringRep)'")
             }
             self = .discoverAutomatically
         } catch {

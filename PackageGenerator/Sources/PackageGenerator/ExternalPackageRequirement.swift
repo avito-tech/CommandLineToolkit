@@ -2,8 +2,8 @@ import Foundation
 
 /// Defines where external package is located.
 public enum ExternalPackageLocation: Codable, Equatable {
-    case url(url: String, version: ExternalPackageVersion, targetNames: [String])
-    case local(path: String, targetNames: LocalPackageTargets)
+    case url(url: String, version: ExternalPackageVersion, targetNames: PackageExposedTargets)
+    case local(path: String, targetNames: PackageExposedTargets)
     
     private enum CodingKeys: CodingKey {
         case url
@@ -17,13 +17,13 @@ public enum ExternalPackageLocation: Codable, Equatable {
         do {
             self = .local(
                 path: try container.decode(String.self, forKey: .path),
-                targetNames: try container.decode(LocalPackageTargets.self, forKey: .targetNames)
+                targetNames: try container.decode(PackageExposedTargets.self, forKey: .targetNames)
             )
         } catch {
             self = .url(
                 url: try container.decode(String.self, forKey: .url),
                 version: try container.decode(ExternalPackageVersion.self, forKey: .version),
-                targetNames: try container.decode([String].self, forKey: .targetNames)
+                targetNames: try container.decode(PackageExposedTargets.self, forKey: .targetNames)
             )
         }
     }

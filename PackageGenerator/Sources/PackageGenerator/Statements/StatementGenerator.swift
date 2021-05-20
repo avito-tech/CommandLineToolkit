@@ -1,6 +1,9 @@
 import Foundation
 
-public struct StatementGenerator {
+public class StatementGenerator {
+    private var importedDependencyCache = [String: ImportedDependency]()
+    private var packageTargetCache = [URL: [PackageTarget]]()
+    
     public init() {}
     
     public func generatePackageSwiftCode(
@@ -36,18 +39,44 @@ public struct StatementGenerator {
                     if swiftPackage.dependencies.implicitSystemModules.contains(importedModuleName) {
                         return nil
                     }
+                    
                     for (externalPackageName, requirement) in swiftPackage.dependencies.external {
+                        if let cachedValue = importedDependencyCache[importedModuleName] {
+                            return cachedValue
+                        }
+                        
                         switch requirement {
                         case let .url(_, _, targetNames):
-                            if targetNames.contains(importedModuleName) {
-                                return ImportedDependency.fromExternalPackage(moduleName: importedModuleName, packageName: externalPackageName)
+                            switch targetNames {
+                            case let .targetNames(targetNames):
+                                if targetNames.contains(importedModuleName) {
+                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, packageName: externalPackageName)
+                                    importedDependencyCache[importedModuleName] = result
+                                    return result
+                                }
+                            case .generated:
+                                let externalCheckoutPath = location.appendingPathComponent(".build/checkouts/\(externalPackageName)/", isDirectory: true)
+                                let anotherPackage = Package(url: externalCheckoutPath)
+                                let exportedProducts = try obtainPackageProducts(
+                                    swiftPackage: try anotherPackage.loadSwiftPackage(),
+                                    location: anotherPackage.url
+                                )
+                                log("Looking for package for external module \(importedModuleName) imported by \(swiftPackage.name)")
+                                if exportedProducts.contains(where: { $0.name == importedModuleName }) {
+                                    log("    External module \(importedModuleName) is provided by \(externalPackageName)")
+                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, packageName: externalPackageName)
+                                    importedDependencyCache[importedModuleName] = result
+                                    return result
+                                }
                             }
                             continue
                         case let .local(path, targetNames):
                             switch targetNames {
                             case let .targetNames(providedTargetNames):
                                 if providedTargetNames.contains(importedModuleName) {
-                                    return ImportedDependency.fromExternalPackage(moduleName: importedModuleName, packageName: externalPackageName)
+                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, packageName: externalPackageName)
+                                    importedDependencyCache[importedModuleName] = result
+                                    return result
                                 }
                             case .generated:
                                 let anotherPackage = Package(url: location.appendingPathComponent(path, isDirectory: true))
@@ -57,14 +86,19 @@ public struct StatementGenerator {
                                 )
                                 log("Looking for package for external module \(importedModuleName) imported by \(swiftPackage.name)")
                                 if exportedProducts.contains(where: { $0.name == importedModuleName }) {
-                                    log("    External module \(importedModuleName) is provided \(externalPackageName)")
-                                    return ImportedDependency.fromExternalPackage(moduleName: importedModuleName, packageName: externalPackageName)
+                                    log("    External module \(importedModuleName) is provided by \(externalPackageName)")
+                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, packageName: externalPackageName)
+                                    importedDependencyCache[importedModuleName] = result
+                                    return result
                                 }
                             }
                             continue
                         }
                     }
-                    return ImportedDependency.fromSamePackage(moduleName: importedModuleName)
+                    
+                    let result = ImportedDependency.fromSamePackage(moduleName: importedModuleName)
+                    importedDependencyCache[importedModuleName] = result
+                    return result
                 }.sorted().map { IndentedStatement(level: 2, string: $0.statement + ",").statement }
             )
             statements.append("    ],")
@@ -93,9 +127,15 @@ public struct StatementGenerator {
         case let .explicit(targets):
             return targets
         case .discoverAutomatically:
-            return try PackageTarget.discoverTargets(packageLocation: location).sorted(by: { left, right -> Bool in
+            if let result = packageTargetCache[location] {
+                return result
+            }
+            
+            let result = try PackageTarget.discoverTargets(packageLocation: location).sorted(by: { left, right -> Bool in
                 left.name < right.name
             })
+            packageTargetCache[location] = result
+            return result
         }
     }
 
