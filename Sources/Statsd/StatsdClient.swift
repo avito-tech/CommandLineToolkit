@@ -1,7 +1,7 @@
 import Foundation
 import Network
 
-public protocol StatsdClient: class {
+public protocol StatsdClient: AnyObject {
     var stateUpdateHandler: ((NWConnection.State) -> ())? { get set }
     var state: NWConnection.State { get }
     

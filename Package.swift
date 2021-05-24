@@ -7,6 +7,7 @@ let package = Package(
     ],
     products: [
         .library(name: "AtomicModels", targets: ["AtomicModels"]),
+        .library(name: "CLTExtensions", targets: ["CLTExtensions"]),
         .library(name: "DateProvider", targets: ["DateProvider"]),
         .library(name: "DateProviderTestHelpers", targets: ["DateProviderTestHelpers"]),
         .library(name: "FileSystem", targets: ["FileSystem"]),
@@ -49,6 +50,19 @@ let package = Package(
             dependencies: [
             ],
             path: "Sources/AtomicModels"
+        ),
+        .target(
+            name: "CLTExtensions",
+            dependencies: [
+            ],
+            path: "Sources/CLTExtensions"
+        ),
+        .testTarget(
+            name: "CLTExtensionsTests",
+            dependencies: [
+                "CLTExtensions",
+            ],
+            path: "Tests/CLTExtensionsTests"
         ),
         .target(
             name: "DateProvider",

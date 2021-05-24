@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol ProcessController: class {
+public protocol ProcessController: AnyObject {
     var subprocess: Subprocess { get }
     var processName: String { get }
     var processId: Int32 { get }

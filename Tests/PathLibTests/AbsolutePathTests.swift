@@ -75,4 +75,11 @@ class AbsolutePathTests: XCTestCase {
             AbsolutePath("/path/of/something").isSubpathOf(anchorPath: AbsolutePath("/path/to/"))
         )
     }
+    
+    func test___init_with_file_url() {
+        XCTAssertEqual(
+            AbsolutePath(fileUrl: URL(fileURLWithPath: "/path/to/something")),
+            AbsolutePath("/path/to/something")
+        )
+    }
 }

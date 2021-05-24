@@ -8,19 +8,15 @@ function generate_package() {
     swift run --package-path "$(pwd)/PackageGenerator/" package-gen $(pwd)
 }
 
-function open_xcodeproj() {
-	generate_xcodeproj
-	open *.xcodeproj
-}
-
-function generate_xcodeproj() {
-	generate_package
-	swift package generate-xcodeproj --enable-code-coverage
+function open_package() {
+    generate_package
+	open Package.swift
 }
 
 function clean() {
 	rm -rf .build/
-	rm -rf *.xcodeproj
+    rm -rf .swiftpm/
+    rm -rf *.xcodeproj
 }
 
 function build() {
@@ -42,11 +38,8 @@ case "$1" in
     package)
         generate_package
         ;;
-    generate)
-        generate_xcodeproj
-        ;;
     open)
-    	open_xcodeproj
+    	open_package
     	;;
     test)
         run_tests_parallel

@@ -41,13 +41,13 @@ public struct AutomaticManagement: CustomStringConvertible, Equatable {
     }
     
     public var description: String {
-        var elements: [String] = ["\(type(of: self))"]
+        let elements: String
         if items.isEmpty {
-            elements.append("no automatic management")
+            elements = "no automatic management"
         } else {
-            elements.append("items: \(items)")
+            elements = "items: \(items)"
         }
-        return "<" + elements.joined(separator: " ") + ">"
+        return "<\(elements)>"
     }
     
     public static let noManagement = AutomaticManagement(items: [])

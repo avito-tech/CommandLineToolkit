@@ -13,6 +13,10 @@ public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLit
         self.components = components
     }
     
+    public convenience init(fileUrl: URL) {
+        self.init(fileUrl.path)
+    }
+    
     public var pathString: String {
         return "/" + components.joined(separator: "/")
     }
