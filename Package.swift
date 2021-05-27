@@ -29,6 +29,7 @@ let package = Package(
         .library(name: "SignalHandling", targets: ["SignalHandling"]),
         .library(name: "SocketModels", targets: ["SocketModels"]),
         .library(name: "Statsd", targets: ["Statsd"]),
+        .library(name: "String", targets: ["String"]),
         .library(name: "SynchronousWaiter", targets: ["SynchronousWaiter"]),
         .library(name: "TestHelpers", targets: ["TestHelpers"]),
         .library(name: "Timer", targets: ["Timer"]),
@@ -328,6 +329,19 @@ let package = Package(
                 "Statsd",
             ],
             path: "Tests/StatsdTests"
+        ),
+        .target(
+            name: "String",
+            dependencies: [
+            ],
+            path: "Sources/String"
+        ),
+        .testTarget(
+            name: "StringTests",
+            dependencies: [
+                "String",
+            ],
+            path: "Tests/StringTests"
         ),
         .target(
             name: "SynchronousWaiter",
