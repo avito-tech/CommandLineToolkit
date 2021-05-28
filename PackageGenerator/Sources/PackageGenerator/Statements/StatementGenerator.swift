@@ -46,12 +46,13 @@ public class StatementGenerator {
                         }
                         
                         switch requirement {
-                        case let .url(_, _, targetNames):
+                        case let .url(_, _, importMappings, targetNames):
                             switch targetNames {
                             case let .targetNames(targetNames):
-                                if targetNames.contains(importedModuleName) {
-                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, packageName: externalPackageName)
-                                    importedDependencyCache[importedModuleName] = result
+                                let importedTargetName = importMappings?[importedModuleName] ?? importedModuleName
+                                if targetNames.contains(importedTargetName) {
+                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedTargetName, packageName: externalPackageName)
+                                    importedDependencyCache[importedTargetName] = result
                                     return result
                                 }
                             case .generated:
