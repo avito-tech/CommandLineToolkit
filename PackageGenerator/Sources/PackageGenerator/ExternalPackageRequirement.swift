@@ -2,7 +2,7 @@ import Foundation
 
 /// Defines where external package is located.
 public enum ExternalPackageLocation: Codable, Equatable {
-    case url(url: String, version: ExternalPackageVersion, importMappings: [String: String]?, targetNames: PackageExposedTargets)
+    case url(url: String, version: ExternalPackageVersion, importMappings: [String: String], targetNames: PackageExposedTargets)
     case local(path: String, targetNames: PackageExposedTargets)
     
     private enum CodingKeys: CodingKey {
@@ -24,7 +24,7 @@ public enum ExternalPackageLocation: Codable, Equatable {
             self = .url(
                 url: try container.decode(String.self, forKey: .url),
                 version: try container.decode(ExternalPackageVersion.self, forKey: .version),
-                importMappings: try container.decodeIfPresent([String: String].self, forKey: .importMappings),
+                importMappings: try container.decodeIfPresent([String: String].self, forKey: .importMappings) ?? [:],
                 targetNames: try container.decode(PackageExposedTargets.self, forKey: .targetNames)
             )
         }

@@ -17,7 +17,7 @@ final class StatementGeneratorTests: XCTestCase {
                         "SomeExternalPackage": ExternalPackageLocation.url(
                             url: "http://example.com/someexternalpackage",
                             version: .exact("123"),
-                            importMappings: nil,
+                            importMappings: [:],
                             targetNames: .targetNames(["SomeExternalModule"])
                         )
                     ]

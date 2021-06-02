@@ -49,10 +49,9 @@ public class StatementGenerator {
                         case let .url(_, _, importMappings, targetNames):
                             switch targetNames {
                             case let .targetNames(targetNames):
-                                let importedTargetName = importMappings?[importedModuleName] ?? importedModuleName
-                                if targetNames.contains(importedTargetName) {
-                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedTargetName, packageName: externalPackageName)
-                                    importedDependencyCache[importedTargetName] = result
+                                if targetNames.contains(importedModuleName) {
+                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, importMappings: importMappings, packageName: externalPackageName)
+                                    importedDependencyCache[importedModuleName] = result
                                     return result
                                 }
                             case .generated:
@@ -65,7 +64,7 @@ public class StatementGenerator {
                                 log("Looking for package for external module \(importedModuleName) imported by \(swiftPackage.name)")
                                 if exportedProducts.contains(where: { $0.name == importedModuleName }) {
                                     log("    External module \(importedModuleName) is provided by \(externalPackageName)")
-                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, packageName: externalPackageName)
+                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, importMappings: [:], packageName: externalPackageName)
                                     importedDependencyCache[importedModuleName] = result
                                     return result
                                 }
@@ -75,7 +74,7 @@ public class StatementGenerator {
                             switch targetNames {
                             case let .targetNames(providedTargetNames):
                                 if providedTargetNames.contains(importedModuleName) {
-                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, packageName: externalPackageName)
+                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, importMappings: [:], packageName: externalPackageName)
                                     importedDependencyCache[importedModuleName] = result
                                     return result
                                 }
@@ -88,7 +87,7 @@ public class StatementGenerator {
                                 log("Looking for package for external module \(importedModuleName) imported by \(swiftPackage.name)")
                                 if exportedProducts.contains(where: { $0.name == importedModuleName }) {
                                     log("    External module \(importedModuleName) is provided by \(externalPackageName)")
-                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, packageName: externalPackageName)
+                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, importMappings: [:], packageName: externalPackageName)
                                     importedDependencyCache[importedModuleName] = result
                                     return result
                                 }
@@ -160,13 +159,14 @@ public class StatementGenerator {
     
     private enum ImportedDependency: Hashable, Comparable {
         case fromSamePackage(moduleName: String)
-        case fromExternalPackage(moduleName: String, packageName: String)
+        case fromExternalPackage(moduleName: String, importMappings: [String: String], packageName: String)
         
         var statement: String {
             switch self {
             case let .fromSamePackage(moduleName):
                 return "\"\(moduleName)\""
-            case let .fromExternalPackage(moduleName, packageName):
+            case let .fromExternalPackage(moduleName, importMappings, packageName):
+                let moduleName = importMappings[moduleName] ?? moduleName
                 return ".product(name: \"\(moduleName)\", package: \"\(packageName)\")"
             }
         }
@@ -175,7 +175,7 @@ public class StatementGenerator {
             switch self {
             case let .fromSamePackage(moduleName):
                 return moduleName
-            case let .fromExternalPackage(moduleName, _):
+            case let .fromExternalPackage(moduleName, _, _):
                 return moduleName
             }
         }
