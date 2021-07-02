@@ -8,6 +8,7 @@ public enum ContentEnumerationStyle {
 
 public protocol FileSystem {
     func contentEnumerator(forPath: AbsolutePath, style: ContentEnumerationStyle) -> FileSystemEnumerator
+    func glob(pattern: GlobPattern) -> FileSystemEnumerator
     
     func createDirectory(atPath: AbsolutePath, withIntermediateDirectories: Bool) throws
     func createFile(atPath: AbsolutePath, data: Data?) throws

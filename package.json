@@ -9,6 +9,15 @@
             "targetNames": [
                 "Signals"
             ]
+        },
+        "Glob": {
+            "url": "https://github.com/Bouke/Glob",
+            "version": {
+                "exact": "1.0.5"
+            },
+            "targetNames": [
+                "Glob"
+            ]
         }
     },
     "implicitSystemModules" : [

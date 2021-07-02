@@ -17,7 +17,10 @@ public final class LocalFileSystem: FileSystem {
         case .shallow:
             return ShallowFileSystemEnumerator(fileManager: fileManager, path: path)
         }
-        
+    }
+    
+    public func glob(pattern: GlobPattern) -> FileSystemEnumerator {
+        GlobFileSystemEnumerator(pattern: pattern)
     }
     
     public func createDirectory(atPath path: AbsolutePath, withIntermediateDirectories: Bool) throws {

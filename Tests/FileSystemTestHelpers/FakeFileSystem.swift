@@ -23,6 +23,10 @@ public class FakeFileSystem: FileSystem {
         fakeContentEnumerator((path: path, style: style))
     }
     
+    public func glob(pattern: GlobPattern) -> FileSystemEnumerator {
+        FakeFileSystemEnumerator(path: AbsolutePath(pattern.value))
+    }
+    
     public func createDirectory(atPath: AbsolutePath, withIntermediateDirectories: Bool) throws {
         
     }

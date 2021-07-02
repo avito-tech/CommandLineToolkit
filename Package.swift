@@ -43,6 +43,7 @@ let package = Package(
         .library(name: "XcodeLocatorModels", targets: ["XcodeLocatorModels"]),
     ],
     dependencies: [
+        .package(name: "Glob", url: "https://github.com/Bouke/Glob", .exact("1.0.5")),
         .package(name: "Signals", url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.21")),
     ],
     targets: [
@@ -81,6 +82,7 @@ let package = Package(
         .target(
             name: "FileSystem",
             dependencies: [
+                .product(name: "Glob", package: "Glob"),
                 "PathLib",
             ],
             path: "Sources/FileSystem"
