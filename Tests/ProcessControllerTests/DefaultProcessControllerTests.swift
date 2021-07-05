@@ -282,7 +282,7 @@ final class DefaultProcessControllerTests: XCTestCase {
     }
     
     func test___callers_waits_for_process_to_die___all_termination_handlers_invoked_before_returning() throws {
-        let expectation = XCTestExpectation(description: "Termination handler has finished")
+        var terminationHandlerHasFinished = false
         
         let controller = try DefaultProcessController(
             dateProvider: dateProvider,
@@ -293,11 +293,12 @@ final class DefaultProcessControllerTests: XCTestCase {
         )
         controller.onTermination { _, _ in
             Thread.sleep(forTimeInterval: 5)
-            expectation.fulfill()
+            terminationHandlerHasFinished = true
         }
         
         try controller.startAndListenUntilProcessDies()
-        wait(for: [expectation], timeout: 0)
+        
+        XCTAssert(terminationHandlerHasFinished, "termination handler was expected to be called")
     }
     
     func test___sigterm_is_sent___when_silent() throws {
@@ -497,7 +498,7 @@ final class DefaultProcessControllerTests: XCTestCase {
             try controller.startAndWaitForSuccessfulTermination()
         }
         
-        wait(for: [stdoutProcessed, deallocated], timeout: 0)
+        wait(for: [stdoutProcessed, deallocated], timeout: 15)
     }
     
     func test___listeners_freed___when_process_controller_instance_not_captured() throws {
@@ -521,7 +522,7 @@ final class DefaultProcessControllerTests: XCTestCase {
             try controller.start()
         }
         
-        wait(for: [deallocated], timeout: 0)
+        wait(for: [deallocated], timeout: 15)
     }
 }
 
