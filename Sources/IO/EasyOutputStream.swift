@@ -55,7 +55,7 @@ public final class EasyOutputStream: NSObject, StreamDelegate {
     
     /// Closes previously opened streams, and opens a new stream.
     public func open() throws {
-        terminateStreamThread()
+        wakeUpAndCancelThread()
         
         let outputStream = try outputStreamProvider.createOutputStream()
         thread = Thread(target: self, selector: #selector(handleStream(outputStream:)), object: outputStream)
@@ -69,7 +69,7 @@ public final class EasyOutputStream: NSObject, StreamDelegate {
     public func close() {
         acceptsNewData.set(false)
         buffer.set(Data())
-        terminateStreamThread()
+        wakeUpAndCancelThread()
     }
     
     /// Waits given time to deliver buffered data and then closes the output stream.
@@ -142,12 +142,12 @@ public final class EasyOutputStream: NSObject, StreamDelegate {
                     self.errorHandler(self, EasyOutputStreamError.streamError(streamError))
                 }
             }
-            terminateStreamThread()
+            wakeUpAndCancelThread()
         case .endEncountered:
             handlerQueue.async {
                 self.streamEndHandler(self)
             }
-            terminateStreamThread()
+            wakeUpAndCancelThread()
         default:
             break
         }
@@ -192,9 +192,21 @@ public final class EasyOutputStream: NSObject, StreamDelegate {
         }
     }
     
-    private func terminateStreamThread() {
+    // It's important to wake up and cancel thread simultaneously
+    // (there was a crash before it was synchronized)
+    private func wakeUpAndCancelThread() {
+        if let thread = thread {
+            self.perform(
+                #selector(cancelThread),
+                on: thread,
+                with: nil,
+                waitUntilDone: false
+            )
+        }
+    }
+    
+    @objc private func cancelThread() {
         thread?.cancel()
-        wakeUpThreadsRunloop()
         thread = nil
     }
     
@@ -202,7 +214,12 @@ public final class EasyOutputStream: NSObject, StreamDelegate {
     
     private func wakeUpThreadsRunloop() {
         if let thread = thread {
-            self.perform(#selector(wakeUpThreadRunloop_onThread), on: thread, with: nil, waitUntilDone: false)
+            self.perform(
+                #selector(wakeUpThreadRunloop_onThread),
+                on: thread,
+                with: nil,
+                waitUntilDone: false
+            )
         }
     }
     
