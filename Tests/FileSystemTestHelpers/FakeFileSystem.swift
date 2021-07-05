@@ -2,7 +2,7 @@ import FileSystem
 import Foundation
 import PathLib
 
-public class FakeFileSystem: FileSystem {
+open class FakeFileSystem: FileSystem {
     public init(rootPath: AbsolutePath) {
         self.fakeCommonlyUsedPathsProvider = FakeCommonlyUsedPathsProvider(
             applicationsProvider: { _ in rootPath.appending(components: ["Applications"]) },
@@ -23,8 +23,12 @@ public class FakeFileSystem: FileSystem {
         fakeContentEnumerator((path: path, style: style))
     }
     
-    public func glob(pattern: GlobPattern) -> FileSystemEnumerator {
+    public var fakeGlobEnumerator: (GlobPattern) -> FileSystemEnumerator = { pattern in
         FakeFileSystemEnumerator(path: AbsolutePath(pattern.value))
+    }
+    
+    public func glob(pattern: GlobPattern) -> FileSystemEnumerator {
+        fakeGlobEnumerator(pattern)
     }
     
     public func createDirectory(atPath: AbsolutePath, withIntermediateDirectories: Bool) throws {

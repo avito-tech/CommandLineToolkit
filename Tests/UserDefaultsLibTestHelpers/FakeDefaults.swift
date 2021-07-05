@@ -1,7 +1,7 @@
 import PlistLib
 import UserDefaultsLib
 
-public class FakeDefaults: Defaults {
+open class FakeDefaults: Defaults {
     public var storage = [String: PlistEntry]()
     
     public init() {}

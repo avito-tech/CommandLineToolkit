@@ -2,7 +2,7 @@ import FileSystem
 import Foundation
 import PathLib
 
-public class FakeFileSystemEnumerator: FileSystemEnumerator {
+open class FakeFileSystemEnumerator: FileSystemEnumerator {
     public let path: AbsolutePath
     public var items = [AbsolutePath]()
     

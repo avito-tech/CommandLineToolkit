@@ -2,7 +2,7 @@ import FileSystem
 import Foundation
 import PathLib
 
-public class FakeFilePropertiesContainer: FilePropertiesContainer {
+open class FakeFilePropertiesContainer: FilePropertiesContainer {
     public init(
         pathExists: Bool = true
     ) {

@@ -2,7 +2,7 @@ import Foundation
 import FileSystem
 import PathLib
 
-public class FakeCommonlyUsedPathsProvider: CommonlyUsedPathsProvider {
+open class FakeCommonlyUsedPathsProvider: CommonlyUsedPathsProvider {
     public var applicationsProvider: ((domain: SearchDomain, create: Bool)) throws -> AbsolutePath
     public var cachesProvider: ((domain: SearchDomain, create: Bool)) throws -> AbsolutePath
     public var libraryProvider: ((domain: SearchDomain, create: Bool)) throws -> AbsolutePath
