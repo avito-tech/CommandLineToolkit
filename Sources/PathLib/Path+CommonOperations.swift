@@ -17,6 +17,10 @@ public extension Path {
         return Self(components: self.components + components)
     }
     
+    func appending(_ components: String...) -> Self {
+        return appending(components: components)
+    }
+    
     func appending(relativePath: RelativePath) -> Self {
         return Self(components: components + relativePath.components)
     }

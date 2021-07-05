@@ -1,6 +1,9 @@
 import Foundation
 import PathLib
+import TestHelpers
 import XCTest
+
+// swiftlint:disable multiple_closures_with_trailing_closure
 
 class RelativePathTests: XCTestCase {
     func test() {
@@ -29,5 +32,26 @@ class RelativePathTests: XCTestCase {
             path.removingLastComponent.pathString,
             "./"
         )
+    }
+    
+    func test___appending() {
+        let path = RelativePath("some/path")
+        XCTAssertEqual(path.appending("another", "subpath").pathString, "some/path/another/subpath")
+    }
+    
+    func test___validating() {
+        assertThrows {
+            try RelativePath.validating(string: "/not/relative/path")
+        }
+        
+        assertThrows {
+            try RelativePath.validating(string: "~/not/relative/path")
+        }
+        
+        assert {
+            try RelativePath.validating(string: "some/path")
+        } equals: {
+            RelativePath("some/path")
+        }
     }
 }

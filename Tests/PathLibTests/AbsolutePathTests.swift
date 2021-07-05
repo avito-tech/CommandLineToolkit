@@ -1,6 +1,9 @@
 import Foundation
 import PathLib
+import TestHelpers
 import XCTest
+
+// swiftlint:disable multiple_closures_with_trailing_closure
 
 class AbsolutePathTests: XCTestCase {
     
@@ -81,5 +84,26 @@ class AbsolutePathTests: XCTestCase {
             AbsolutePath(fileUrl: URL(fileURLWithPath: "/path/to/something")),
             AbsolutePath("/path/to/something")
         )
+    }
+    
+    func test___appending() {
+        let path = AbsolutePath("/some/path")
+        XCTAssertEqual(path.appending("another", "subpath").pathString, "/some/path/another/subpath")
+    }
+    
+    func test___validating() {
+        assertThrows {
+            try AbsolutePath.validating(string: "not/absolute/path")
+        }
+        
+        assertThrows {
+            try AbsolutePath.validating(string: "~/not/absolute/path")
+        }
+        
+        assert {
+            try AbsolutePath.validating(string: "/some/path")
+        } equals: {
+            AbsolutePath("/some/path")
+        }
     }
 }

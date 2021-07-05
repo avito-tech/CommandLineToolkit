@@ -1,12 +1,12 @@
 import Foundation
 import XCTest
 
-public func assertTrue(
-    message: @autoclosure () -> String = { "Unexpected result: got false instead of true" }(),
+public func assertFalse(
+    message: @autoclosure () -> String = { "Unexpected result: got true instead of false" }(),
     file: StaticString = #filePath,
     line: UInt = #line,
     work: () throws -> Bool
 ) {
     let result = assertDoesNotThrow(file: file, line: line, work: work)
-    XCTAssertTrue(result, message(), file: file, line: line)
+    XCTAssertFalse(result, message(), file: file, line: line)
 }

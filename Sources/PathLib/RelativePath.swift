@@ -12,6 +12,19 @@ public final class RelativePath: Path, Codable, Hashable, ExpressibleByStringLit
         self.components = components
     }
     
+    /// Returns a `RelativePath` only if `string` has a value that looks like a relative path - does not begin with `/` or `~`.
+    /// - Parameter string: String representation of relative path.
+    /// - Throws: Error when `string` doesn't seem to be a relative path
+    /// - Returns:`RelativePath` with path parsed from `string`.
+    public static func validating(string: String) throws -> RelativePath {
+        struct ValidationError: Error, CustomStringConvertible {
+            let string: String
+            var description: String { "String '\(string)' does not appear to be a relative path" }
+        }
+        guard !string.hasPrefix("/"), !string.hasPrefix("~") else { throw ValidationError(string: string) }
+        return RelativePath(string)
+    }
+    
     public var pathString: String {
         guard !components.isEmpty else {
             return "./"

@@ -17,6 +17,19 @@ public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLit
         self.init(fileUrl.path)
     }
     
+    /// Returns an `AbsolutePath` only if `string` has a value that looks like an absolute path - begins with `/`.
+    /// - Parameter string: String representation of absolute path.
+    /// - Throws: Error when `string` doesn't seem to be an absolute path.
+    /// - Returns:`AbsolutePath` with path parsed from `string`.
+    public static func validating(string: String) throws -> AbsolutePath {
+        struct ValidationError: Error, CustomStringConvertible {
+            let string: String
+            var description: String { "String '\(string)' does not appear to be an absolute path" }
+        }
+        guard string.hasPrefix("/") else { throw ValidationError(string: string) }
+        return AbsolutePath(string)
+    }
+    
     public var pathString: String {
         return "/" + components.joined(separator: "/")
     }

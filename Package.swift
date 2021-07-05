@@ -237,6 +237,7 @@ let package = Package(
             name: "PathLibTests",
             dependencies: [
                 "PathLib",
+                "TestHelpers",
             ],
             path: "Tests/PathLibTests"
         ),

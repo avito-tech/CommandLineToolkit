@@ -14,7 +14,7 @@ public final class XcodeLocatorImpl: XcodeLocator {
     }
     
     public func discoverXcodes() throws -> [DiscoveredXcode] {
-        let applicationsFolder = try fileSystem.commonlyUsedPathsProvider.applications(inDomain: .local, create: false)
+        let applicationsFolder = try fileSystem.localApplicationsFolder()
         let enumerator = fileSystem.contentEnumerator(forPath: applicationsFolder, style: .shallow)
         
         var discoveredXcodes = [DiscoveredXcode]()
@@ -24,7 +24,7 @@ public final class XcodeLocatorImpl: XcodeLocator {
                 return
             }
             let plistPath = path.appending(components: ["Contents", "Info.plist"])
-            guard fileSystem.properties(forFileAtPath: plistPath).exists() else {
+            guard fileSystem.exists(path: plistPath) else {
                 return
             }
             
