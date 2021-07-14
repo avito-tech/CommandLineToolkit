@@ -31,16 +31,22 @@ open class FakeFileSystem: FileSystem {
         fakeGlobEnumerator(pattern)
     }
     
+    public var onCreateDirectory: (AbsolutePath, Bool) throws -> () = { _, _ in }
+    
     public func createDirectory(atPath: AbsolutePath, withIntermediateDirectories: Bool) throws {
-        
+        try onCreateDirectory(atPath, withIntermediateDirectories)
     }
+    
+    public var onCreateFile: (AbsolutePath, Data?) throws -> () = { _, _ in }
     
     public func createFile(atPath: AbsolutePath, data: Data?) throws {
-        
+        try onCreateFile(atPath, data)
     }
     
+    public var onCopy: (AbsolutePath, AbsolutePath) throws -> () = { _, _ in }
+    
     public func copy(source: AbsolutePath, destination: AbsolutePath) throws {
-        
+        try onCopy(source, destination)
     }
     
     public var onMove: (AbsolutePath, AbsolutePath) throws -> () = { _, _ in }
