@@ -5,6 +5,10 @@ public final class ShallowFileSystemEnumerator: FileSystemEnumerator {
     private let path: AbsolutePath
     private let fileManager: FileManager
     
+    public enum EnumerationError: Error {
+        case enumeratorFailure
+    }
+    
     public init(
         fileManager: FileManager,
         path: AbsolutePath

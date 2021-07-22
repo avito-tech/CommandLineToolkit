@@ -1,4 +1,4 @@
-import CLTExtensions
+import String
 import Foundation
 import XCTest
 

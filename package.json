@@ -18,25 +18,6 @@
             "targetNames": [
                 "Glob"
             ]
-        },
-        "Mixbox": {
-            "url": "ssh://git@stash.msk.avito.ru:7999/ma/mixbox.git",
-            "version": {
-                "revision": "de04d73c1c7a7db2a912236bd29e87b448d3b261"
-            },
-            "targetNames": [
-                "MixboxDi",
-                "MixboxBuiltinDi"
-            ]
-        },
-        "swift-argument-parser": {
-            "url": "https://github.com/apple/swift-argument-parser",
-            "version": {
-                "from": "0.4.3"
-            },
-            "targetNames": [
-                "ArgumentParser"
-            ]
         }
     },
     "implicitSystemModules" : [
