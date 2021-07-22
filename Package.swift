@@ -26,10 +26,10 @@ let package = Package(
         .library(name: "PlistLib", targets: ["PlistLib"]),
         .library(name: "ProcessController", targets: ["ProcessController"]),
         .library(name: "ProcessControllerTestHelpers", targets: ["ProcessControllerTestHelpers"]),
+        .library(name: "SAPCommand", targets: ["SAPCommand"]),
         .library(name: "SignalHandling", targets: ["SignalHandling"]),
         .library(name: "SocketModels", targets: ["SocketModels"]),
         .library(name: "Statsd", targets: ["Statsd"]),
-        .library(name: "String", targets: ["String"]),
         .library(name: "SynchronousWaiter", targets: ["SynchronousWaiter"]),
         .library(name: "TestHelpers", targets: ["TestHelpers"]),
         .library(name: "Timer", targets: ["Timer"]),
@@ -44,7 +44,9 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "Glob", url: "https://github.com/Bouke/Glob", .exact("1.0.5")),
+        .package(name: "Mixbox", url: "ssh://git@stash.msk.avito.ru:7999/ma/mixbox.git", .revision("de04d73c1c7a7db2a912236bd29e87b448d3b261")),
         .package(name: "Signals", url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.21")),
+        .package(name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser", from: "0.4.3"),
     ],
     targets: [
         .target(
@@ -292,6 +294,15 @@ let package = Package(
             path: "Tests/ProcessControllerTests"
         ),
         .target(
+            name: "SAPCommand",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "MixboxBuiltinDi", package: "Mixbox"),
+                .product(name: "MixboxDi", package: "Mixbox"),
+            ],
+            path: "Sources/SAPCommand"
+        ),
+        .target(
             name: "SignalHandling",
             dependencies: [
                 .product(name: "Signals", package: "Signals"),
@@ -332,19 +343,6 @@ let package = Package(
                 "Statsd",
             ],
             path: "Tests/StatsdTests"
-        ),
-        .target(
-            name: "String",
-            dependencies: [
-            ],
-            path: "Sources/String"
-        ),
-        .testTarget(
-            name: "StringTests",
-            dependencies: [
-                "String",
-            ],
-            path: "Tests/StringTests"
         ),
         .target(
             name: "SynchronousWaiter",
