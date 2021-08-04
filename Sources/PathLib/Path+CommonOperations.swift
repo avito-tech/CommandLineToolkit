@@ -34,6 +34,15 @@ public extension Path {
         return removingLastComponent.appending(component: lastComponent + "." + `extension`)
     }
     
+    var removingExtension: Self {
+        let ext = `extension`
+        if ext.isEmpty {
+            return self
+        }
+        let lastComponent = self.lastComponent
+        return removingLastComponent.appending(component: String(lastComponent.dropLast(ext.count + 1)))
+    }
+    
     var removingLastComponent: Self {
         guard !components.isEmpty else {
             return self

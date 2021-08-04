@@ -27,4 +27,15 @@ class PathTests: XCTestCase {
         let path = AbsolutePath(components: [".file.aaa.txt"])
         XCTAssertEqual(path.extension, "txt")
     }
+    
+    func test___removing_extension() {
+        XCTAssertEqual(
+            AbsolutePath("/path/to/file.txt").removingExtension,
+            AbsolutePath("/path/to/file")
+        )
+        XCTAssertEqual(
+            AbsolutePath("/path/to/file").removingExtension,
+            AbsolutePath("/path/to/file")
+        )
+    }
 }
