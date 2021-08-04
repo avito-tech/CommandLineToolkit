@@ -64,6 +64,14 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
         return value
     }
     
+    public func isHidden() throws -> Bool {
+        let values = try path.fileUrl.resourceValues(forKeys: [.isHiddenKey])
+        guard let value = values.isHidden else {
+            throw FilePropertiesContainerError.emptyValue(path, .isHiddenKey)
+        }
+        return value
+    }
+    
     public func size() throws -> Int {
         let values = try path.fileUrl.resourceValues(forKeys: [.fileSizeKey])
         guard let value = values.fileSize else {

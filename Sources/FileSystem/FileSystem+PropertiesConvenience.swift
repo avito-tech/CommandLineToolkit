@@ -18,6 +18,10 @@ public extension FileSystem {
         try properties(forFileAtPath: path).isRegularFile()
     }
     
+    func isHidden(path: AbsolutePath) throws -> Bool {
+        try properties(forFileAtPath: path).isHidden()
+    }
+    
     // MARK: mtime
     
     func modificationDate(for path: AbsolutePath) throws -> Date {
