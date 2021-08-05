@@ -1,6 +1,6 @@
 import Foundation
 
-open class NewStringType: ExpressibleByStringLiteral, Codable, Hashable, CustomStringConvertible, Comparable {
+open class NewStringType: ExpressibleByStringLiteral, Codable, Hashable, CustomStringConvertible, CustomDebugStringConvertible, Comparable {
     public typealias StringLiteralType = String
 
     public let value: String
@@ -14,6 +14,10 @@ open class NewStringType: ExpressibleByStringLiteral, Codable, Hashable, CustomS
     }
 
     public var description: String {
+        value
+    }
+    
+    public var debugDescription: String {
         return "\(type(of: self)): \(value)"
     }
 
