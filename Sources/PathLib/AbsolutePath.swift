@@ -26,8 +26,12 @@ public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLit
             let string: String
             var description: String { "String '\(string)' does not appear to be an absolute path" }
         }
-        guard string.hasPrefix("/") else { throw ValidationError(string: string) }
+        guard isAbsolute(path: string) else { throw ValidationError(string: string) }
         return AbsolutePath(string)
+    }
+    
+    public static func isAbsolute(path: String) -> Bool {
+        path.hasPrefix("/")
     }
     
     public var pathString: String {
@@ -36,6 +40,10 @@ public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLit
     
     public var fileUrl: URL {
         return URL(fileURLWithPath: pathString)
+    }
+    
+    public var standardized: AbsolutePath {
+        AbsolutePath(fileUrl.standardized)
     }
     
     /// Returns true if current path is a child of given anchor path.

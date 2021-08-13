@@ -43,7 +43,8 @@ public final class TemporaryFolder {
         return absolutePath.appending(components: components)
     }
     
-    public func pathByCreatingDirectories(components: [String]) throws -> AbsolutePath {
+    @discardableResult
+    public func createDirectory(components: [String]) throws -> AbsolutePath {
         let path = pathWith(components: components)
         try FileManager.default.createDirectory(atPath: path)
         return path
@@ -51,10 +52,19 @@ public final class TemporaryFolder {
     
     @discardableResult
     public func createFile(components: [String] = [], filename: String, contents: Data? = nil) throws -> AbsolutePath {
-        let container = try pathByCreatingDirectories(components: components)
+        let container = try createDirectory(components: components)
         let path = container.appending(component: filename)
         FileManager.default.createFile(atPath: path.pathString, contents: contents)
         return path
+    }
+    
+    public func createSymbolicLink(at path: RelativePath, destination: Path) throws -> AbsolutePath {
+        let symbolicLinkPath = pathWith(components: path.components)
+        try FileManager.default.createSymbolicLink(
+            atPath: symbolicLinkPath.pathString,
+            withDestinationPath: destination.pathString
+        )
+        return symbolicLinkPath
     }
     
     public static func == (left: TemporaryFolder, right: TemporaryFolder) -> Bool {

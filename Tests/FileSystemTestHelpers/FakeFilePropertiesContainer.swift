@@ -34,4 +34,19 @@ open class FakeFilePropertiesContainer: FilePropertiesContainer {
     
     public var fileSize = 0
     public func size() throws -> Int { fileSize }
+    
+    public var symbolicLink = false
+    public func isSymbolicLink() throws -> Bool { symbolicLink }
+    
+    public var brokenSymbolicLink = false
+    public func isBrokenSymbolicLink() throws -> Bool { brokenSymbolicLink }
+    
+    public var symbolicLinkToDirectory = false
+    public func isSymbolicLinkToDirectory() throws -> Bool { symbolicLinkToDirectory }
+    
+    public var symbolicLinkToFile = false
+    public func isSymbolicLinkToFile() throws -> Bool { symbolicLinkToFile }
+    
+    public var symbolicLinkPathValue: AbsolutePath?
+    public func symbolicLinkPath() throws -> AbsolutePath? { symbolicLinkPathValue }
 }

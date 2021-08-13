@@ -13,7 +13,7 @@ final class TemporaryStuffTests: XCTestCase {
     
     func testCreatingFolders() throws {
         let tempFolder = try TemporaryFolder()
-        let path = try tempFolder.pathByCreatingDirectories(components: ["a", "b", "c"])
+        let path = try tempFolder.createDirectory(components: ["a", "b", "c"])
         var isDir: ObjCBool = false
         XCTAssertTrue(FileManager.default.fileExists(atPath: path.pathString, isDirectory: &isDir))
         XCTAssertTrue(isDir.boolValue)

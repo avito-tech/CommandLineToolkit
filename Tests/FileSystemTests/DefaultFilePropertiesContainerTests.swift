@@ -1,11 +1,13 @@
 import FileSystem
 import Foundation
+import PathLib
 import TestHelpers
 import Tmp
 import XCTest
 
 final class DefaultFilePropertiesContainerTests: XCTestCase {
     private lazy var temporaryFile = assertDoesNotThrow { try TemporaryFile(deleteOnDealloc: true) }
+    private lazy var temporaryFolder = assertDoesNotThrow { try TemporaryFolder(deleteOnDealloc: true) }
     private lazy var filePropertiesContainer = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
     
     func test___modificationDate() {
@@ -90,4 +92,71 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
         XCTAssertEqual(try properties.size(), 3)
     }
+    
+    func test___symbolic_link___for_absolute_directory() throws {
+        let symbolicLinkPath = try temporaryFolder.createSymbolicLink(
+            at: "symbolic_link",
+            destination: AbsolutePath("/System")
+        )
+        let properties = DefaultFilePropertiesContainer(path: symbolicLinkPath)
+        XCTAssertTrue(try properties.isSymbolicLink())
+        XCTAssertFalse(try properties.isBrokenSymbolicLink())
+        XCTAssertTrue(try properties.isSymbolicLinkToDirectory())
+        XCTAssertFalse(try properties.isSymbolicLinkToFile())
+        XCTAssertEqual(try properties.symbolicLinkPath(), "/System")
+    }
+    
+    func test___symbolic_link___for_relative_directory() throws {
+        let directoryName = "directory"
+        let directoryPath = try temporaryFolder.createDirectory(components: [directoryName])
+        let symbolicLinkPath = try temporaryFolder.createSymbolicLink(
+            at: "directory_link",
+            destination: RelativePath(directoryName)
+        )
+        let properties = DefaultFilePropertiesContainer(path: symbolicLinkPath)
+        XCTAssertTrue(try properties.isSymbolicLink())
+        XCTAssertFalse(try properties.isBrokenSymbolicLink())
+        XCTAssertTrue(try properties.isSymbolicLinkToDirectory())
+        XCTAssertFalse(try properties.isSymbolicLinkToFile())
+        XCTAssertEqual(try properties.symbolicLinkPath(), directoryPath)
+    }
+    
+    func test___symbolic_link___for_relative_file() throws {
+        let filename = "file"
+        let filePath = try temporaryFolder.createFile(filename: filename)
+        let symbolicLinkPath = try temporaryFolder.createSymbolicLink(
+            at: "file_link",
+            destination: RelativePath(filename)
+        )
+        let properties = DefaultFilePropertiesContainer(path: symbolicLinkPath)
+        XCTAssertTrue(try properties.isSymbolicLink())
+        XCTAssertFalse(try properties.isBrokenSymbolicLink())
+        XCTAssertFalse(try properties.isSymbolicLinkToDirectory())
+        XCTAssertTrue(try properties.isSymbolicLinkToFile())
+        XCTAssertEqual(try properties.symbolicLinkPath(), filePath)
+    }
+    
+    func test___not_symbolic_link() throws {
+        let filePath = try temporaryFolder.createFile(filename: "file")
+        let properties = DefaultFilePropertiesContainer(path: filePath)
+        XCTAssertFalse(try properties.isSymbolicLink())
+        XCTAssertFalse(try properties.isBrokenSymbolicLink())
+        XCTAssertFalse(try properties.isSymbolicLinkToDirectory())
+        XCTAssertFalse(try properties.isSymbolicLinkToFile())
+        XCTAssertEqual(try properties.symbolicLinkPath(), nil)
+    }
+    
+    func test___broken_symbolic_link() throws {
+        let symbolicLinkPath = try temporaryFolder.createSymbolicLink(
+            at: "broken_link",
+            destination: RelativePath("nonexisting")
+        )
+        let properties = DefaultFilePropertiesContainer(path: symbolicLinkPath)
+        XCTAssertTrue(try properties.isSymbolicLink())
+        XCTAssertTrue(try properties.isBrokenSymbolicLink())
+        XCTAssertFalse(try properties.isSymbolicLinkToDirectory())
+        XCTAssertFalse(try properties.isSymbolicLinkToFile())
+        XCTAssertEqual(try properties.symbolicLinkPath(), temporaryFolder.absolutePath.appending("nonexisting"))
+    }
+    
 }

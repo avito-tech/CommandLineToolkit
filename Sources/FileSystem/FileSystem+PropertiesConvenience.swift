@@ -22,6 +22,26 @@ public extension FileSystem {
         try properties(forFileAtPath: path).isHidden()
     }
     
+    func isSymbolicLink(path: AbsolutePath) throws -> Bool {
+        try properties(forFileAtPath: path).isSymbolicLink()
+    }
+    
+    func isBrokenSymbolicLink(path: AbsolutePath) throws -> Bool {
+        try properties(forFileAtPath: path).isBrokenSymbolicLink()
+    }
+    
+    func isSymbolicLinkToDirectory(path: AbsolutePath) throws -> Bool {
+        try properties(forFileAtPath: path).isSymbolicLinkToDirectory()
+    }
+    
+    func isSymbolicLinkToFile(path: AbsolutePath) throws -> Bool {
+        try properties(forFileAtPath: path).isSymbolicLinkToFile()
+    }
+    
+    func symbolicLinkPath(for path: AbsolutePath) throws -> AbsolutePath? {
+        try properties(forFileAtPath: path).symbolicLinkPath()
+    }
+    
     // MARK: mtime
     
     func modificationDate(for path: AbsolutePath) throws -> Date {

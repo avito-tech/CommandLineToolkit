@@ -106,4 +106,11 @@ class AbsolutePathTests: XCTestCase {
             AbsolutePath("/some/path")
         }
     }
+    
+    func test___standartization() {
+        XCTAssertEqual(
+            AbsolutePath("/some/path/../otherPath").standardized,
+            AbsolutePath("/some/otherPath")
+        )
+    }
 }

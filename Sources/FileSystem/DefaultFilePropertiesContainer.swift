@@ -79,4 +79,58 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
         }
         return value
     }
+    
+    public func isSymbolicLink() throws -> Bool {
+        let values = try path.fileUrl.resourceValues(forKeys: [.isSymbolicLinkKey])
+        guard let value = values.isSymbolicLink else {
+            throw FilePropertiesContainerError.emptyValue(path, .isSymbolicLinkKey)
+        }
+        return value
+    }
+    
+    public func isBrokenSymbolicLink() throws -> Bool {
+        guard let symbolicLinkContainer = try symbolicLinkContainer() else {
+            return false
+        }
+        return !symbolicLinkContainer.exists()
+    }
+    
+    public func isSymbolicLinkToDirectory() throws -> Bool {
+        guard
+            let symbolicLinkContainer = try symbolicLinkContainer(),
+            symbolicLinkContainer.exists() else {
+            return false
+        }
+        return try symbolicLinkContainer.isDirectory()
+    }
+    
+    public func isSymbolicLinkToFile() throws -> Bool {
+        guard
+            let symbolicLinkContainer = try symbolicLinkContainer(),
+            symbolicLinkContainer.exists() else {
+            return false
+        }
+        return try symbolicLinkContainer.isRegularFile()
+    }
+    
+    public func symbolicLinkPath() throws -> AbsolutePath? {
+        guard try isSymbolicLink() else { return nil }
+        let symbolicLinkValue = try fileManager.destinationOfSymbolicLink(atPath: path.pathString)
+        let symbolicLinkPath: AbsolutePath
+        if RelativePath.isRelative(path: symbolicLinkValue) {
+            symbolicLinkPath = path.removingLastComponent.appending(relativePath: RelativePath(symbolicLinkValue))
+        } else if AbsolutePath.isAbsolute(path: symbolicLinkValue) {
+            symbolicLinkPath = try AbsolutePath.validating(string: symbolicLinkValue)
+        } else {
+            throw FilePropertiesContainerError.unrecognizedSymblicLinkValue(path, symbolicLinkValue)
+        }
+        return symbolicLinkPath
+    }
+    
+    private func symbolicLinkContainer() throws -> FilePropertiesContainer? {
+        guard let symbolicLinkPath = try symbolicLinkPath() else {
+            return nil
+        }
+        return DefaultFilePropertiesContainer(path: symbolicLinkPath)
+    }
 }

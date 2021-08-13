@@ -44,10 +44,6 @@ class RelativePathTests: XCTestCase {
             try RelativePath.validating(string: "/not/relative/path")
         }
         
-        assertThrows {
-            try RelativePath.validating(string: "~/not/relative/path")
-        }
-        
         assert {
             try RelativePath.validating(string: "some/path")
         } equals: {

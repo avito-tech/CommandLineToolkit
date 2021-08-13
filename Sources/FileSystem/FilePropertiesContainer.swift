@@ -1,4 +1,5 @@
 import Foundation
+import PathLib
 
 public protocol FilePropertiesContainer {
     func exists() -> Bool
@@ -6,6 +7,12 @@ public protocol FilePropertiesContainer {
     func isDirectory() throws -> Bool
     func isRegularFile() throws -> Bool
     func isHidden() throws -> Bool
+    
+    func isSymbolicLink() throws -> Bool
+    func isBrokenSymbolicLink() throws -> Bool
+    func isSymbolicLinkToDirectory() throws -> Bool
+    func isSymbolicLinkToFile() throws -> Bool
+    func symbolicLinkPath() throws -> AbsolutePath?
     
     func modificationDate() throws -> Date
     func set(modificationDate: Date) throws

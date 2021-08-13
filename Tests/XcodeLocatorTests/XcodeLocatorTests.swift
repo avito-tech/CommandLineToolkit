@@ -15,7 +15,7 @@ final class XcodeLocatorTests: XCTestCase {
     func test___discovering_xcodes() throws {
         let xcode115Plist = try tempFolder.createFile(components: ["Applications", "Xcode115.app", "Contents"], filename: "Info.plist", contents: try plist(shortVersion: "11.5").data(format: .xml))
         let xcode101Plist = try tempFolder.createFile(components: ["Applications", "Xcode101.app", "Contents"], filename: "Info.plist", contents: try plist(shortVersion: "10.1").data(format: .xml))
-        _ = try tempFolder.pathByCreatingDirectories(components: ["Applications", "Xcode123.app"])
+        _ = try tempFolder.createDirectory(components: ["Applications", "Xcode123.app"])
         
         fileSystem.propertiesProvider = { DefaultFilePropertiesContainer(path: $0) }
         
