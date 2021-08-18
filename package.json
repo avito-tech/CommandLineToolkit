@@ -18,7 +18,26 @@
             "targetNames": [
                 "Glob"
             ]
-        }
+        },
+        "swift-argument-parser": {
+            "url": "https://github.com/apple/swift-argument-parser",
+            "version": {
+                "from": "0.4.3"
+            },
+            "targetNames": [
+                "ArgumentParser"
+            ]
+        },
+        "Mixbox": {
+          "url": "ssh://git@stash.msk.avito.ru:7999/ma/mixbox.git",
+          "version": {
+            "revision": "00284542b42125b101ce923c35e93b3ba9f08ff6"
+          },
+          "targetNames": [
+            "MixboxDi",
+            "MixboxBuiltinDi"
+          ]
+        },
     },
     "implicitSystemModules" : [
       "Darwin",

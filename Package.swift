@@ -8,6 +8,7 @@ let package = Package(
     products: [
         .library(name: "AtomicModels", targets: ["AtomicModels"]),
         .library(name: "CLTExtensions", targets: ["CLTExtensions"]),
+        .library(name: "CommandSupport", targets: ["CommandSupport"]),
         .library(name: "DateProvider", targets: ["DateProvider"]),
         .library(name: "DateProviderTestHelpers", targets: ["DateProviderTestHelpers"]),
         .library(name: "FileSystem", targets: ["FileSystem"]),
@@ -44,7 +45,9 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "Glob", url: "https://github.com/Bouke/Glob", .exact("1.0.5")),
+        .package(name: "Mixbox", url: "ssh://git@stash.msk.avito.ru:7999/ma/mixbox.git", .revision("00284542b42125b101ce923c35e93b3ba9f08ff6")),
         .package(name: "Signals", url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.21")),
+        .package(name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser", from: "0.4.3"),
     ],
     targets: [
         .target(
@@ -65,6 +68,16 @@ let package = Package(
                 "CLTExtensions",
             ],
             path: "Tests/CLTExtensionsTests"
+        ),
+        .target(
+            name: "CommandSupport",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "MixboxBuiltinDi", package: "Mixbox"),
+                .product(name: "MixboxDi", package: "Mixbox"),
+                "PathLib",
+            ],
+            path: "Sources/CommandSupport"
         ),
         .target(
             name: "DateProvider",
