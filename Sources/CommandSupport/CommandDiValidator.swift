@@ -16,10 +16,16 @@ import ArgumentParser
 public final class CommandDiValidator {
     public init() {
     }
-    
-    public func validate(commandType: ParsableCommand.Type) throws {
+        
+    public func validate(
+        commandType: ParsableCommand.Type
+    ) throws {
         // May contain DI resolves
-        if let commandLogicProvider = try self.commandLogicProvider(commandType: commandType) {
+        let commandLogicProviderOrNil = try self.commandLogicProvider(
+            commandType: commandType
+        )
+        
+        if let commandLogicProvider = commandLogicProviderOrNil {
             try validate(commandLogicProvider: commandLogicProvider)
         }
         
@@ -27,27 +33,59 @@ public final class CommandDiValidator {
         _ = commandType.helpMessage()
         
         try commandType.configuration.subcommands.forEach {
-            try validate(commandType: $0)
+            try validate(
+                commandType: $0
+            )
         }
     }
     
-    private func commandLogicProvider(commandType: ParsableCommand.Type) throws -> CommandLogicProvider? {
-        let command: ParsableCommand
-        
-        if let testableCommand = commandType as? TestableCommand.Type {
-            command = try commandType.parse(
-                testableCommand.testableCommandArguments()
+    private func commandLogicProvider(
+        commandType: ParsableCommand.Type
+    ) throws -> CommandLogicProvider? {
+        try commandType.parseAsRoot(
+            arguments(
+                commandType: commandType
             )
+        ) as? CommandLogicProvider
+    }
+    
+    private func arguments(commandType: ParsableCommand.Type) -> [String] {
+        if let testableCommand = commandType as? TestableCommand.Type {
+            return testableCommand.testableCommandArguments()
         } else {
-            // Note: if your tests crash, use `TestableCommand`
-            // (see `TestableCommand.swift` for docs)
-            command = commandType.init()
+            return []
         }
-        
-        return command as? CommandLogicProvider
     }
     
     private func validate(commandLogicProvider: CommandLogicProvider) throws {
-        _ = try commandLogicProvider.commandLogic()
+        try wrapFunctionError(functionName: "commandLogic") {
+            _ = try commandLogicProvider.commandLogic()
+        }
+    }
+    
+    private func wrapFunctionError<T>(
+        functionName: String,
+        body: () throws -> T
+    ) throws -> T {
+        try wrapError(
+            message: "Caught error while trying to execute `\(functionName)`",
+            body: body
+        )
+    }
+    
+    private struct Error: Swift.Error, CustomStringConvertible {
+        let description: String
+    }
+    
+    private func wrapError<T>(
+        message: String,
+        body: () throws -> T
+    ) throws -> T {
+        do {
+            return try body()
+        } catch {
+            
+            throw Error(description: "\(message): \(error)")
+        }
     }
 }
