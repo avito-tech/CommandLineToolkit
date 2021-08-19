@@ -43,7 +43,7 @@ public extension PackageTarget {
             var importedDependencies = Set<String>()
             
             while let moduleFile = moduleEnumerator?.nextObject() as? URL {
-                if ["md"].contains(moduleFile.pathExtension) {
+                if moduleFile.pathExtension != "swift" {
                     continue
                 }
                 log("    Analyzing \(moduleFile.lastPathComponent)")

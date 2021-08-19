@@ -29,6 +29,17 @@ func main() throws {
         try packageSwiftContents
             .data(using: .utf8)?
             .write(to: package.packageSwiftUrl)
+        log("Wrote package contents into \(package.packageSwiftUrl.path)")
+    }
+    
+    let postFlightExecutablePath = packageLocation.appendingPathComponent("package_postflight")
+    if FileManager().fileExists(atPath: postFlightExecutablePath.path) {
+        log("Executing postflight package at \(postFlightExecutablePath.path)")
+        let process = Process()
+        process.launchPath = postFlightExecutablePath.path
+        process.currentDirectoryURL = packageLocation
+        try process.run()
+        process.waitUntilExit()
     }
 }
 
