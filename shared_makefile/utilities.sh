@@ -16,10 +16,14 @@ __set_repo_root() {
 
 __set_repo_root
 
+__echo_error() {
+    echo "$@" 1>&2
+}
+
 # Convenient method to report errors
 # Example: cat foo | grep bar || __fatal_error "Can not find bar in foo"
 __fatal_error() {
-    echo $@
+    __echo_error "$@"
     exit 1
 }
 
