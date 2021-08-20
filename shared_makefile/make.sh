@@ -1,6 +1,10 @@
 #!/bin/bash
 
-set -xueo pipefail
+set -ueo pipefail
+
+if [ "${DEBUG:-0}" != "0" ]; then
+    set -x
+fi
 
 SHARED_MAKE_SH_DIRNAME=$(realpath "$(dirname "$0")")
 
