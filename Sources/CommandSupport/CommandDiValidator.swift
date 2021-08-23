@@ -48,7 +48,7 @@ public final class CommandDiValidator {
             )
         ) as? CommandLogicProvider
     }
-    
+
     private func arguments(commandType: ParsableCommand.Type) -> [String] {
         if let testableCommand = commandType as? TestableCommand.Type {
             return testableCommand.testableCommandArguments()
