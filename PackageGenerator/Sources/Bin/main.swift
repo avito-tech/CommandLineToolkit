@@ -11,35 +11,15 @@ func main() throws {
         fatalError("File at \(packageLocation.path) does not exists or not writable")
     }
     
-    let package = Package(url: packageLocation)
+    let generator = SwiftPackageGenerator(directoryContainingPackageSwiftFile: packageLocation)
+    let generatedContents = try generator.generateContents()
     
-    let packageSwiftContents = try StatementGenerator().generatePackageSwiftCode(
-        swiftPackage: try package.loadSwiftPackage(),
-        location: packageLocation
-    ).joined(separator: "\n")
-
     // Note that Package.swift can be under `.gitignore`. For this case the check is not valid and makes no sense.
     // Don't pass `VERIFY_PACKAGE_CONTENTS_ARE_UNCHANGED` if Package.swift is ignored.
     if ProcessInfo.processInfo.environment["SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED"] == "true" {
-        let currentContents = try Data(contentsOf: package.packageSwiftUrl)
-        if currentContents != packageSwiftContents.data(using: .utf8) {
-            fatalError("Contents of \(package.packageSwiftUrl.path) differs from expected. Please re-generate it and commit changes.")
-        }
+        try generator.assertCurrentContentsEquals(generatedContents: generatedContents)
     } else {
-        try packageSwiftContents
-            .data(using: .utf8)?
-            .write(to: package.packageSwiftUrl)
-        log("Wrote package contents into \(package.packageSwiftUrl.path)")
-    }
-    
-    let postFlightExecutablePath = packageLocation.appendingPathComponent("package_postflight")
-    if FileManager().fileExists(atPath: postFlightExecutablePath.path) {
-        log("Executing postflight package at \(postFlightExecutablePath.path)")
-        let process = Process()
-        process.launchPath = postFlightExecutablePath.path
-        process.currentDirectoryURL = packageLocation
-        try process.run()
-        process.waitUntilExit()
+        try generator.store(generatedContents: generatedContents)
     }
 }
 

@@ -3,36 +3,38 @@ import XCTest
 
 final class StatementGeneratorTests: XCTestCase {
     func test() throws {
-        let statements = try StatementGenerator().generatePackageSwiftCode(
-            swiftPackage: SwiftPackage(
-                swiftToolsVersion: "1.2",
-                name: "TestPackage",
-                platforms: [
-                    PackagePlatform(name: "macOS", version: "10.15")
-                ],
-                products: PackageProducts.productForEachTarget,
-                dependencies: PackageDependencies(
-                    implicitSystemModules: [],
-                    external: [
-                        "SomeExternalPackage": ExternalPackageLocation.url(
-                            url: "http://example.com/someexternalpackage",
-                            version: .exact("123"),
-                            importMappings: [:],
-                            targetNames: .targetNames(["SomeExternalModule"])
+        let contents = try StatementGenerator().generatePackageSwiftCode(
+            generatablePackage: GeneratablePackage(
+                location: URL(fileURLWithPath: NSTemporaryDirectory()),
+                packageJsonFile: PackageJsonFile(
+                    swiftToolsVersion: "1.2",
+                    name: "TestPackage",
+                    platforms: [
+                        PackagePlatform(name: "macOS", version: "10.15")
+                    ],
+                    products: PackageProducts.productForEachTarget,
+                    dependencies: PackageDependencies(
+                        implicitSystemModules: [],
+                        external: [
+                            "SomeExternalPackage": ExternalPackageLocation.url(
+                                url: "http://example.com/someexternalpackage",
+                                version: .exact("123"),
+                                importMappings: [:],
+                                targetNames: .targetNames(["SomeExternalModule"])
+                            )
+                        ]
+                    ),
+                    targets: PackageTargets.explicit([
+                        PackageTarget(
+                            name: "TargetA",
+                            dependencies: [],
+                            path: "Sources/TargetA",
+                            isTest: false,
+                            settings: TargetSpecificSettings(linkerSettings: LinkerSettings(unsafeFlags: []))
                         )
-                    ]
-                ),
-                targets: PackageTargets.explicit([
-                    PackageTarget(
-                        name: "TargetA",
-                        dependencies: [],
-                        path: "Sources/TargetA",
-                        isTest: false,
-                        settings: TargetSpecificSettings(linkerSettings: LinkerSettings(unsafeFlags: []))
-                    )
-                ])
-            ),
-            location: URL(fileURLWithPath: NSTemporaryDirectory())
+                    ])
+                )
+            )
         )
         
         let expectedContents = """
@@ -62,37 +64,39 @@ final class StatementGeneratorTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            statements.joined(separator: "\n"),
+            contents.first?.contents,
             expectedContents
         )
     }
     
     func test___linker_settings() throws {
-        let statements = try StatementGenerator().generatePackageSwiftCode(
-            swiftPackage: SwiftPackage(
-                swiftToolsVersion: "1.2",
-                name: "TestPackage",
-                platforms: [],
-                products: PackageProducts.explicit([]),
-                dependencies: PackageDependencies(
-                    implicitSystemModules: [],
-                    external: [:]
-                ),
-                targets: PackageTargets.explicit([
-                    PackageTarget(
-                        name: "TargetA",
-                        dependencies: [],
-                        path: "Sources/TargetA",
-                        isTest: false,
-                        settings: TargetSpecificSettings(
-                            linkerSettings: LinkerSettings(
-                                unsafeFlags: ["some", "flags"]
+        let contents = try StatementGenerator().generatePackageSwiftCode(
+            generatablePackage: GeneratablePackage(
+                location: URL(fileURLWithPath: NSTemporaryDirectory()),
+                packageJsonFile: PackageJsonFile(
+                    swiftToolsVersion: "1.2",
+                    name: "TestPackage",
+                    platforms: [],
+                    products: PackageProducts.explicit([]),
+                    dependencies: PackageDependencies(
+                        implicitSystemModules: [],
+                        external: [:]
+                    ),
+                    targets: PackageTargets.explicit([
+                        PackageTarget(
+                            name: "TargetA",
+                            dependencies: [],
+                            path: "Sources/TargetA",
+                            isTest: false,
+                            settings: TargetSpecificSettings(
+                                linkerSettings: LinkerSettings(
+                                    unsafeFlags: ["some", "flags"]
+                                )
                             )
                         )
-                    )
-                ])
-            ),
-            location: URL(fileURLWithPath: NSTemporaryDirectory())
+                    ])
+                )
+            )
         )
         
         let expectedContents = """
@@ -122,7 +126,7 @@ final class StatementGeneratorTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            statements.joined(separator: "\n"),
+            contents.first?.contents,
             expectedContents
         )
     }

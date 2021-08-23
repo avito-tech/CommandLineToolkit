@@ -1,7 +1,7 @@
 import Foundation
 
 /// Defines what targets package defines.
-public enum PackageTargets: Codable, Equatable {
+public enum PackageTargets: Codable, Hashable {
     
     /// A package declares a specific list of targets
     case explicit([PackageTarget])

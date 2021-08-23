@@ -1,7 +1,7 @@
 import Foundation
 
 /// Describes contents of `Package.swift` fiile
-public struct SwiftPackage: Codable, Equatable {
+public struct PackageJsonFile: Codable, Hashable {
     
     /// Swift tooling version, e.g. for "5.2" this statement will be generated: `// swift-tools-version:5.2`
     public let swiftToolsVersion: String

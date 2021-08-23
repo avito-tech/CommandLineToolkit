@@ -1,7 +1,7 @@
 import Foundation
 
 /// Defines where external package is located.
-public enum ExternalPackageLocation: Codable, Equatable {
+public enum ExternalPackageLocation: Codable, Hashable {
     case url(url: String, version: ExternalPackageVersion, importMappings: [String: String], targetNames: PackageExposedTargets)
     case local(path: String, targetNames: PackageExposedTargets)
     

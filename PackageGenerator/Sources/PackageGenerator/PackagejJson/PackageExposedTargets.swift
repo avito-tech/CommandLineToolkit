@@ -1,7 +1,7 @@
 import Foundation
 
 /// Defines a set of targets that packages exposes.
-public enum PackageExposedTargets: Codable, Equatable {
+public enum PackageExposedTargets: Codable, Hashable {
     
     /// Package defines an explicit list of targets. This is a 'traditional' way of exposing targets. 
     case targetNames([String])

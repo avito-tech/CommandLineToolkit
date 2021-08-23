@@ -1,7 +1,7 @@
 import Foundation
 
 /// Defines what products a package exports
-public enum PackageProducts: Codable, Equatable {
+public enum PackageProducts: Codable, Hashable {
     
     /// Package declares a specific list of products
     case explicit([PackageProduct])

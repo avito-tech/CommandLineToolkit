@@ -1,7 +1,7 @@
 import Foundation
 
 /// Defines package dependencies.
-public struct PackageDependencies: Codable, Equatable {
+public struct PackageDependencies: Codable, Hashable {
     
     /// A list of modules which are provided by a system
     public let implicitSystemModules: [String]

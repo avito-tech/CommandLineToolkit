@@ -1,7 +1,7 @@
 import Foundation
 
 /// Defines external package version
-public enum ExternalPackageVersion: Codable, Equatable {
+public enum ExternalPackageVersion: Codable, Hashable {
     case upToNextMajor(String)
     case exact(String)
     case from(String)

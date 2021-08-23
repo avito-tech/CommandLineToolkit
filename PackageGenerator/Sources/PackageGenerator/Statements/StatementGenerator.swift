@@ -1,32 +1,40 @@
 import Foundation
 
-public class StatementGenerator {
-    private var importedDependencyCache = [String: ImportedDependency]()
+public struct GeneratedPackageContents: Hashable {
+    public let contents: String
+    public let package: GeneratablePackage
+}
+
+public final class StatementGenerator {
     private var packageTargetCache = [URL: [PackageTarget]]()
     
     public init() {}
     
     public func generatePackageSwiftCode(
-        swiftPackage: SwiftPackage,
-        location: URL
-    ) throws -> [String] {
+        generatablePackage: GeneratablePackage
+    ) throws -> Set<GeneratedPackageContents> {
+        try willGenerate(generatablePackage: generatablePackage)
+        
+        var importedDependencyCache = [String: ImportedDependency]()
         var output = [String]()
         
-        let packageTargets = try obtainPackageTargets(swiftPackage: swiftPackage, location: location)
-        let packageProducts = try obtainPackageProducts(swiftPackage: swiftPackage, location: location)
+        var anotherPackagesReferencedByPackageBeingGenerated = Set<GeneratablePackage>()
         
-        output.append("// swift-tools-version:" + swiftPackage.swiftToolsVersion)
+        let packageTargets = try obtainPackageTargets(generatablePackage: generatablePackage)
+        let packageProducts = try obtainPackageProducts(generatablePackage: generatablePackage)
+        
+        output.append("// swift-tools-version:" + generatablePackage.packageJsonFile.swiftToolsVersion)
         output.append("import PackageDescription")
         output.append("let package = Package(")
-        output.append("    name: \"\(swiftPackage.name)\",")
+        output.append("    name: \"\(generatablePackage.packageJsonFile.name)\",")
         output.append("    platforms: [")
-        output.append(contentsOf: swiftPackage.platforms.map { "        \($0.statement)," })
+        output.append(contentsOf: generatablePackage.packageJsonFile.platforms.map { "        \($0.statement)," })
         output.append("    ],")
         output.append("    products: [")
         output.append(contentsOf: packageProducts.map { "        \($0.statement)," })
         output.append("    ],")
         output.append("    dependencies: [")
-        output.append(contentsOf: swiftPackage.dependencies.statements.map { IndentedStatement(level: 2, string: $0 + ",").statement })
+        output.append(contentsOf: generatablePackage.packageJsonFile.dependencies.statements.map { IndentedStatement(level: 2, string: $0 + ",").statement })
         output.append("    ],")
         output.append("    targets: [")
         let targetStatements: [String] = try packageTargets.flatMap { target -> [String] in
@@ -36,11 +44,11 @@ public class StatementGenerator {
             statements.append("    dependencies: [")
             statements.append(
                 contentsOf: try target.dependencies.compactMap { importedModuleName -> ImportedDependency? in
-                    if swiftPackage.dependencies.implicitSystemModules.contains(importedModuleName) {
+                    if generatablePackage.packageJsonFile.dependencies.implicitSystemModules.contains(importedModuleName) {
                         return nil
                     }
                     
-                    for (externalPackageName, requirement) in swiftPackage.dependencies.external {
+                    for (externalPackageName, requirement) in generatablePackage.packageJsonFile.dependencies.external {
                         if let cachedValue = importedDependencyCache[importedModuleName] {
                             return cachedValue
                         }
@@ -55,18 +63,16 @@ public class StatementGenerator {
                                     return result
                                 }
                             case .generated:
-                                let externalCheckoutPath = location.appendingPathComponent(".build/checkouts/\(externalPackageName)/", isDirectory: true)
-                                let anotherPackage = Package(url: externalCheckoutPath)
-                                let exportedProducts = try obtainPackageProducts(
-                                    swiftPackage: try anotherPackage.loadSwiftPackage(),
-                                    location: anotherPackage.url
-                                )
-                                log("Looking for package for external module \(importedModuleName) imported by \(swiftPackage.name)")
-                                if exportedProducts.contains(where: { $0.name == importedModuleName }) {
-                                    log("    External module \(importedModuleName) is provided by \(externalPackageName)")
-                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, importMappings: [:], packageName: externalPackageName)
-                                    importedDependencyCache[importedModuleName] = result
-                                    return result
+                                let externalCheckoutPath = generatablePackage.location.appendingPathComponent(".build/checkouts/\(externalPackageName)/", isDirectory: true)
+                                let anotherPackage = try GeneratablePackage(location: externalCheckoutPath)
+                                anotherPackagesReferencedByPackageBeingGenerated.insert(anotherPackage)
+                                if let importedDependency = try importedDependency(
+                                    forImportedModuleName: importedModuleName,
+                                    requiredBy: generatablePackage.packageJsonFile,
+                                    ifProvidedByAnotherGeneratablePackage: anotherPackage
+                                ) {
+                                    importedDependencyCache[importedModuleName] = importedDependency
+                                    return importedDependency
                                 }
                             }
                             continue
@@ -79,17 +85,16 @@ public class StatementGenerator {
                                     return result
                                 }
                             case .generated:
-                                let anotherPackage = Package(url: location.appendingPathComponent(path, isDirectory: true))
-                                let exportedProducts = try obtainPackageProducts(
-                                    swiftPackage: try anotherPackage.loadSwiftPackage(),
-                                    location: anotherPackage.url
-                                )
-                                log("Looking for package for external module \(importedModuleName) imported by \(swiftPackage.name)")
-                                if exportedProducts.contains(where: { $0.name == importedModuleName }) {
-                                    log("    External module \(importedModuleName) is provided by \(externalPackageName)")
-                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, importMappings: [:], packageName: externalPackageName)
-                                    importedDependencyCache[importedModuleName] = result
-                                    return result
+                                let onDiskGeneratablePackagePath = generatablePackage.location.appendingPathComponent(path, isDirectory: true)
+                                let anotherPackage = try GeneratablePackage(location: onDiskGeneratablePackagePath)
+                                anotherPackagesReferencedByPackageBeingGenerated.insert(anotherPackage)
+                                if let importedDependency = try importedDependency(
+                                    forImportedModuleName: importedModuleName,
+                                    requiredBy: generatablePackage.packageJsonFile,
+                                    ifProvidedByAnotherGeneratablePackage: anotherPackage
+                                ) {
+                                    importedDependencyCache[importedModuleName] = importedDependency
+                                    return importedDependency
                                 }
                             }
                             continue
@@ -119,32 +124,83 @@ public class StatementGenerator {
         output.append(")")
         output.append("")
         
-        return output
+        try didGenerate(generatablePackage: generatablePackage)
+        
+        let result = Set(try anotherPackagesReferencedByPackageBeingGenerated.flatMap { referencedGeneratedPackage in
+            try generatePackageSwiftCode(generatablePackage: referencedGeneratedPackage)
+        }).union([
+            GeneratedPackageContents(
+                contents: output.joined(separator: "\n"),
+                package: generatablePackage
+            )
+        ])
+        return result
     }
     
-    private func obtainPackageTargets(swiftPackage: SwiftPackage, location: URL) throws -> [PackageTarget] {
-        switch swiftPackage.targets {
+    private func willGenerate(generatablePackage: GeneratablePackage) throws {
+        try execute(executableFileUrl: generatablePackage.preflightExecutableUrl, contextPackage: generatablePackage)
+    }
+    
+    private func didGenerate(generatablePackage: GeneratablePackage) throws {
+        try execute(executableFileUrl: generatablePackage.postflightExecutableUrl, contextPackage: generatablePackage)
+    }
+    
+    private func execute(executableFileUrl: URL, contextPackage: GeneratablePackage) throws {
+        if FileManager().fileExists(atPath: executableFileUrl.path) {
+            log("Executing executable \(executableFileUrl.path)")
+            let process = Process()
+            process.launchPath = executableFileUrl.path
+            process.currentDirectoryURL = contextPackage.location
+            try process.run()
+            process.waitUntilExit()
+        }
+    }
+    
+    private func importedDependency(
+        forImportedModuleName importedModuleName: String,
+        requiredBy packageJsonFile: PackageJsonFile,
+        ifProvidedByAnotherGeneratablePackage anotherPackage: GeneratablePackage
+    ) throws -> ImportedDependency? {
+        let anotherPackageName = anotherPackage.packageJsonFile.name
+        
+        let exportedProducts = try obtainPackageProducts(
+            generatablePackage: anotherPackage
+        )
+        log("Looking for package for external module \(importedModuleName) required by \(packageJsonFile.name) inside \(anotherPackageName)")
+        if exportedProducts.contains(where: { $0.name == importedModuleName }) {
+            log("    External module \(importedModuleName) is provided by \(anotherPackageName)")
+            return ImportedDependency.fromExternalPackage(moduleName: importedModuleName, importMappings: [:], packageName: anotherPackageName)
+        }
+        return nil
+    }
+    
+    private func obtainPackageTargets(
+        generatablePackage: GeneratablePackage
+    ) throws -> [PackageTarget] {
+        switch generatablePackage.packageJsonFile.targets {
         case let .explicit(targets):
             return targets
         case .discoverAutomatically:
-            if let result = packageTargetCache[location] {
+            if let result = packageTargetCache[generatablePackage.location] {
                 return result
             }
             
-            let result = try PackageTarget.discoverTargets(packageLocation: location).sorted(by: { left, right -> Bool in
+            let result = try PackageTarget.discoverTargets(packageLocation: generatablePackage.location).sorted(by: { left, right -> Bool in
                 left.name < right.name
             })
-            packageTargetCache[location] = result
+            packageTargetCache[generatablePackage.location] = result
             return result
         }
     }
 
-    private func obtainPackageProducts(swiftPackage: SwiftPackage, location: URL) throws -> [PackageProduct] {
-        switch swiftPackage.products {
+    private func obtainPackageProducts(
+        generatablePackage: GeneratablePackage
+    ) throws -> [PackageProduct] {
+        switch generatablePackage.packageJsonFile.products {
         case let .explicit(products):
             return products
         case .productForEachTarget:
-            let packageTargets = try obtainPackageTargets(swiftPackage: swiftPackage, location: location)
+            let packageTargets = try obtainPackageTargets(generatablePackage: generatablePackage)
             return packageTargets.filter { !$0.isTest }.map { packageTarget in
                 PackageProduct(
                     name: packageTarget.name,
@@ -183,5 +239,15 @@ public class StatementGenerator {
         static func < (left: Self, right: Self) -> Bool {
             left.moduleName < right.moduleName
         }
+    }
+}
+
+public extension LinkerSettings {
+    var statements: [String] {
+        var result = [String]()
+        if !unsafeFlags.isEmpty {
+            result.append(".unsafeFlags([" + unsafeFlags.map { "\"\($0)\"" }.joined(separator: ", ") + "])")
+        }
+        return result
     }
 }
