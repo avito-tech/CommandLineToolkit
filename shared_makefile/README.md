@@ -1,10 +1,18 @@
 # Shared Makefile
 
+This Makefile can be shared across multiple projects, so you can have zero boilerplate code related to building or generating projects using [PackageGenerator](../PackageGenerator).
+
+## Installation
+
+- Use this repo via git submodule or other way where you have static access to all sources in this repo.
+- Alternatively, you can copypaste this folder and [PackageGenerator](../PackageGenerator)
+
 ## How to use
 
+- Have `package.json` in you project's dir (use `package.json` from this project as an example).
 - Create symlink from Makefile from this folder to Makefile in your project's folder
 - `make` will work out of the box with default actions like `generate`, `open` (see `default_actions.sh`
-- Autocomplete will work in `bash` and `fish` (if you installed completion packages)
+- Autocomplete will work in `bash` (if you installed completion packages) and `fish`
 - To make it work in zsh, add this to `.zshrc`:
 
 ```
@@ -12,11 +20,11 @@ zstyle ':completion:*:make:*:targets' call-command true
 zstyle ':completion:*:*:make:*' tag-order 'targets'
 ```
 
-Note: to install completion, use this.
+Note: to install completion, use this:
 
-For bash: `brew install bash-completion`
-For zsh: `brew install zsh-completions`
-For fish: just install fish (`brew install fish`)
+- For `bash`: `brew install bash-completion`
+- For `zsh`: `brew install zsh-completions`
+- For `fish`: just install fish (`brew install fish`)
 
 ## Custom actions
 

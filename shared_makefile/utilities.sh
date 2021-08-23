@@ -1,3 +1,4 @@
+# Note: requires to have `.reporoot` file
 __set_repo_root() {
     [ -z "${REPO_ROOT:-}" ] || return 0
     
@@ -14,7 +15,15 @@ __set_repo_root() {
     exit 1
 }
 
-__set_repo_root
+# Example: __perform_inside_folder "folder_name" any command
+__perform_inside_folder() {
+    local folder=$1
+    shift
+    
+    pushd "$folder" > /dev/null
+    "$@"
+    popd > /dev/null
+}
 
 __echo_error() {
     echo "$@" 1>&2

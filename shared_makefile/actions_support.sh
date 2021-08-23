@@ -15,3 +15,7 @@ export_executable() {
     strip "$executable_path"
     mv -f "$executable_path" "$destination_path"
 }
+
+perform_inside_project() {
+    __perform_inside_folder "$PROJECT_DIR" "$@"
+}
