@@ -1,21 +1,10 @@
 import Foundation
 
 public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLiteral {
-    public typealias StringLiteralType = String
-    
-    public let components: [String]
+    // MARK: - Static interface
     
     public static let root = AbsolutePath(components: [])
-    
     public static let home = AbsolutePath(NSHomeDirectory())
-    
-    public init(components: [String]) {
-        self.components = components
-    }
-    
-    public convenience init(fileUrl: URL) {
-        self.init(fileUrl.path)
-    }
     
     /// Returns an `AbsolutePath` only if `string` has a value that looks like an absolute path - begins with `/`.
     /// - Parameter string: String representation of absolute path.
@@ -34,8 +23,40 @@ public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLit
         path.hasPrefix("/")
     }
     
-    public var pathString: String {
-        return "/" + components.joined(separator: "/")
+    // MARK: - Instance members
+    
+    public let components: [String]
+    public let pathString: String
+    
+    // MARK: - Initializers members
+    
+    // Main properties are both precomputes
+    private init(
+        components: [String],
+        pathString: String)
+    {
+        self.components = components
+        self.pathString = pathString
+    }
+    
+    public convenience init(components: [String]) {
+        self.init(
+            components: components,
+            pathString: Self.pathString(components: components)
+        )
+    }
+    
+    public convenience init(_ path: String) {
+        self.init(
+            components: StringPathParsing.components(path: path),
+            pathString: path
+        )
+    }
+    
+    // MARK: - Instance interface
+    
+    public var isRoot: Bool {
+        components.isEmpty
     }
     
     public var fileUrl: URL {
@@ -65,8 +86,8 @@ public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLit
         let anchorComponents = anchorPath.components
         
         var componentsInCommon = 0
-        for (c1, c2) in zip(pathComponents, anchorComponents) {
-            if c1 != c2 {
+        for (pathComponent, anchorComponent) in zip(pathComponents, anchorComponents) {
+            if pathComponent != anchorComponent {
                 break
             }
             componentsInCommon += 1
@@ -85,26 +106,13 @@ public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLit
         return RelativePath(components: relativeComponents)
     }
     
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        let stringValue = try container.decode(String.self)
-        self.components = StringPathParsing.components(path: stringValue)
-    }
+    // MARK: - Conformance to `ExpressibleByStringLiteral`
     
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(pathString)
-    }
+    public typealias StringLiteralType = String
     
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(components)
-    }
+    // MARK: - Private
     
-    public static func == (left: AbsolutePath, right: AbsolutePath) -> Bool {
-        return left.components == right.components
-    }
-    
-    public var isRoot: Bool {
-        components.isEmpty
+    private static func pathString(components: [String]) -> String {
+        "/" + components.joined(separator: "/")
     }
 }

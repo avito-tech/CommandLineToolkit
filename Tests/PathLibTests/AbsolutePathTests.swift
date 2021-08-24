@@ -81,7 +81,7 @@ class AbsolutePathTests: XCTestCase {
     
     func test___init_with_file_url() {
         XCTAssertEqual(
-            AbsolutePath(fileUrl: URL(fileURLWithPath: "/path/to/something")),
+            AbsolutePath(URL(fileURLWithPath: "/path/to/something")),
             AbsolutePath("/path/to/something")
         )
     }
@@ -111,6 +111,50 @@ class AbsolutePathTests: XCTestCase {
         XCTAssertEqual(
             AbsolutePath("/some/path/../otherPath").standardized,
             AbsolutePath("/some/otherPath")
+        )
+    }
+    
+    func test___join() {
+        XCTAssertEqual(
+            AbsolutePath.join("a", "b/c", "d").standardized,
+            AbsolutePath("/a/b/c/d")
+        )
+        XCTAssertEqual(
+            AbsolutePath.join("/a/", "/b/c/", "/d/").standardized,
+            AbsolutePath("/a/b/c/d")
+        )
+    }
+    
+    func test___hasSuffix() {
+        XCTAssertEqual(
+            AbsolutePath("/a/b/c").hasSuffix("b/c"),
+            true
+        )
+        XCTAssertEqual(
+            AbsolutePath("/a/b/c").hasSuffix("b/"),
+            false
+        )
+    }
+    
+    func test___contains() {
+        XCTAssertEqual(
+            AbsolutePath("/a/b/c").contains("/b/"),
+            true
+        )
+        XCTAssertEqual(
+            AbsolutePath("/a/b/c").contains("/c/"),
+            false
+        )
+    }
+    
+    func test___hasPrefix() {
+        XCTAssertEqual(
+            AbsolutePath("/a/b/c").hasPrefix("/a/b"),
+            true
+        )
+        XCTAssertEqual(
+            AbsolutePath("/a/b/c").hasPrefix("a/b"),
+            false
         )
     }
 }

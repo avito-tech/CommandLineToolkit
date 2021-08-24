@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol Path: CustomStringConvertible {
+public protocol Path: CustomStringConvertible, StringRepresentable {
     init(components: [String])
     
     var components: [String] { get }
@@ -9,6 +9,10 @@ public protocol Path: CustomStringConvertible {
 
 extension Path {
     public var description: String {
+        return pathString
+    }
+    
+    public var asString: String {
         return pathString
     }
 }

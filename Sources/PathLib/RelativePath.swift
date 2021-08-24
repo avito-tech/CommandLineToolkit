@@ -36,23 +36,4 @@ public final class RelativePath: Path, Codable, Hashable, ExpressibleByStringLit
         
         return components.joined(separator: "/")
     }
-    
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        let stringValue = try container.decode(String.self)
-        self.components = StringPathParsing.components(path: stringValue)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(pathString)
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(components)
-    }
-    
-    public static func == (left: RelativePath, right: RelativePath) -> Bool {
-        return left.components == right.components
-    }
 }
