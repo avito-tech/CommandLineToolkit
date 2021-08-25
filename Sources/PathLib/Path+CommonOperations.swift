@@ -78,8 +78,8 @@ extension Path {
         pathString.hasSuffix(suffix)
     }
     
-    public func contains<S: StringProtocol>(_ suffix: S) -> Bool {
-        pathString.contains(suffix)
+    public func contains<S: StringProtocol>(_ string: S) -> Bool {
+        pathString.contains(string)
     }
     
     public func hasPrefix<S: StringProtocol>(_ prefix: S) -> Bool {
