@@ -2,8 +2,8 @@ import Foundation
 import PathLib
 
 public extension FileSystem {
-    func exists(path: AbsolutePath) -> Bool {
-        properties(forFileAtPath: path).exists()
+    func existence(path: AbsolutePath) -> FileExistence {
+        properties(forFileAtPath: path).existence()
     }
     
     func isExecutable(path: AbsolutePath) throws -> Bool {
@@ -69,7 +69,7 @@ public extension FileSystem {
     }
     
     func touch(path: AbsolutePath) throws {
-        if exists(path: path) {
+        if existence(path: path).exists {
             try properties(forFileAtPath: path).touch()
         } else {
             try createFile(atPath: path, data: nil)

@@ -35,11 +35,28 @@ final class LocalFileSystemTest: XCTestCase {
         XCTAssertTrue(isDir.boolValue)
     }
     
-    func test___deleting_file() throws {
+    func test___delete___deletes_file___if_file_exists() throws {
         let path = try tempFolder.createFile(filename: "file")
         
-        try fileSystem.delete(fileAtPath: path)
+        try fileSystem.delete(path: path)
         XCTAssertFalse(fileManager.fileExists(atPath: path.pathString))
+    }
+    
+    func test___delete___throws___if_file_doesnt_exists() throws {
+        let path = tempFolder.pathWith(components: ["non existing file"])
+        
+        XCTAssertFalse(fileManager.fileExists(atPath: path.pathString))
+        assertThrows {
+            try fileSystem.delete(path: path)
+        }
+    }
+    func test___delete_with_ignoreMissing_equals_true___doesnt_throw___if_file_doesnt_exists() throws {
+        let path = tempFolder.pathWith(components: ["non existing file"])
+        
+        XCTAssertFalse(fileManager.fileExists(atPath: path.pathString))
+        assertDoesNotThrow {
+            try fileSystem.delete(path: path, ignoreMissing: true)
+        }
     }
     
     func test___properties() throws {

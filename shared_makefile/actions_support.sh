@@ -19,3 +19,11 @@ export_executable() {
 perform_inside_project() {
     __perform_inside_folder "$PROJECT_DIR" "$@"
 }
+
+with_internal_field_separator() {
+    local savedIFS=$IFS
+    IFS=$1
+    shift 1
+    "$@"
+    IFS=$savedIFS
+}

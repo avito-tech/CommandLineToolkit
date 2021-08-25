@@ -5,9 +5,9 @@ import PathLib
 open class FakeFileSystem: FileSystem {
     public init(rootPath: AbsolutePath) {
         self.fakeCommonlyUsedPathsProvider = FakeCommonlyUsedPathsProvider(
-            applicationsProvider: { _ in rootPath.appending(components: ["Applications"]) },
-            cachesProvider: { _ in rootPath.appending(components: ["Library", "Caches"]) },
-            libraryProvider: { _ in rootPath.appending(component: "Library") },
+            applicationsProvider: { _ in rootPath.appending("Applications") },
+            cachesProvider: { _ in rootPath.appending("Library", "Caches") },
+            libraryProvider: { _ in rootPath.appending("Library") },
             currentWorkingDirectoryProvider: { rootPath }
         )
     }
@@ -57,8 +57,8 @@ open class FakeFileSystem: FileSystem {
     
     public var onDelete: (AbsolutePath) throws -> () = { _ in }
     
-    public func delete(fileAtPath: AbsolutePath) throws {
-        try onDelete(fileAtPath)
+    public func delete(path: AbsolutePath) throws {
+        try onDelete(path)
     }
     
     public var propertiesProvider: (AbsolutePath) -> FilePropertiesContainer = { _ in FakeFilePropertiesContainer() }

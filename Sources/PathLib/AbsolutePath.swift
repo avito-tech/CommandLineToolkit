@@ -1,9 +1,15 @@
 import Foundation
 
-public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLiteral {
+public final class AbsolutePath:
+    Path,
+    Codable,
+    Hashable,
+    ExpressibleByStringLiteral,
+    ExpressibleByArrayLiteral
+{
     // MARK: - Static interface
     
-    public static let root = AbsolutePath(components: [])
+    public static let root = AbsolutePath(components: [String]())
     public static let home = AbsolutePath(NSHomeDirectory())
     
     /// Returns an `AbsolutePath` only if `string` has a value that looks like an absolute path - begins with `/`.
@@ -25,32 +31,14 @@ public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLit
     
     // MARK: - Instance members
     
-    public let components: [String]
-    public let pathString: String
+    public let components: [String] // source value
+    public let pathString: String // precomputed value
     
     // MARK: - Initializers members
     
-    // Main properties are both precomputes
-    private init(
-        components: [String],
-        pathString: String)
-    {
-        self.components = components
-        self.pathString = pathString
-    }
-    
-    public convenience init(components: [String]) {
-        self.init(
-            components: components,
-            pathString: Self.pathString(components: components)
-        )
-    }
-    
-    public convenience init(_ path: String) {
-        self.init(
-            components: StringPathParsing.components(path: path),
-            pathString: path
-        )
+    public init<S: StringProtocol>(components: [S]) {
+        self.components = StringPathParsing.slashSeparatedComponents(paths: components)
+        self.pathString = Self.pathString(components: self.components)
     }
     
     // MARK: - Instance interface
@@ -76,8 +64,9 @@ public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLit
         guard components.count > anchorPath.components.count else {
             return false
         }
-        let headComponents = Array(components.dropLast(components.count - anchorPath.components.count))
-        return headComponents == anchorPath.components
+        return zip(anchorPath.components, components.prefix(upTo: anchorPath.components.count)).allSatisfy { lhs, rhs in
+            lhs == rhs
+        }
     }
     
     /// Finds a `RelativePath` for this instance and a given anchor path.
@@ -112,7 +101,7 @@ public final class AbsolutePath: Path, Codable, Hashable, ExpressibleByStringLit
     
     // MARK: - Private
     
-    private static func pathString(components: [String]) -> String {
+    private static func pathString<S: StringProtocol>(components: [S]) -> String {
         "/" + components.joined(separator: "/")
     }
 }

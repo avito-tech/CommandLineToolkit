@@ -1,7 +1,7 @@
 import Foundation
 
-public protocol Path: CustomStringConvertible, StringRepresentable {
-    init(components: [String])
+public protocol Path: CustomStringConvertible {
+    init<S: StringProtocol>(components: [S])
     
     var components: [String] { get }
     var pathString: String { get }

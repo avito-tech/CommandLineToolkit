@@ -49,4 +49,12 @@ open class FakeFilePropertiesContainer: FilePropertiesContainer {
     
     public var symbolicLinkPathValue: AbsolutePath?
     public func symbolicLinkPath() throws -> AbsolutePath? { symbolicLinkPathValue }
+    
+    public func existence() -> FileExistence {
+        FileExistence(
+            exists: pathExists,
+            isFile: regularFile,
+            isDirectory: directory
+        )
+    }
 }

@@ -32,15 +32,14 @@ class AbsolutePathTests: XCTestCase {
     }
     
     func test___last_component___when_absolute_path_is_root() {
-        let path = AbsolutePath(components: [])
         XCTAssertEqual(
-            path.lastComponent,
+            AbsolutePath.root.lastComponent,
             "/"
         )
     }
     
     func test___removing_last_path_component_from_componentless_path() {
-        let path = AbsolutePath(components: [])
+        let path = AbsolutePath(components: [String]())
         XCTAssertEqual(
             path.removingLastComponent.pathString,
             "/"
@@ -86,9 +85,16 @@ class AbsolutePathTests: XCTestCase {
         )
     }
     
-    func test___appending() {
-        let path = AbsolutePath("/some/path")
-        XCTAssertEqual(path.appending("another", "subpath").pathString, "/some/path/another/subpath")
+    func test___appending___can_add_arbitrary_number_of_components() {
+        let path = AbsolutePath("/a/b")
+        XCTAssertEqual(path.appending("c", "d", "e").pathString, "/a/b/c/d/e")
+    }
+    
+    func test___appending___separates_every_component_by_slash_as_a_separator() {
+        let path = AbsolutePath("/a/b")
+        XCTAssertEqual(path.appending("c/d", "e/f").components, [
+            "a", "b", "c", "d", "e", "f"
+        ])
     }
     
     func test___validating() {
@@ -111,17 +117,6 @@ class AbsolutePathTests: XCTestCase {
         XCTAssertEqual(
             AbsolutePath("/some/path/../otherPath").standardized,
             AbsolutePath("/some/otherPath")
-        )
-    }
-    
-    func test___join() {
-        XCTAssertEqual(
-            AbsolutePath.join("a", "b/c", "d").standardized,
-            AbsolutePath("/a/b/c/d")
-        )
-        XCTAssertEqual(
-            AbsolutePath.join("/a/", "/b/c/", "/d/").standardized,
-            AbsolutePath("/a/b/c/d")
         )
     }
     

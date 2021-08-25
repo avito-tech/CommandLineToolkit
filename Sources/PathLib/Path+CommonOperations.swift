@@ -5,28 +5,17 @@ extension Path {
         self.init(fileUrl.path)
     }
     
-    public init(_ path: String) {
-        self.init(components: StringPathParsing.components(path: path))
+    public init<S: StringProtocol>(_ path: S) {
+        self.init(components: [path])
     }
     
-    public init(stringLiteral: String) {
-        self.init(stringLiteral)
-    }
-    
-    // Example: PathClass.join("foo", "bar/baz", "qux")
-    public static func join(_ components: StringRepresentable...) -> Self {
-        Self(
-            components: components.flatMap {
-                StringPathParsing.components(path: $0.asString)
-            }
+    public func appending<S: StringProtocol>(components: [S]) -> Self {
+        return Self(
+            components: self.components + components.map { String($0) }
         )
     }
     
-    public func appending(components: [String]) -> Self {
-        return Self(components: self.components + components)
-    }
-    
-    public func appending(_ components: String...) -> Self {
+    public func appending<S: StringProtocol>(_ components: S...) -> Self {
         return appending(components: components)
     }
     
@@ -34,13 +23,9 @@ extension Path {
         return Self(components: components + relativePath.components)
     }
     
-    public func appending(component: String) -> Self {
-        return Self(components: self.components + [component])
-    }
-    
-    public func appending(extension: String) -> Self {
+    public func appending<S: StringProtocol>(extension: S) -> Self {
         let lastComponent = self.lastComponent
-        return removingLastComponent.appending(component: lastComponent + "." + `extension`)
+        return removingLastComponent.appending(lastComponent + "." + `extension`)
     }
     
     public var removingExtension: Self {
@@ -49,14 +34,14 @@ extension Path {
             return self
         }
         let lastComponent = self.lastComponent
-        return removingLastComponent.appending(component: String(lastComponent.dropLast(ext.count + 1)))
+        return removingLastComponent.appending(lastComponent.dropLast(ext.count + 1))
     }
     
     public var removingLastComponent: Self {
         guard !components.isEmpty else {
             return self
         }
-        return Self(components: Array(components.dropLast()))
+        return Self(components: components.dropLast())
     }
     
     public var lastComponent: String {
@@ -89,15 +74,15 @@ extension Path {
         return String(component.suffix(from: component.index(after: dotPosition)))
     }
     
-    public func hasSuffix(_ suffix: String) -> Bool {
+    public func hasSuffix<S: StringProtocol>(_ suffix: S) -> Bool {
         pathString.hasSuffix(suffix)
     }
     
-    public func contains(_ suffix: String) -> Bool {
+    public func contains<S: StringProtocol>(_ suffix: S) -> Bool {
         pathString.contains(suffix)
     }
     
-    public func hasPrefix(_ prefix: String) -> Bool {
+    public func hasPrefix<S: StringProtocol>(_ prefix: S) -> Bool {
         pathString.hasPrefix(prefix)
     }
     
@@ -126,5 +111,17 @@ extension Path {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(pathString)
+    }
+    
+    // MARK: - Conformance to `ExpressibleByArrayLiteral`
+    
+    public init(arrayLiteral elements: String...) {
+        self.init(components: elements)
+    }
+    
+    // MARK: - Conformance to `ExpressibleByStringLiteral`
+    
+    public init(stringLiteral: String) {
+        self.init(stringLiteral)
     }
 }

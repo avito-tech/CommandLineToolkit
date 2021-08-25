@@ -21,7 +21,7 @@ public final class ShallowFileSystemEnumerator: FileSystemEnumerator {
         let contents = try fileManager.contentsOfDirectory(atPath: path.pathString)
         
         for element in contents {
-            try iterator(path.appending(component: element))
+            try iterator(path.appending(element))
         }
     }
 }

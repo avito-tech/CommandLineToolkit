@@ -44,7 +44,7 @@ public final class LocalFileSystem: FileSystem {
         try fileManager.moveItem(at: source.fileUrl, to: destination.fileUrl)
     }
     
-    public func delete(fileAtPath path: AbsolutePath) throws {
+    public func delete(path: AbsolutePath) throws {
         try fileManager.removeItem(at: path.fileUrl)
     }
     

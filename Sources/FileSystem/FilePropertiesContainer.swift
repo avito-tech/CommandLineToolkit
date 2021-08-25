@@ -2,7 +2,7 @@ import Foundation
 import PathLib
 
 public protocol FilePropertiesContainer {
-    func exists() -> Bool
+    func existence() -> FileExistence
     func isExecutable() throws -> Bool
     func isDirectory() throws -> Bool
     func isRegularFile() throws -> Bool
@@ -23,6 +23,19 @@ public protocol FilePropertiesContainer {
     func size() throws -> Int
 }
 
-public extension FilePropertiesContainer {
-    func touch() throws { try set(modificationDate: Date()) }
+extension FilePropertiesContainer {
+    public func touch() throws {
+        try set(modificationDate: Date())
+    }
+    
+    public func exists(type: FileExistenceCheckType = .any) -> Bool {
+        switch type {
+        case .any:
+            return existence().exists
+        case .directory:
+            return existence().isDirectory
+        case .file:
+            return existence().isFile
+        }
+    }
 }

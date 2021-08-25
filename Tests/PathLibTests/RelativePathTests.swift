@@ -13,7 +13,7 @@ class RelativePathTests: XCTestCase {
     
     func test___empty_components() {
         XCTAssertEqual(
-            RelativePath(components: []).pathString,
+            RelativePath(components: [String]()).pathString,
             "./"
         )
     }
@@ -27,7 +27,7 @@ class RelativePathTests: XCTestCase {
     }
     
     func test___removing_last_path_component_from_componentless_path() {
-        let path = RelativePath(components: [])
+        let path = RelativePath(components: [String]())
         XCTAssertEqual(
             path.removingLastComponent.pathString,
             "./"

@@ -29,7 +29,7 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
     }
     
     func test___properties_for_nonexisting_file() {
-        let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath.appending(component: "nonexisting"))
+        let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath.appending("nonexisting"))
         assertThrows {
             try properties.modificationDate()
         }
@@ -73,7 +73,7 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
     }
     
     func test___not_exists___when_not_exists() throws {
-        let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath.appending(component: "nonexisting"))
+        let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath.appending("nonexisting"))
         XCTAssertFalse(properties.exists())
     }
     

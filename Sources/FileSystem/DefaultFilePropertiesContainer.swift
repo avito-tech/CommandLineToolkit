@@ -44,8 +44,18 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
         try fileManager.setAttributes([.posixPermissions: permissions], ofItemAtPath: path.pathString)
     }
     
-    public func exists() -> Bool {
-        fileManager.fileExists(atPath: path.pathString)
+    public func existence() -> FileExistence {
+        var isDirectory: ObjCBool = false
+        
+        if fileManager.fileExists(atPath: path.pathString, isDirectory: &isDirectory) {
+            if isDirectory.boolValue {
+                return .isDirectory
+            } else {
+                return .isFile
+            }
+        } else {
+            return .doesntExist
+        }
     }
     
     public func isDirectory() throws -> Bool {

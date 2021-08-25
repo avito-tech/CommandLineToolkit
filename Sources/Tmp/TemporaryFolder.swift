@@ -15,7 +15,7 @@ public final class TemporaryFolder {
             try FileManager.default.createDirectory(atPath: containerPath)
         }
         let containerPath = containerPath ?? AbsolutePath(NSTemporaryDirectory())
-        let pathTemplate = containerPath.appending(component: "\(prefix).XXXXXX")
+        let pathTemplate = containerPath.appending("\(prefix).XXXXXX")
         var templateBytes = [UInt8](pathTemplate.pathString.utf8).map { Int8($0) } + [Int8(0)]
         if mkdtemp(&templateBytes) == nil {
             throw ErrnoError.failedToCreateTemporaryFolder(pathTemplate, code: errno)
@@ -53,7 +53,7 @@ public final class TemporaryFolder {
     @discardableResult
     public func createFile(components: [String] = [], filename: String, contents: Data? = nil) throws -> AbsolutePath {
         let container = try createDirectory(components: components)
-        let path = container.appending(component: filename)
+        let path = container.appending(filename)
         FileManager.default.createFile(atPath: path.pathString, contents: contents)
         return path
     }

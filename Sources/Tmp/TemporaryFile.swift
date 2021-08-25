@@ -15,7 +15,7 @@ public final class TemporaryFile {
         deleteOnDealloc: Bool = true
     ) throws {
         let containerPath = containerPath ?? AbsolutePath(NSTemporaryDirectory())
-        let pathTemplate = containerPath.appending(component: "\(prefix).XXXXXX\(suffix)")
+        let pathTemplate = containerPath.appending("\(prefix).XXXXXX\(suffix)")
         
         var templateBytes = [UInt8](pathTemplate.pathString.utf8).map { Int8($0) } + [Int8(0)]
         let fileDescriptor = mkstemps(&templateBytes, Int32(suffix.count))
