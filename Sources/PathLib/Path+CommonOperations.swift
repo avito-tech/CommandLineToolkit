@@ -5,8 +5,8 @@ extension Path {
         self.init(fileUrl.path)
     }
     
-    public init<S: StringProtocol>(_ path: S) {
-        self.init(components: [path])
+    public init<S: StringProtocol>(_ components: S...) {
+        self.init(components: components)
     }
     
     public func appending<S: StringProtocol>(components: [S]) -> Self {
@@ -90,6 +90,12 @@ extension Path {
     
     public static func == (left: Self, right: Self) -> Bool {
         return left.components == right.components
+    }
+    
+    // MARK: - Conformance to `Comparable`
+    
+    public static func <(lhs: Self, rhs: Self) -> Bool {
+        lhs.pathString < rhs.pathString
     }
     
     // MARK: - Conformance to `Hashable`

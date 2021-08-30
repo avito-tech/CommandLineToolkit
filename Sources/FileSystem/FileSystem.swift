@@ -64,6 +64,26 @@ extension FileSystem {
         )
     }
     
+    public func copy(
+        contentsOfDirectory sourcePath: AbsolutePath,
+        destinationDirectory destinationPath: AbsolutePath,
+        overwrite: Bool,
+        ensureDirectoryExists: Bool
+    ) throws {
+        if ensureDirectoryExists {
+            try self.ensureDirectoryExists(path: sourcePath)
+        }
+        
+        try contentEnumerator(forPath: sourcePath, style: .shallow).each { path in
+            try copy(
+                source: path,
+                destination: destinationPath.appending(path.lastComponent),
+                overwrite: overwrite,
+                ensureDirectoryExists: false
+            )
+        }
+    }
+    
     public func move(
         source: AbsolutePath,
         destination: AbsolutePath,
@@ -92,7 +112,7 @@ extension FileSystem {
         
         if shouldEnsureDirectoryExists {
             try ensureDirectoryExists(
-                directory: destination.removingLastComponent
+                path: destination.removingLastComponent
             )
         }
         
@@ -105,20 +125,20 @@ extension FileSystem {
         }
     }
     
-    private func ensureDirectoryExists(directory: AbsolutePath) throws {
-        let existence = existence(path: directory)
+    public func ensureDirectoryExists(path: AbsolutePath) throws {
+        let existence = existence(path: path)
         
         if existence.exists {
             if existence.isDirectory {
                 // Already exists.
             } else {
                 throw FileSystemError(
-                    errorDescription: "Expected a directory, but found a file at path: \(directory)"
+                    errorDescription: "Expected a directory, but found a file at path: \(path)"
                 )
             }
         } else {
             try createDirectory(
-                atPath: directory,
+                atPath: path,
                 withIntermediateDirectories: true
             )
         }

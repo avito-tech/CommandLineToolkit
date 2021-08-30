@@ -51,10 +51,14 @@ open class FakeFilePropertiesContainer: FilePropertiesContainer {
     public func symbolicLinkPath() throws -> AbsolutePath? { symbolicLinkPathValue }
     
     public func existence() -> FileExistence {
-        FileExistence(
-            exists: pathExists,
-            isFile: regularFile,
-            isDirectory: directory
-        )
+        if pathExists {
+            if directory {
+                return .isDirectory
+            } else {
+                return .isFile
+            }
+        } else {
+            return .doesntExist
+        }
     }
 }

@@ -4,6 +4,7 @@ public final class RelativePath:
     Path,
     Codable,
     Hashable,
+    Comparable,
     ExpressibleByStringLiteral,
     ExpressibleByArrayLiteral
 {
