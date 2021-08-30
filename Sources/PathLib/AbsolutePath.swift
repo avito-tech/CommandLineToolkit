@@ -71,7 +71,6 @@ public final class AbsolutePath:
     }
     
     /// Finds a `RelativePath` for this instance and a given anchor path.
-    /// TODO: throw if path can not be calculated instead of returning incorrect value.
     public func relativePath(anchorPath: AbsolutePath) -> RelativePath {
         let pathComponents = components
         let anchorComponents = anchorPath.components
