@@ -35,7 +35,7 @@ final class PathDeleterImplTests: XCTestCase {
         
         XCTAssertFalse(fileManager.fileExists(atPath: path.pathString))
         assertDoesNotThrow {
-            try pathDeleter.delete(path: path, ignoreMissing: true)
+            try pathDeleter.delete(path: path)
         }
     }
 }

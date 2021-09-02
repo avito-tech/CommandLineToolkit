@@ -19,8 +19,7 @@ final class DestinationPreparer {
     ) throws {
         if prepareForOverwriting {
             try pathDeleter.delete(
-                path: destination,
-                ignoreMissing: true
+                path: destination
             )
         }
         

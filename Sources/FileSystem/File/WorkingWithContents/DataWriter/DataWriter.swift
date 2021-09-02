@@ -11,9 +11,20 @@ public protocol DataWriter {
 
 extension DataWriter {
     public func write(
+        data: Data,
+        filePath: AbsolutePath
+    ) throws {
+        try write(
+            data: data,
+            filePath: filePath,
+            ensureDirectoryExists: true
+        )
+    }
+    
+    public func write(
         string: String,
         filePath: AbsolutePath,
-        ensureDirectoryExists: Bool
+        ensureDirectoryExists: Bool = true
     ) throws {
         try write(
             data: Data(string.utf8),

@@ -9,3 +9,19 @@ public protocol PathMover {
         ensureDirectoryExists: Bool
     ) throws
 }
+
+extension PathMover {
+    public func move(
+        source: AbsolutePath,
+        destination: AbsolutePath,
+        overwrite: Bool = true,
+        ensureDirectoryExists: Bool = true
+    ) throws {
+        try move(
+            source: source,
+            destination: destination,
+            overwrite: overwrite,
+            ensureDirectoryExists: ensureDirectoryExists
+        )
+    }
+}
