@@ -10,8 +10,10 @@ let package = Package(
         .library(name: "CLTExtensions", targets: ["CLTExtensions"]),
         .library(name: "Collections", targets: ["Collections"]),
         .library(name: "CommandSupport", targets: ["CommandSupport"]),
+        .library(name: "DI", targets: ["DI"]),
         .library(name: "DateProvider", targets: ["DateProvider"]),
         .library(name: "DateProviderTestHelpers", targets: ["DateProviderTestHelpers"]),
+        .library(name: "Environment", targets: ["Environment"]),
         .library(name: "FileSystem", targets: ["FileSystem"]),
         .library(name: "FileSystemTestHelpers", targets: ["FileSystemTestHelpers"]),
         .library(name: "Graphite", targets: ["Graphite"]),
@@ -28,6 +30,7 @@ let package = Package(
         .library(name: "PlistLib", targets: ["PlistLib"]),
         .library(name: "ProcessController", targets: ["ProcessController"]),
         .library(name: "ProcessControllerTestHelpers", targets: ["ProcessControllerTestHelpers"]),
+        .library(name: "RepoRoot", targets: ["RepoRoot"]),
         .library(name: "SignalHandling", targets: ["SignalHandling"]),
         .library(name: "SocketModels", targets: ["SocketModels"]),
         .library(name: "Statsd", targets: ["Statsd"]),
@@ -46,7 +49,6 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "Glob", url: "https://github.com/Bouke/Glob", .exact("1.0.5")),
-        .package(name: "Mixbox", url: "ssh://git@stash.msk.avito.ru:7999/ma/mixbox.git", .revision("00284542b42125b101ce923c35e93b3ba9f08ff6")),
         .package(name: "Signals", url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.21")),
         .package(name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser", from: "0.4.3"),
     ],
@@ -80,15 +82,21 @@ let package = Package(
             name: "CommandSupport",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "MixboxBuiltinDi", package: "Mixbox"),
-                .product(name: "MixboxDi", package: "Mixbox"),
+                "DI",
                 "PathLib",
             ],
             path: "Sources/CommandSupport"
         ),
         .target(
+            name: "DI",
+            dependencies: [
+            ],
+            path: "Sources/DI"
+        ),
+        .target(
             name: "DateProvider",
             dependencies: [
+                "DI",
             ],
             path: "Sources/DateProvider"
         ),
@@ -100,10 +108,20 @@ let package = Package(
             path: "Tests/DateProviderTestHelpers"
         ),
         .target(
+            name: "Environment",
+            dependencies: [
+                "CLTExtensions",
+                "DI",
+            ],
+            path: "Sources/Environment"
+        ),
+        .target(
             name: "FileSystem",
             dependencies: [
+                "DI",
                 .product(name: "Glob", package: "Glob"),
                 "PathLib",
+                "String",
             ],
             path: "Sources/FileSystem"
         ),
@@ -118,7 +136,6 @@ let package = Package(
         .testTarget(
             name: "FileSystemTests",
             dependencies: [
-                "DateProvider",
                 "FileSystem",
                 "PathLib",
                 "TestHelpers",
@@ -279,6 +296,7 @@ let package = Package(
             name: "ProcessController",
             dependencies: [
                 "AtomicModels",
+                "DI",
                 "DateProvider",
                 "FileSystem",
                 "ObjCExceptionCatcher",
@@ -310,6 +328,28 @@ let package = Package(
                 "Tmp",
             ],
             path: "Tests/ProcessControllerTests"
+        ),
+        .target(
+            name: "RepoRoot",
+            dependencies: [
+                "DI",
+                "FileSystem",
+                "PathLib",
+                "ProcessController",
+                "String",
+            ],
+            path: "Sources/RepoRoot"
+        ),
+        .testTarget(
+            name: "RepoRootTests",
+            dependencies: [
+                "FileSystem",
+                "FileSystemTestHelpers",
+                "PathLib",
+                "RepoRoot",
+                "TestHelpers",
+            ],
+            path: "Tests/RepoRootTests"
         ),
         .target(
             name: "SignalHandling",

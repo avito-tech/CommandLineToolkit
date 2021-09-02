@@ -21,11 +21,15 @@
 /// ## MyProjectDependencies.swift (declare all your dependencies):
 ///
 /// ```
-/// class MyProjectDependencies: DependencyCollectionRegisterer {
-///     func register(dependencyRegisterer di: DependencyRegisterer) {
+/// class MyProjectDependencies: ModuleDependencies {
+///     func registerDependenciesOfCurrentModule(di: DependencyRegisterer) {
 ///         di.register(type: MyType.self) { _ in
 ///             MyTypeImpl()
 ///         }
+///     }
+///
+///     func otherModulesDependecies() -> [ModuleDependencies] {
+///         [...]
 ///     }
 /// }
 /// ```
@@ -54,11 +58,10 @@
 /// }
 /// ```
 
-import MixboxDi
-import MixboxBuiltinDi
+import DI
 
 open class BaseCommand<T> where
-    T: DependencyCollectionRegisterer,
+    T: ModuleDependencies,
     T: InitializableWithNoArguments
 {
     public let di: DependencyInjection = makeDi()
@@ -67,9 +70,13 @@ open class BaseCommand<T> where
     }
     
     private static func makeDi() -> DependencyInjection {
-        let di = BuiltinDependencyInjection()
+        let di = DependencyInjectionImpl()
         
-        T().register(dependencyRegisterer: di)
+        let registerer = AllModularDependenciesDependencyCollectionRegisterer(
+            moduleDependencies: T()
+        )
+        
+        registerer.register(dependencyRegisterer: di)
         
         return di
     }

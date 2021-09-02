@@ -33,31 +33,36 @@ open class FakeFileSystem: FileSystem {
     
     public var onCreateDirectory: (AbsolutePath, Bool) throws -> () = { _, _ in }
     
-    public func createDirectory(atPath: AbsolutePath, withIntermediateDirectories: Bool) throws {
-        try onCreateDirectory(atPath, withIntermediateDirectories)
+    public func createDirectory(path: AbsolutePath, withIntermediateDirectories: Bool, ignoreExisting: Bool) throws {
+        try onCreateDirectory(path, withIntermediateDirectories)
     }
     
     public var onCreateFile: (AbsolutePath, Data?) throws -> () = { _, _ in }
     
-    public func createFile(atPath: AbsolutePath, data: Data?) throws {
-        try onCreateFile(atPath, data)
+    public func createFile(path: AbsolutePath, data: Data?) throws {
+        try onCreateFile(path, data)
     }
     
     public var onCopy: (AbsolutePath, AbsolutePath) throws -> () = { _, _ in }
     
-    public func copy(source: AbsolutePath, destination: AbsolutePath) throws {
+    public func copy(
+        source: AbsolutePath,
+        destination: AbsolutePath,
+        overwrite: Bool,
+        ensureDirectoryExists: Bool
+    ) throws {
         try onCopy(source, destination)
     }
     
     public var onMove: (AbsolutePath, AbsolutePath) throws -> () = { _, _ in }
-    
-    public func move(source: AbsolutePath, destination: AbsolutePath) throws {
+
+    public func move(source: AbsolutePath, destination: AbsolutePath, overwrite: Bool, ensureDirectoryExists: Bool) throws {
         try onMove(source, destination)
     }
     
     public var onDelete: (AbsolutePath) throws -> () = { _ in }
     
-    public func delete(path: AbsolutePath) throws {
+    public func delete(path: AbsolutePath, ignoreMissing: Bool) throws {
         try onDelete(path)
     }
     
@@ -69,5 +74,10 @@ open class FakeFileSystem: FileSystem {
     public var fileSystemPropertiesProvider: (AbsolutePath) -> FileSystemPropertiesContainer = { _ in FakeFileSystemPropertiesContainer() }
     public func fileSystemProperties(forFileAtPath path: AbsolutePath) -> FileSystemPropertiesContainer {
         fileSystemPropertiesProvider(path)
+    }
+    
+    public var onTouch: (AbsolutePath) throws -> () = { _ in }
+    public func touch(path: AbsolutePath) throws {
+        try onTouch(path)
     }
 }

@@ -1,7 +1,10 @@
-import Foundation
 import PathLib
 
-public extension FileSystem {
+public protocol CommonlyUsedPathsProviderFactory {
+    var commonlyUsedPathsProvider: CommonlyUsedPathsProvider { get }
+}
+
+public extension CommonlyUsedPathsProviderFactory {
     
     // MARK: Applications
     

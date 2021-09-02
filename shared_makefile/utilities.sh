@@ -25,6 +25,15 @@ __perform_inside_folder() {
     popd > /dev/null
 }
 
+__make_temporary_directory() {
+    local directory
+    directory="/tmp/$(uuidgen)" 1>/dev/null
+    
+    mkdir -p "$directory" 1>/dev/null
+    
+    echo "$directory"
+}
+
 __echo_error() {
     echo "$@" 1>&2
 }

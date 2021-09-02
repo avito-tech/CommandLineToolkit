@@ -23,7 +23,16 @@ action___build() {
 
 action___test() {
 	action___generate
-	perform_inside_project swift test --parallel
+    
+    if [ "${SUPPRESS_ERROR_WHEN_NO_TESTS_FOUND:-false}" == "true" ]; then
+        perform_ignoring_nonzero_exit_status_if_stderr_contains "no tests found" \
+            perform_inside_project \
+            swift test --parallel
+    else
+        perform_inside_project \
+            swift test --parallel
+    fi
+        
 }
 
 action___run_ci_tests() {

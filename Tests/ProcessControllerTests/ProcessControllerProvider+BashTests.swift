@@ -8,12 +8,11 @@ import XCTest
 
 final class ProcessControllerProviderBashTests: XCTestCase {
     lazy var dateProvider = SystemDateProvider()
-    lazy var fileSystem = LocalFileSystem()
     lazy var tempFolder = assertDoesNotThrow { try TemporaryFolder() }
     
     lazy var processControllerProvider = DefaultProcessControllerProvider(
         dateProvider: dateProvider,
-        fileSystem: fileSystem
+        filePropertiesProvider: FilePropertiesProviderImpl()
     )
     
     func test__stdout() throws {

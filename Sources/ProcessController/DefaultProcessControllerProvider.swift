@@ -5,20 +5,20 @@ import PathLib
 
 public final class DefaultProcessControllerProvider: ProcessControllerProvider {
     private let dateProvider: DateProvider
-    private let fileSystem: FileSystem
+    private let filePropertiesProvider: FilePropertiesProvider
     
     public init(
         dateProvider: DateProvider,
-        fileSystem: FileSystem
+        filePropertiesProvider: FilePropertiesProvider
     ) {
         self.dateProvider = dateProvider
-        self.fileSystem = fileSystem
+        self.filePropertiesProvider = filePropertiesProvider
     }
     
     public func createProcessController(subprocess: Subprocess) throws -> ProcessController {
         return try DefaultProcessController(
             dateProvider: dateProvider,
-            fileSystem: fileSystem,
+            filePropertiesProvider: filePropertiesProvider,
             subprocess: subprocess
         )
     }

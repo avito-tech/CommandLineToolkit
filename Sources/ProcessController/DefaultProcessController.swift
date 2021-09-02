@@ -14,7 +14,6 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     public private(set) var processId: Int32 = 0
     
     private let automaticManagementItemControllers: [AutomaticManagementItemController]
-    private let fileSystem: FileSystem
     let listenerQueue = DispatchQueue(label: "DefaultProcessController.listenerQueue")
     private let openPipeFileHandleGroup = DispatchGroup()
     private let process: Process
@@ -46,7 +45,7 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     
     public init(
         dateProvider: DateProvider,
-        fileSystem: FileSystem,
+        filePropertiesProvider: FilePropertiesProvider,
         subprocess: Subprocess
     ) throws {
         automaticManagementItemControllers = subprocess.automaticManagement.items.map { item in
@@ -56,27 +55,26 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
         let arguments = try subprocess.arguments.map { try $0.stringValue() }
         processName = (arguments[0] as NSString).lastPathComponent
         process = try DefaultProcessController.createProcess(
-            fileSystem: fileSystem,
+            filePropertiesProvider: filePropertiesProvider,
             arguments: arguments,
             environment: subprocess.environment.values,
             workingDirectory: subprocess.workingDirectory
         )
         
         self.subprocess = subprocess
-        self.fileSystem = fileSystem
         
         try setUpProcessListening()
     }
     
     private static func createProcess(
-        fileSystem: FileSystem,
+        filePropertiesProvider: FilePropertiesProvider,
         arguments: [String],
         environment: [String: String],
         workingDirectory: AbsolutePath
     ) throws -> Process {
         let pathToExecutable = AbsolutePath(arguments[0])
         
-        let executableProperties = fileSystem.properties(forFileAtPath: pathToExecutable)
+        let executableProperties = filePropertiesProvider.properties(forFileAtPath: pathToExecutable)
         
         guard try executableProperties.isExecutable() else {
             throw ProcessControllerError.fileIsNotExecutable(path: pathToExecutable)

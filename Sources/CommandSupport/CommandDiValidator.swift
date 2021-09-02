@@ -1,10 +1,15 @@
 /// Can be used in tests:
 ///
 /// ```
+/// import XCTest
+/// import TestHelpers
+/// import CommandSupport
+/// import <your module>
+/// 
 /// final class DiTests: XCTestCase {
 ///     func test() {
 ///         assertDoesNotThrow {
-///             CommandDiValidator().validate(commandType: MyCommand.self)
+///             try CommandDiValidator().validate(commandType: MyCommand.self)
 ///         }
 ///     }
 /// }
