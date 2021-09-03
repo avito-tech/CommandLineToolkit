@@ -48,7 +48,8 @@ public final class FileSystemModuleDependencies: ModuleDependencies {
         }
         di.register(type: FileSystemEnumeratorFactory.self) { di in
             try FileSystemEnumeratorFactoryImpl(
-                fileManager: di.resolve()
+                fileManager: di.resolve(),
+                filePropertiesProvider: di.resolve()
             )
         }
         di.register(type: DirectoryCreator.self) { di in
