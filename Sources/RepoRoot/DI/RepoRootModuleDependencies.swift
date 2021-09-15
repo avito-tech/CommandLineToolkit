@@ -1,17 +1,13 @@
 import DI
 import FileSystem
 import ProcessController
+import Environment
 
 public final class RepoRootModuleDependencies: ModuleDependencies {
     public init() {
     }
     
     public func registerDependenciesOfCurrentModule(di: DependencyRegisterer) {
-        di.register(type: RepoRootProvider.self) { di in
-            try (di.resolve() as RepoRootProviderFactory).repoRootProvider(
-                anyPathWithinRepo: #filePath
-            )
-        }
         di.register(type: RepoRootProviderFactory.self) { di in
             try CachingRepoRootProviderFactory(
                 repoRootProviderFactory: MarkerFileRepoRootProviderFactory(
@@ -25,7 +21,8 @@ public final class RepoRootModuleDependencies: ModuleDependencies {
     public func otherModulesDependecies() -> [ModuleDependencies] {
         [
             FileSystemModuleDependencies(),
-            ProcessControllerModuleDependencies()
+            ProcessControllerModuleDependencies(),
+            EnvironmentModuleDependencies()
         ]
     }
 }

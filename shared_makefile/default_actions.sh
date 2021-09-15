@@ -21,6 +21,11 @@ action___build() {
 	perform_inside_project swift build --triple x86_64-apple-macosx11.0 -c release -Xswiftc -Osize
 }
 
+action___build_debug() {
+	action___generate
+	perform_inside_project swift build -c debug -Xswiftc -Onone
+}
+
 action___test() {
 	action___generate
     

@@ -16,7 +16,9 @@ public final class DataWriterImpl: DataWriter {
         ensureDirectoryExists: Bool
     ) throws {
         if ensureDirectoryExists {
-            try directoryCreator.ensureDirectoryExists(path: filePath)
+            try directoryCreator.ensureDirectoryExists(
+                path: filePath.removingLastComponent
+            )
         }
         
         try data.write(to: filePath.fileUrl, options: .atomic)

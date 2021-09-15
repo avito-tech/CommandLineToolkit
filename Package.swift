@@ -333,6 +333,7 @@ let package = Package(
             name: "RepoRoot",
             dependencies: [
                 "DI",
+                "Environment",
                 "FileSystem",
                 "PathLib",
                 "ProcessController",
