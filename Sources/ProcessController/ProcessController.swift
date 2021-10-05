@@ -56,4 +56,21 @@ public extension ProcessController {
     func forceKillProcess() {
         send(signal: SIGKILL)
     }
+    
+    func restreamStdout() {
+        onStdout { _, data, _ in
+            FileHandle.standardOutput.write(data)
+        }
+    }
+    
+    func restreamStderr() {
+        onStderr { _, data, _ in
+            FileHandle.standardError.write(data)
+        }
+    }
+    
+    func restreamOutput() {
+        restreamStdout()
+        restreamStderr()
+    }
 }
