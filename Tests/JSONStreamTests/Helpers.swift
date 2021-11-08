@@ -30,7 +30,7 @@ class FakeEventStream: JSONReaderEventStream {
     var allArrays = [NSArray]()
     var allData = [Data]()
     
-    public init() {}
+    init() {}
     
     func newArray(_ array: NSArray, data: Data) {
         all.append(array)

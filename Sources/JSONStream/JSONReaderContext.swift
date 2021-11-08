@@ -4,7 +4,7 @@ final class NumericStorage {
     var bytes = Data()
     var parsedNumber: NSNumber?
     
-    public init(_ initialBytes: Data) {
+    init(_ initialBytes: Data) {
         bytes = initialBytes
     }
 }

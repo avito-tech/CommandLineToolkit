@@ -36,8 +36,8 @@ public final class MarkerFileRepoRootProvider: RepoRootProvider {
 }
 
 private struct RepoRootNotFoundError: Error, CustomStringConvertible {
-    public let path: AbsolutePath
-    public var description: String {
+    let path: AbsolutePath
+    var description: String {
         return "Did not find repo root while starting searching in path \(path)"
     }
 }

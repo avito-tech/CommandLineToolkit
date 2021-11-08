@@ -36,7 +36,6 @@ extension FileSystem {
         }
     }
     
-    
     private func deleteIfExists(path: AbsolutePath) throws {
         try delete(path: path)
     }

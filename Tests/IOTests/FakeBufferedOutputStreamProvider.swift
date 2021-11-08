@@ -5,7 +5,7 @@ final class FakeBufferedOutputStreamProvider: OutputStreamProvider {
     let capacity: Int
     var data: Data
 
-    public init(capacity: Int) {
+    init(capacity: Int) {
         self.capacity = capacity
         self.data = Data(capacity: capacity)
     }

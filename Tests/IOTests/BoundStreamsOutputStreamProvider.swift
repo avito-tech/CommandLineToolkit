@@ -6,7 +6,7 @@ final class BoundStreamsOutputStreamProvider: OutputStreamProvider {
     let inputStream: InputStream
     let outputStream: OutputStream
     
-    public init(bufferSize: Int = 1024) {
+    init(bufferSize: Int = 1024) {
         var boundInputStream: InputStream?
         var boundOutputStream: OutputStream?
         Stream.getBoundStreams(
