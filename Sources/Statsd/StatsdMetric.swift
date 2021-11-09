@@ -1,6 +1,7 @@
 import Foundation
 import MetricsUtils
 
+// https://github.com/statsd/statsd/blob/master/docs/metric_types.md
 open class StatsdMetric: CustomStringConvertible, Hashable {
     public enum Value: Hashable {
         case gauge(Int)
