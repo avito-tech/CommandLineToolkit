@@ -21,4 +21,15 @@ extension DependencyRegisterer {
             factory: factory
         )
     }
+    
+    public func register<T>(
+        type: T.Type,
+        factory: @escaping () throws -> T)
+    {
+        register(
+            scope: .single,
+            type: type,
+            factory: { _ in try factory() }
+        )
+    }
 }
