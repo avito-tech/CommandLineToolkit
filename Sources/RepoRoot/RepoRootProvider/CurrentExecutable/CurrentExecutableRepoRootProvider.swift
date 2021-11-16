@@ -21,7 +21,7 @@ public final class CurrentExecutableRepoRootProvider: RepoRootProvider {
         do {
             // When executable is called from script and lays within repo
             return try repoRootProviderFactory.repoRoot(
-                anyPathWithinRepo: AbsolutePath(currentExecutablePath)
+                anyPathWithinRepo: currentExecutablePath
             )
         } catch {
             // When program is run in Xcode and sources are in repo

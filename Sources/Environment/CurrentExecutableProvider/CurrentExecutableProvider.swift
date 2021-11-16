@@ -1,3 +1,5 @@
+import PathLib
+
 public protocol CurrentExecutableProvider {
-    func currentExecutablePath() throws -> String
+    func currentExecutablePath() throws -> AbsolutePath
 }

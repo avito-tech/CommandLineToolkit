@@ -112,6 +112,7 @@ let package = Package(
             dependencies: [
                 "CLTExtensions",
                 "DI",
+                "PathLib",
             ],
             path: "Sources/Environment"
         ),
@@ -447,6 +448,7 @@ let package = Package(
             name: "Tmp",
             dependencies: [
                 "PathLib",
+                "String",
             ],
             path: "Sources/Tmp"
         ),
@@ -502,6 +504,8 @@ let package = Package(
         .target(
             name: "XcodeLocator",
             dependencies: [
+                "CLTExtensions",
+                "DI",
                 "FileSystem",
                 "PathLib",
                 "PlistLib",

@@ -23,13 +23,20 @@ final class XcodeLocatorTests: XCTestCase {
             ShallowFileSystemEnumerator(fileManager: FileManager(), path: args.path)
         }
 
-        let locator = XcodeLocatorImpl(fileSystem: fileSystem)
-        let discoveredTests = assertDoesNotThrow {
+        let locator = XcodeLocatorImpl(
+            applicationPathsProvider: ApplicationPathsProviderImpl(
+                commonlyUsedPathsProvider: fileSystem.commonlyUsedPathsProvider,
+                fileSystemEnumeratorFactory: fileSystem
+            ),
+            xcodeApplicationVerifier: XcodeApplicationVerifierImpl(),
+            applicationPlistReader: ApplicationPlistReaderImpl()
+        )
+        let discoveredXcodes = assertDoesNotThrow {
             try locator.discoverXcodes()
         }
         
         XCTAssertEqual(
-            Set(discoveredTests),
+            Set(discoveredXcodes),
             Set([
                 DiscoveredXcode(path: xcode115Plist.removingLastComponent.removingLastComponent, shortVersion: "11.5"),
                 DiscoveredXcode(path: xcode101Plist.removingLastComponent.removingLastComponent, shortVersion: "10.1"),

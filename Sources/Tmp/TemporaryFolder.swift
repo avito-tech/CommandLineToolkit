@@ -1,6 +1,7 @@
 import Darwin
 import Foundation
 import PathLib
+import String
 
 public final class TemporaryFolder {
     public let absolutePath: AbsolutePath
@@ -56,6 +57,11 @@ public final class TemporaryFolder {
         let path = container.appending(filename)
         FileManager.default.createFile(atPath: path.pathString, contents: contents)
         return path
+    }
+    
+    @discardableResult
+    public func createFile(components: [String] = [], filename: String, contents: String) throws -> AbsolutePath {
+        return try createFile(components: components, filename: filename, contents: contents.dataUsingUtf8())
     }
     
     public func createSymbolicLink(at path: RelativePath, destination: Path) throws -> AbsolutePath {
