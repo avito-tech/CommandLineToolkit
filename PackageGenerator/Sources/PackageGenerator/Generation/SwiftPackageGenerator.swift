@@ -3,9 +3,14 @@ import Foundation
 public final class SwiftPackageGenerator {
     private let statementGenerator = StatementGenerator()
     private let directoryContainingPackageSwiftFile: URL
+    private let failOnStoreError: Bool
     
-    public init(directoryContainingPackageSwiftFile: URL) {
+    public init(
+        directoryContainingPackageSwiftFile: URL,
+        failOnStoreError: Bool
+    ) {
         self.directoryContainingPackageSwiftFile = directoryContainingPackageSwiftFile
+        self.failOnStoreError = failOnStoreError
     }
     
     public func generateContents() throws -> Set<GeneratedPackageContents> {
@@ -29,19 +34,22 @@ public final class SwiftPackageGenerator {
     }
     
     public func store(generatedContents: Set<GeneratedPackageContents>) throws {
+        var collectedErrors = [Error]()
+        
         for item in generatedContents {
             log("Storing generated package contents at \(item.package.packageSwiftUrl.path)")
-            try item.contents
-                .data(using: .utf8)?
-                .write(to: item.package.packageSwiftUrl)
+            do {
+                try item.contents
+                    .data(using: .utf8)?
+                    .write(to: item.package.packageSwiftUrl)
+            } catch {
+                collectedErrors.append(error)
+                log("ERROR: failed to write into \(item.package.packageSwiftUrl.path): \(error)")
+            }
         }
-    }
-}
-
-public struct ContentMismatchError: Error, CustomStringConvertible {
-    let packageSwiftFileUrl: URL
-    
-    public var description: String {
-        "Contents of \(packageSwiftFileUrl.path) differs from expected. Please re-generate it and commit changes."
+        
+        if failOnStoreError {
+            throw StoreGenerationResultError(errors: collectedErrors)
+        }
     }
 }

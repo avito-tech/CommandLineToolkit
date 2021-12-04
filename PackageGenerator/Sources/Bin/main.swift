@@ -11,12 +11,26 @@ func main() throws {
         fatalError("File at \(packageLocation.path) does not exists or not writable")
     }
     
-    let generator = SwiftPackageGenerator(directoryContainingPackageSwiftFile: packageLocation)
-    let generatedContents = try generator.generateContents()
+    let environment = ProcessInfo.processInfo.environment
     
     // Note that Package.swift can be under `.gitignore`. For this case the check is not valid and makes no sense.
     // Don't pass `VERIFY_PACKAGE_CONTENTS_ARE_UNCHANGED` if Package.swift is ignored.
-    if ProcessInfo.processInfo.environment["SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED"] == "true" {
+    // Don't forget that SPM requires Package.swift to be present in a repo.
+    let shouldVerifyThatPackageContentsAreUnchanged = environment["SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED"] == "true"
+    
+    // If for any reason it is impossible to write out generated Package.swift, error will be logger in any case.
+    // This env enables failing the process entirely.
+    // In some cases it is impossible to store Package.swift, e.g. if it is inside remote repo checkout - in this case files are read-only.
+    // That's why this behaviour is opt-in instead of opt-out.
+    let failOnPackageWriteFailure = environment["FAIL_ON_PACKAGE_WRITE_FAILURE"] == "true"
+    
+    let generator = SwiftPackageGenerator(
+        directoryContainingPackageSwiftFile: packageLocation,
+        failOnStoreError: failOnPackageWriteFailure
+    )
+    let generatedContents = try generator.generateContents()
+    
+    if shouldVerifyThatPackageContentsAreUnchanged {
         try generator.assertCurrentContentsEquals(generatedContents: generatedContents)
     } else {
         try generator.store(generatedContents: generatedContents)
