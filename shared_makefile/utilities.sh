@@ -50,3 +50,23 @@ __fatal_error() {
 __ignore_error() {
     true 
 }
+
+# Return --arch options formed from input arguments.
+# If input arguments are empty, return all availabile --arch options.
+# Example:
+# __make_swift_build_arch_options x86_64    ->    --arch x86_64
+# __make_swift_build_arch_options           ->    --arch arm64 --arch x86_64
+#
+__make_swift_build_arch_options() {
+    local input_archs=("$@")
+    local all_archs=(
+      arm64
+      x86_64
+    )
+    local archs=("${input_archs[@]:-${all_archs[@]}}") # all_archs if input_archs are empty, otherwise input_archs
+    local arch_options=()
+    for arch in "${archs[@]}"; do
+        arch_options+=("--arch $arch")
+    done
+    echo "${arch_options[@]}"
+}

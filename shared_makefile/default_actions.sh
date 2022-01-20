@@ -8,26 +8,28 @@ action___generate() {
 }
 
 action___open() {
-	action___generate
-	perform_inside_project open Package.swift
+    action___generate
+    perform_inside_project open Package.swift
 }
 
 action___clean() {
-	perform_inside_project rm -rf .build/
+    perform_inside_project rm -rf .build/
 }
 
 action___build() {
-	action___generate
-	perform_inside_project swift build --triple x86_64-apple-macosx11.0 -c release -Xswiftc -Osize
+    action___generate
+    local arch_options=$(__make_swift_build_arch_options "$@")
+    perform_inside_project swift build $arch_options -c release -Xswiftc -Osize
 }
 
 action___build_debug() {
-	action___generate
-	perform_inside_project swift build -c debug -Xswiftc -Onone
+    action___generate
+    local arch_options=$(__make_swift_build_arch_options "$@")
+    perform_inside_project swift build $arch_options -c debug -Xswiftc -Onone
 }
 
 action___test() {
-	action___generate
+    action___generate
     
     if [ "${SUPPRESS_ERROR_WHEN_NO_TESTS_FOUND:-false}" == "true" ]; then
         perform_ignoring_nonzero_exit_status_if_stderr_contains "no tests found" \
@@ -37,7 +39,6 @@ action___test() {
         perform_inside_project \
             swift test --parallel
     fi
-        
 }
 
 action___run_ci_tests() {

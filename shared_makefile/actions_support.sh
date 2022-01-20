@@ -1,10 +1,18 @@
 build_and_export_executable() {
     local executable_name=$1 # basename of file in release build folder
     local destination_path=$2 # exact file path or folder
+    local archs_to_build=("${@:3}") # architectures to build into fat binary
 
-    local executable_path="$PROJECT_DIR/.build/release/$executable_name"
+    if [ ${#archs_to_build[@]} -eq 1 ]; then
+        # binaries for single architecture are built into this folder
+        local executable_path="$PROJECT_DIR/.build/release/$executable_name"
+    else
+        # fat binaries are built into this folder
+        # if archs_to_build is empty, we build fat binary for all available architectures
+        local executable_path="$PROJECT_DIR/.build/apple/Products/Release/$executable_name"
+    fi
     
-    action___build
+    action___build ${archs_to_build[@]+"${archs_to_build[@]}"}
     export_executable "$executable_path" "$destination_path"
 }
 
