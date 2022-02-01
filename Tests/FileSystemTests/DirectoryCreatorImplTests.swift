@@ -17,8 +17,7 @@ final class DirectoryCreatorImplTests: XCTestCase {
         XCTAssertFalse(fileManager.fileExists(atPath: path.pathString))
         try directoryCreator.createDirectory(
             path: path,
-            withIntermediateDirectories: true,
-            ignoreExisting: false
+            withIntermediateDirectories: true
         )
 
         var isDir: ObjCBool = false

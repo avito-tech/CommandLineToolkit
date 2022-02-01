@@ -33,7 +33,7 @@ open class FakeFileSystem: FileSystem {
     
     public var onCreateDirectory: (AbsolutePath, Bool) throws -> () = { _, _ in }
     
-    public func createDirectory(path: AbsolutePath, withIntermediateDirectories: Bool, ignoreExisting: Bool) throws {
+    public func createDirectory(path: AbsolutePath, withIntermediateDirectories: Bool) throws {
         try onCreateDirectory(path, withIntermediateDirectories)
     }
     

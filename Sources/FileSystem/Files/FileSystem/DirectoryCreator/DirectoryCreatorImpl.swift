@@ -15,8 +15,7 @@ public final class DirectoryCreatorImpl: DirectoryCreator {
     
     public func createDirectory(
         path: AbsolutePath,
-        withIntermediateDirectories: Bool,
-        ignoreExisting: Bool
+        withIntermediateDirectories: Bool
     ) throws {
         struct DirectoryCreatorError: LocalizedError {
             let errorDescription: String?

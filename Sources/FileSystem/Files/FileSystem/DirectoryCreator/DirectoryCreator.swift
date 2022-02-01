@@ -3,21 +3,18 @@ import PathLib
 public protocol DirectoryCreator {
     func createDirectory(
         path: AbsolutePath,
-        withIntermediateDirectories: Bool,
-        ignoreExisting: Bool
+        withIntermediateDirectories: Bool
     ) throws
 }
 
 extension DirectoryCreator {
     public func createDirectory(
         path: AbsolutePath,
-        withIntermediateDirectories: Bool = true,
-        ignoreExisting: Bool = true
+        withIntermediateDirectories: Bool = true
     ) throws {
         try createDirectory(
             path: path,
-            withIntermediateDirectories: withIntermediateDirectories,
-            ignoreExisting: ignoreExisting
+            withIntermediateDirectories: withIntermediateDirectories
         )
     }
     
@@ -26,8 +23,7 @@ extension DirectoryCreator {
     ) throws {
         try createDirectory(
             path: path,
-            withIntermediateDirectories: true,
-            ignoreExisting: true
+            withIntermediateDirectories: true
         )
     }
 }

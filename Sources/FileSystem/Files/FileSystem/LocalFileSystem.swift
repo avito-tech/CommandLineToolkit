@@ -87,13 +87,11 @@ public final class LocalFileSystem: FileSystem {
     
     public func createDirectory(
         path: AbsolutePath,
-        withIntermediateDirectories: Bool,
-        ignoreExisting: Bool
+        withIntermediateDirectories: Bool
     ) throws {
         try directoryCreator.createDirectory(
             path: path,
-            withIntermediateDirectories: withIntermediateDirectories,
-            ignoreExisting: ignoreExisting
+            withIntermediateDirectories: withIntermediateDirectories
         )
     }
     
