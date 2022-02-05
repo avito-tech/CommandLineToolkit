@@ -34,15 +34,15 @@ action___test() {
     if [ "${SUPPRESS_ERROR_WHEN_NO_TESTS_FOUND:-false}" == "true" ]; then
         perform_ignoring_nonzero_exit_status_if_stderr_contains "no tests found" \
             perform_inside_project \
-            swift test --parallel
+            swift test --parallel "$@"
     else
         perform_inside_project \
-            swift test --parallel
+            swift test --parallel "$@"
     fi
 }
 
 action___run_ci_tests() {
     export ON_CI=true
     export SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED=true
-    action___test
+    action___test --enable-code-coverage
 }
