@@ -68,7 +68,7 @@ extension Path {
         guard let dotPosition = component.lastIndex(of: ".") else {
             return ""
         }
-        if component.starts(with: "."), component.startIndex == dotPosition {
+        if component.startIndex == dotPosition {
             return ""
         }
         return String(component.suffix(from: component.index(after: dotPosition)))
