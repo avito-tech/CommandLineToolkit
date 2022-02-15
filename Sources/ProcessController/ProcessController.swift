@@ -10,8 +10,11 @@ public protocol ProcessController: AnyObject {
     func processStatus() -> ProcessStatus
     func send(signal: Int32)
     
-    func terminateAndForceKillIfNeeded()
-    func interruptAndForceKillIfNeeded()
+    func signalAndForceKillIfNeeded(
+        terminationSignal: Int32,
+        terminationSignalTimeout: TimeInterval,
+        onKill: @escaping () -> ()
+    )
     
     func onSignal(listener: @escaping SignalListener)
     func onStart(listener: @escaping StartListener)
@@ -72,5 +75,21 @@ public extension ProcessController {
     func restreamOutput() {
         restreamStdout()
         restreamStderr()
+    }
+    
+    func terminateAndForceKillIfNeeded() {
+        signalAndForceKillIfNeeded(
+            terminationSignal: SIGTERM,
+            terminationSignalTimeout: 15,
+            onKill: { }
+        )
+    }
+    
+    func interruptAndForceKillIfNeeded() {
+        signalAndForceKillIfNeeded(
+            terminationSignal: SIGINT,
+            terminationSignalTimeout: 15,
+            onKill: { }
+        )
     }
 }

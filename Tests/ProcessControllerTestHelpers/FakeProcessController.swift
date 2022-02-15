@@ -48,14 +48,13 @@ public final class FakeProcessController: ProcessController {
         }
     }
     
-    public func terminateAndForceKillIfNeeded() {
-        send(signal: SIGTERM)
-        overridedProcessStatus = .terminated(exitCode: SIGTERM)
-    }
-    
-    public func interruptAndForceKillIfNeeded() {
-        send(signal: SIGINT)
-        overridedProcessStatus = .terminated(exitCode: SIGINT)
+    public func signalAndForceKillIfNeeded(
+        terminationSignal: Int32,
+        terminationSignalTimeout: TimeInterval,
+        onKill: @escaping () -> ()
+    ) {
+        send(signal: terminationSignal)
+        overridedProcessStatus = .terminated(exitCode: terminationSignal)
     }
     
     public var startListeners = [StartListener]()

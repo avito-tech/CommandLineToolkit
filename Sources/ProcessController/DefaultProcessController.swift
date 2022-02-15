@@ -163,16 +163,16 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
         }
     }
     
-    public func terminateAndForceKillIfNeeded() {
-        attemptToKillProcess { _ in
-            send(signal: SIGTERM)
-        }
-    }
-    
-    public func interruptAndForceKillIfNeeded() {
-        attemptToKillProcess { _ in
-            send(signal: SIGINT)
-        }
+    public func signalAndForceKillIfNeeded(
+        terminationSignal: Int32,
+        terminationSignalTimeout: TimeInterval,
+        onKill: @escaping () -> ()
+    ) {
+        attemptToKillProcess(
+            signalTermination: { _ in send(signal: terminationSignal) },
+            terminationSignalTimeout: terminationSignalTimeout,
+            onKill: onKill
+        )
     }
     
     public func onStart(listener: @escaping StartListener) {
@@ -195,20 +195,25 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
         terminationListeners.append(ListenerWrapper(uuid: UUID(), purpose: "onTermination", listener: listener))
     }
     
-    private func attemptToKillProcess(killer: (Process) -> ()) {
+    private func attemptToKillProcess(
+        signalTermination: (Process) -> (),
+        terminationSignalTimeout: TimeInterval,
+        onKill: @escaping () -> ()
+    ) {
         processTerminationQueue.sync {
             guard didInitiateKillOfProcess == false else { return }
             didInitiateKillOfProcess = true
-            killer(process)
-            processTerminationQueue.asyncAfter(deadline: .now() + 15.0) { [weak self] in
+            signalTermination(process)
+            processTerminationQueue.asyncAfter(deadline: .now() + terminationSignalTimeout) { [weak self] in
                 guard let strongSelf = self else { return }
-                strongSelf.forceKillProcess()
+                strongSelf.forceKillProcess(onKill: onKill)
             }
         }
     }
     
-    private func forceKillProcess() {
+    private func forceKillProcess(onKill: () -> ()) {
         if isProcessRunning {
+            onKill()
             send(signal: SIGKILL)
         }
     }
