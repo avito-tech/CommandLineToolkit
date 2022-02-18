@@ -2,11 +2,15 @@
 
 set -ueo pipefail
 
+python_realpath() {
+  python -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
+}
+
 if [ "${DEBUG:-0}" != "0" ]; then
     set -x
 fi
 
-SHARED_MAKE_SH_DIRNAME=$(realpath "$(dirname "$0")")
+SHARED_MAKE_SH_DIRNAME=$(python_realpath "$(dirname "$0")")
 
 source "${SHARED_MAKE_SH_DIRNAME}/actions_support.sh"
 source "${SHARED_MAKE_SH_DIRNAME}/calling_actions.sh"
@@ -19,10 +23,10 @@ __validate_project() {
     ! [ -z "$PROJECT_DIR" ] || __fatal_error "Project is not defined, use --project-dir <dir> option to define project dir"
     
     local shared_makefile
-    shared_makefile=$(realpath "$SHARED_MAKE_SH_DIRNAME/Makefile")
+    shared_makefile=$(python_realpath "$SHARED_MAKE_SH_DIRNAME/Makefile")
     
     local project_makefile
-    project_makefile=$(realpath "$PROJECT_DIR/Makefile")
+    project_makefile=$(python_realpath "$PROJECT_DIR/Makefile")
     
     [ "$project_makefile" == "$shared_makefile" ] || $ignore_errors_for_projects_without_shared_make || __fatal_error "Project $PROJECT_DIR is not using shared make"
 }
