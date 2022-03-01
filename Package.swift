@@ -48,9 +48,9 @@ let package = Package(
         .library(name: "XcodeLocatorModels", targets: ["XcodeLocatorModels"]),
     ],
     dependencies: [
-        .package(name: "Glob", url: "https://github.com/Bouke/Glob", .exact("1.0.5")),
-        .package(name: "Signals", url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.21")),
-        .package(name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser", from: "0.4.3"),
+        .package(name: "Glob", url: "ssh://git@stash.msk.avito.ru:7999/iedm/glob", .exact("1.0.5")),
+        .package(name: "Signals", url: "ssh://git@stash.msk.avito.ru:7999/iedm/bluesignals.git", .exact("1.0.21")),
+        .package(name: "swift-argument-parser", url: "ssh://git@stash.msk.avito.ru:7999/iedm/swift-argument-parser", from: "0.4.3"),
     ],
     targets: [
         .target(
