@@ -50,7 +50,7 @@ let package = Package(
     dependencies: [
         .package(name: "Glob", url: "ssh://git@stash.msk.avito.ru:7999/iedm/glob", .exact("1.0.5")),
         .package(name: "Signals", url: "ssh://git@stash.msk.avito.ru:7999/iedm/bluesignals.git", .exact("1.0.21")),
-        .package(name: "swift-argument-parser", url: "ssh://git@stash.msk.avito.ru:7999/iedm/swift-argument-parser", from: "0.4.3"),
+        .package(name: "swift-argument-parser", url: "ssh://git@stash.msk.avito.ru:7999/iedm/swift-argument-parser", from: "1.0.3"),
     ],
     targets: [
         .target(

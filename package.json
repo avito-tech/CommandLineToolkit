@@ -22,7 +22,7 @@
         "swift-argument-parser": {
             "url": "ssh://git@stash.msk.avito.ru:7999/iedm/swift-argument-parser",
             "version": {
-                "from": "0.4.3"
+                "from": "1.0.3"
             },
             "targetNames": [
                 "ArgumentParser"
