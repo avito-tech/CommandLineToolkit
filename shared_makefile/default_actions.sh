@@ -44,5 +44,5 @@ action___test() {
 action___run_ci_tests() {
     export ON_CI=true
     export SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED=true
-    action___test --enable-code-coverage
+    action___test --enable-code-coverage -Xswiftc -DTEST
 }
