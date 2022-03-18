@@ -3,7 +3,7 @@
 set -ueo pipefail
 
 python_realpath() {
-  python -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
+  /usr/bin/python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
 }
 
 if [ "${DEBUG:-0}" != "0" ]; then
