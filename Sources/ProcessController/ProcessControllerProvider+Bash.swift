@@ -26,8 +26,8 @@ public extension ProcessControllerProvider {
 }
 
 public struct OutputStreaming: ExpressibleByArrayLiteral {
-    let stdout: (Data) -> ()
-    let stderr: (Data) -> ()
+    public let stdout: (Data) -> ()
+    public let stderr: (Data) -> ()
     
     public init(
         stdout: @escaping (Data) -> (),
