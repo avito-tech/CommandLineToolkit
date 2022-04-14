@@ -1,6 +1,6 @@
 import Foundation
 import Graphite
-import Metrics
+import MetricsRecording
 import Statsd
 
 public final class FakeMetricHandler<Metric> {

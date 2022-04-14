@@ -1,4 +1,4 @@
-import Metrics
+import MetricsRecording
 import Statsd
 import XCTest
 

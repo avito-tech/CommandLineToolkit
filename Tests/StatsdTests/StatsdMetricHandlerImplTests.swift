@@ -1,5 +1,5 @@
 import Foundation
-import Metrics
+import MetricsRecording
 import Network
 import Statsd
 import XCTest

@@ -21,7 +21,7 @@ let package = Package(
         .library(name: "IO", targets: ["IO"]),
         .library(name: "JSONStream", targets: ["JSONStream"]),
         .library(name: "LaunchdUtils", targets: ["LaunchdUtils"]),
-        .library(name: "Metrics", targets: ["Metrics"]),
+        .library(name: "MetricsRecording", targets: ["MetricsRecording"]),
         .library(name: "MetricsTestHelpers", targets: ["MetricsTestHelpers"]),
         .library(name: "MetricsUtils", targets: ["MetricsUtils"]),
         .library(name: "ObjCExceptionCatcher", targets: ["ObjCExceptionCatcher"]),
@@ -216,19 +216,19 @@ let package = Package(
             path: "Tests/LaunchdUtilsTests"
         ),
         .target(
-            name: "Metrics",
+            name: "MetricsRecording",
             dependencies: [
                 "DateProvider",
                 "Graphite",
                 "Statsd",
             ],
-            path: "Sources/Metrics"
+            path: "Sources/MetricsRecording"
         ),
         .target(
             name: "MetricsTestHelpers",
             dependencies: [
                 "Graphite",
-                "Metrics",
+                "MetricsRecording",
                 "Statsd",
             ],
             path: "Tests/MetricsTestHelpers"
@@ -238,7 +238,7 @@ let package = Package(
             dependencies: [
                 "DateProviderTestHelpers",
                 "Graphite",
-                "Metrics",
+                "MetricsRecording",
                 "MetricsTestHelpers",
                 "Statsd",
                 "TestHelpers",
@@ -390,7 +390,7 @@ let package = Package(
         .testTarget(
             name: "StatsdTests",
             dependencies: [
-                "Metrics",
+                "MetricsRecording",
                 "Statsd",
             ],
             path: "Tests/StatsdTests"

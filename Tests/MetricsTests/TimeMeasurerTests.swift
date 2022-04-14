@@ -1,6 +1,6 @@
 import DateProviderTestHelpers
 import Foundation
-import Metrics
+import MetricsRecording
 import TestHelpers
 import XCTest
 

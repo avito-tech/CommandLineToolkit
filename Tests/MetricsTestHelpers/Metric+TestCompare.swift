@@ -1,5 +1,5 @@
 import Graphite
-import Metrics
+import MetricsRecording
 
 public extension GraphiteMetric {
     func testCompare(_ other: GraphiteMetric) -> Bool {
