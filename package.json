@@ -2,7 +2,7 @@
   "dependencies" : {
     "external" : {
         "Signals": {
-            "url": "ssh://git@stash.msk.avito.ru:7999/iedm/bluesignals.git",
+            "url": "https://github.com/IBM-Swift/BlueSignals.git",
             "version": {
                 "exact": "1.0.21"
             },
@@ -11,7 +11,7 @@
             ]
         },
         "Glob": {
-            "url": "ssh://git@stash.msk.avito.ru:7999/iedm/glob",
+            "url": "https://github.com/Bouke/Glob",
             "version": {
                 "exact": "1.0.5"
             },
@@ -20,7 +20,7 @@
             ]
         },
         "swift-argument-parser": {
-            "url": "ssh://git@stash.msk.avito.ru:7999/iedm/swift-argument-parser",
+            "url": "https://github.com/apple/swift-argument-parser",
             "version": {
                 "from": "1.0.3"
             },

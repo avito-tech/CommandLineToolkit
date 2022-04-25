@@ -2,7 +2,7 @@
 __set_repo_root() {
     [ -z "${REPO_ROOT:-}" ] || return 0
     
-    REPO_ROOT="$(realpath "$0")"
+    REPO_ROOT="$(python_realpath "$0")"
     while [[ "$REPO_ROOT" != "/" ]]
     do
         if [[ -f "$REPO_ROOT/.reporoot" ]]

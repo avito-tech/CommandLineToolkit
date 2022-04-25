@@ -3,7 +3,7 @@
     "pins": [
       {
         "package": "Signals",
-        "repositoryURL": "ssh://git@stash.msk.avito.ru:7999/iedm/bluesignals.git",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSignals.git",
         "state": {
           "branch": null,
           "revision": "b7331c8bef913f5f8b3cffa6ecfcce679f7c2531",
@@ -12,7 +12,7 @@
       },
       {
         "package": "Glob",
-        "repositoryURL": "ssh://git@stash.msk.avito.ru:7999/iedm/glob",
+        "repositoryURL": "https://github.com/Bouke/Glob",
         "state": {
           "branch": null,
           "revision": "deda6e163d2ff2a8d7e138e2c3326dbd71157faf",
@@ -21,7 +21,7 @@
       },
       {
         "package": "swift-argument-parser",
-        "repositoryURL": "ssh://git@stash.msk.avito.ru:7999/iedm/swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
           "revision": "e394bf350e38cb100b6bc4172834770ede1b7232",
