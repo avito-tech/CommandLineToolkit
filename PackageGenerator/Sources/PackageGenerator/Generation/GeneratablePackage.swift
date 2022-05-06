@@ -27,6 +27,22 @@ public struct GeneratablePackage: Hashable {
         location.appendingPathComponent("Package.swift", isDirectory: false)
     }
     
+    /// This method returns a path to package's `.build/checkouts/` folder.
+    /// It takes in account that this folder is shared for all remote packages.
+    public var buildCheckoutUrl: URL {
+        var pathToRootPackageWhichContainsBuildCheckout = location
+        
+        while pathToRootPackageWhichContainsBuildCheckout.pathComponents.contains(".build") {
+            pathToRootPackageWhichContainsBuildCheckout.deleteLastPathComponent()
+        }
+        
+        return pathToRootPackageWhichContainsBuildCheckout.appendingPathComponent(".build/checkouts/", isDirectory: true)
+    }
+    
+    public func checkout(forPackage externalPackageName: String) -> URL {
+        buildCheckoutUrl.appendingPathComponent(externalPackageName, isDirectory: true)
+    }
+    
     public var packageJsonUrl: URL {
         Self.packageJsonUrl(for: location)
     }

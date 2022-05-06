@@ -63,7 +63,7 @@ public final class StatementGenerator {
                                     return result
                                 }
                             case .generated:
-                                let externalCheckoutPath = generatablePackage.location.appendingPathComponent(".build/checkouts/\(externalPackageName)/", isDirectory: true)
+                                let externalCheckoutPath = generatablePackage.checkout(forPackage: externalPackageName)
                                 let anotherPackage = try GeneratablePackage(location: externalCheckoutPath)
                                 anotherPackagesReferencedByPackageBeingGenerated.insert(anotherPackage)
                                 if let importedDependency = try importedDependency(
