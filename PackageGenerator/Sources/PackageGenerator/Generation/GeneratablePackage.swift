@@ -56,6 +56,16 @@ public struct GeneratablePackage: Hashable {
     public var postflightExecutableUrl: URL {
         location.appendingPathComponent("package_postflight", isDirectory: false)
     }
+    
+    /// SPM mirror configuration file for Xcoder 13.3 and later.
+    public var mirrorsFile_xcode13_3: URL {
+        location.appendingPathComponent(".swiftpm/configuration/mirrors.json", isDirectory: false)
+    }
+    
+    /// SPM mirror configuration file for Xcoder 13.2 and earlier.
+    public var mirrorsFile_pre_xcode13_3: URL {
+        location.appendingPathComponent(".swiftpm/config", isDirectory: false)
+    }
 
     private static func packageJsonUrl(for location: URL) -> URL {
         location.appendingPathComponent("package.json", isDirectory: false)

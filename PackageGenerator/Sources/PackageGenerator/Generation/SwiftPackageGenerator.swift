@@ -1,7 +1,11 @@
 import Foundation
 
 public final class SwiftPackageGenerator {
-    private let statementGenerator = StatementGenerator()
+    private let statementGenerator = StatementGenerator(
+        filePathResolver: FilePathResolverImpl(
+            repoRootProvider: RepoRootProviderImpl()
+        )
+    )
     private let directoryContainingPackageSwiftFile: URL
     private let failOnStoreError: Bool
     

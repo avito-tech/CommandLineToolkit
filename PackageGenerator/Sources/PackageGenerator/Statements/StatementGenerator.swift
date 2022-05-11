@@ -7,8 +7,11 @@ public struct GeneratedPackageContents: Hashable {
 
 public final class StatementGenerator {
     private var packageTargetCache = [URL: [PackageTarget]]()
+    private let filePathResolver: FilePathResolver
     
-    public init() {}
+    public init(filePathResolver: FilePathResolver) {
+        self.filePathResolver = filePathResolver
+    }
     
     public func generatePackageSwiftCode(
         generatablePackage: GeneratablePackage
@@ -124,6 +127,10 @@ public final class StatementGenerator {
         output.append(")")
         output.append("")
         
+        if let mirrorFile = generatablePackage.packageJsonFile.dependencies.mirrorFilePath {
+            try prepareMirrorFile(sourcePath: mirrorFile, generatablePackage: generatablePackage)
+        }
+        
         try didGenerate(generatablePackage: generatablePackage)
         
         let result = Set(try anotherPackagesReferencedByPackageBeingGenerated.flatMap { referencedGeneratedPackage in
@@ -156,6 +163,26 @@ public final class StatementGenerator {
         }
     }
     
+    private func prepareMirrorFile(sourcePath: FilePath, generatablePackage: GeneratablePackage) throws {
+        let path = try filePathResolver.absoluteUrl(
+            from: sourcePath,
+            generatablePackageLocation: generatablePackage.location
+        )
+        
+        try FileManager().createDirectory(
+            at: generatablePackage.mirrorsFile_xcode13_3.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        
+        log("Copying \(path.path) to \(generatablePackage.mirrorsFile_xcode13_3.path)")
+        try? FileManager().removeItem(at: generatablePackage.mirrorsFile_xcode13_3)
+        try FileManager().copyItem(at: path, to: generatablePackage.mirrorsFile_xcode13_3)
+        
+        log("Copying \(path.path) to \(generatablePackage.mirrorsFile_pre_xcode13_3.path)")
+        try? FileManager().removeItem(at: generatablePackage.mirrorsFile_pre_xcode13_3)
+        try FileManager().copyItem(at: path, to: generatablePackage.mirrorsFile_pre_xcode13_3)
+    }
+    
     private func importedDependency(
         forImportedModuleName importedModuleName: String,
         requiredBy packageJsonFile: PackageJsonFile,
@@ -177,18 +204,35 @@ public final class StatementGenerator {
     private func obtainPackageTargets(
         generatablePackage: GeneratablePackage
     ) throws -> [PackageTarget] {
-        switch generatablePackage.packageJsonFile.targets {
-        case let .explicit(targets):
-            return targets
+        try obtainPackageTargets(
+            packageTargets: generatablePackage.packageJsonFile.targets,
+            generatablePackageLocation: generatablePackage.location
+        )
+    }
+    
+    private func obtainPackageTargets(
+        packageTargets: PackageTargets,
+        generatablePackageLocation: URL
+    ) throws -> [PackageTarget] {
+        switch packageTargets {
+        case let .multiple(packageTargets):
+            return try packageTargets.flatMap {
+                try obtainPackageTargets(
+                    packageTargets: $0,
+                    generatablePackageLocation: generatablePackageLocation
+                )
+            }
+        case let .single(target):
+            return [target]
         case .discoverAutomatically:
-            if let result = packageTargetCache[generatablePackage.location] {
+            if let result = packageTargetCache[generatablePackageLocation] {
                 return result
             }
             
-            let result = try PackageTarget.discoverTargets(packageLocation: generatablePackage.location).sorted(by: { left, right -> Bool in
+            let result = try PackageTarget.discoverTargets(packageLocation: generatablePackageLocation).sorted(by: { left, right -> Bool in
                 left.name < right.name
             })
-            packageTargetCache[generatablePackage.location] = result
+            packageTargetCache[generatablePackageLocation] = result
             return result
         }
     }
