@@ -13,6 +13,7 @@ let package = Package(
         .library(name: "DI", targets: ["DI"]),
         .library(name: "DateProvider", targets: ["DateProvider"]),
         .library(name: "DateProviderTestHelpers", targets: ["DateProviderTestHelpers"]),
+        .library(name: "DispatchGroup", targets: ["DispatchGroup"]),
         .library(name: "Environment", targets: ["Environment"]),
         .library(name: "FileSystem", targets: ["FileSystem"]),
         .library(name: "FileSystemTestHelpers", targets: ["FileSystemTestHelpers"]),
@@ -106,6 +107,13 @@ let package = Package(
                 "DateProvider",
             ],
             path: "Tests/DateProviderTestHelpers"
+        ),
+        .target(
+            name: "DispatchGroup",
+            dependencies: [
+                "String",
+            ],
+            path: "Sources/DispatchGroup"
         ),
         .target(
             name: "Environment",
