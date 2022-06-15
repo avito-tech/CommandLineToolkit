@@ -4,7 +4,6 @@ import FileSystem
 import Foundation
 import PathLib
 import Timer
-import ObjCExceptionCatcher
 
 // swiftlint:disable async
 // swiftlint:disable sync
