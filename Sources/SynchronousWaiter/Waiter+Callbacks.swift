@@ -53,7 +53,7 @@ public final class CallbackWaiter<T> {
 }
 
 public extension Waiter {
-    func createCallbackWaiter<T>() -> CallbackWaiter<T> {
+    func createCallbackWaiter<T>(_ type: T.Type = T.self) -> CallbackWaiter<T> {
         return CallbackWaiter<T>(waiter: self)
     }
 }
