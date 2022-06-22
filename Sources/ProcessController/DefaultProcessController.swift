@@ -82,7 +82,9 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
         let process = Process()
         process.launchPath = pathToExecutable.pathString
         process.arguments = Array(arguments.dropFirst())
-        process.environment = environment
+        if (!environment.isEmpty) {
+            process.environment = environment
+        }
         process.currentDirectoryPath = workingDirectory.pathString
         try process.setStartsNewProcessGroup(false)
         return process
