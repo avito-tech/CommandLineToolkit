@@ -43,6 +43,19 @@ public extension DispatchGroup {
     enum WaitResult<T> {
         case success(T)
         case timedOut
+        
+        public func get() throws -> T {
+            switch self {
+            case .success(let value):
+                return value
+            case .timedOut:
+                throw WaitTimedOutError(errorDescription: "DispatchGroup.wait(timeout:closure:) finished with WaitResult<\(T.self)>.timedOut")
+            }
+        }
+    }
+    
+    struct WaitTimedOutError: LocalizedError {
+        public var errorDescription: String
     }
     
     final class Continuation<Success, Failure> where Failure: Error {
