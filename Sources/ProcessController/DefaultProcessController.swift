@@ -56,7 +56,7 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
         process = try DefaultProcessController.createProcess(
             filePropertiesProvider: filePropertiesProvider,
             arguments: arguments,
-            environment: subprocess.environment.values,
+            environment: subprocess.environment,
             workingDirectory: subprocess.workingDirectory
         )
         
@@ -68,7 +68,7 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     private static func createProcess(
         filePropertiesProvider: FilePropertiesProvider,
         arguments: [String],
-        environment: [String: String],
+        environment: Environment,
         workingDirectory: AbsolutePath
     ) throws -> Process {
         let pathToExecutable = AbsolutePath(arguments[0])
@@ -82,7 +82,7 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
         let process = Process()
         process.launchPath = pathToExecutable.pathString
         process.arguments = Array(arguments.dropFirst())
-        process.environment = environment
+        process.environment = environment.asStringDictionary
         process.currentDirectoryPath = workingDirectory.pathString
         try process.setStartsNewProcessGroup(false)
         return process
