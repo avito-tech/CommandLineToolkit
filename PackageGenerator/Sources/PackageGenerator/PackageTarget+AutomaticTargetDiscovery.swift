@@ -51,15 +51,18 @@ public extension PackageTarget {
         }
         return packageTargets
     }
-    
-    private static func isDirectoryPresent(url: URL, perform: () throws -> ()) rethrows {
-        if FileManager().fileExists(atPath: url.path) {
-            try perform()
+
+    private static func isDirectory(url: URL) -> Bool {
+        var isDirectory: ObjCBool = false
+        if FileManager().fileExists(atPath: url.path, isDirectory: &isDirectory) {
+            return isDirectory.boolValue
         }
+        return false
     }
     
     private static func isDirectoryEmpty(url: URL) throws -> Bool {
-        try FileManager().contentsOfDirectory(atPath: url.path).isEmpty
+        try isDirectory(url: url) &&
+        FileManager().contentsOfDirectory(atPath: url.path).isEmpty
     }
     
     private static func targetsWithSeparateSourcesAndTests(packageLocation: URL) throws -> [PackageTarget] {
