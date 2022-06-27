@@ -24,37 +24,27 @@ public extension PackageTarget {
         var packageTargets = [PackageTarget]()
         let enumerator = subdirectriesEnumerator(url: targetsLocation)
         
-        while let targetUrl = enumerator.nextObject() as? URL {
-            let sources = targetUrl.appendingPathComponent("Sources", isDirectory: true)
-            try ifDirectoryPresent(url: sources) {
+        while let targetContainerUrl = enumerator.nextObject() as? URL {
+            let targetsEnumerator = subdirectriesEnumerator(url: targetContainerUrl)
+            while let targetUrl = targetsEnumerator.nextObject() as? URL {
+                guard try !isDirectoryEmpty(url: targetUrl) else {
+                    log("Folder at \(targetUrl.path) is empty, won't create module for it")
+                    continue
+                }
+                
+                var targetName = targetContainerUrl.lastPathComponent
+                if targetUrl.lastPathComponent != "Sources" {
+                    targetName = "\(targetName)\(targetUrl.lastPathComponent)"
+                }
+                let isTestTarget = targetUrl.lastPathComponent == "Tests"
+                
+                log("Found \(isTestTarget ? "test " : "")target \(targetName) at \(targetUrl.path)")
                 try packageTargets.append(
                     generateTarget(
-                        moduleName: targetUrl.lastPathComponent,
-                        url: sources,
+                        moduleName: targetName,
+                        url: targetUrl,
                         packageLocation: packageLocation,
-                        isTest: false
-                    )
-                )
-            }
-            let tests = targetUrl.appendingPathComponent("Tests", isDirectory: true)
-            try ifDirectoryPresent(url: tests) {
-                try packageTargets.append(
-                    generateTarget(
-                        moduleName: "\(targetUrl.lastPathComponent)Tests",
-                        url: tests,
-                        packageLocation: packageLocation,
-                        isTest: true
-                    )
-                )
-            }
-            let testHelpers = targetUrl.appendingPathComponent("TestHelpers", isDirectory: true)
-            try ifDirectoryPresent(url: testHelpers) {
-                try packageTargets.append(
-                    generateTarget(
-                        moduleName: "\(targetUrl.lastPathComponent)TestHelpers",
-                        url: testHelpers,
-                        packageLocation: packageLocation,
-                        isTest: false
+                        isTest: isTestTarget
                     )
                 )
             }
@@ -62,10 +52,14 @@ public extension PackageTarget {
         return packageTargets
     }
     
-    private static func ifDirectoryPresent(url: URL, perform: () throws -> ()) rethrows {
+    private static func isDirectoryPresent(url: URL, perform: () throws -> ()) rethrows {
         if FileManager().fileExists(atPath: url.path) {
             try perform()
         }
+    }
+    
+    private static func isDirectoryEmpty(url: URL) throws -> Bool {
+        try FileManager().contentsOfDirectory(atPath: url.path).isEmpty
     }
     
     private static func targetsWithSeparateSourcesAndTests(packageLocation: URL) throws -> [PackageTarget] {
