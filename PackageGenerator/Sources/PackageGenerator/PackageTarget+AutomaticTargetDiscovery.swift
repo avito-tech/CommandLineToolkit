@@ -27,6 +27,7 @@ public extension PackageTarget {
         while let targetContainerUrl = enumerator.nextObject() as? URL {
             let targetsEnumerator = subdirectriesEnumerator(url: targetContainerUrl)
             while let targetUrl = targetsEnumerator.nextObject() as? URL {
+                guard isDirectory(url: targetUrl) else { continue }
                 guard try !isDirectoryEmpty(url: targetUrl) else {
                     log("Folder at \(targetUrl.path) is empty, won't create module for it")
                     continue
