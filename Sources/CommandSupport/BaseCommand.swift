@@ -64,20 +64,8 @@ open class BaseCommand<T> where
     T: ModuleDependencies,
     T: InitializableWithNoArguments
 {
-    public let di: DependencyInjection = makeDi()
+    public let di: DependencyInjection = DiMaker<T>.makeDi()
     
     public init() {
-    }
-    
-    private static func makeDi() -> DependencyInjection {
-        let di = DependencyInjectionImpl()
-        
-        let registerer = AllModularDependenciesDependencyCollectionRegisterer(
-            moduleDependencies: T()
-        )
-        
-        registerer.register(dependencyRegisterer: di)
-        
-        return di
     }
 }
