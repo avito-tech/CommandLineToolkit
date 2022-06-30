@@ -87,7 +87,7 @@ extension Optional {
     }
 }
 
-private final class UnwrappingError: Error {
+private final class UnwrappingError: Error, CustomStringConvertible {
     private let message: String
     
     init(_ message: String) {
