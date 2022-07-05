@@ -132,11 +132,7 @@ public extension PackageTarget {
     }
     
     private static func importedModules(url: URL) throws -> Set<String> {
-        // `@testable import ModuleName // from package-name`, with optional `@testable ` and `// from package-name` parts
-        let importStatementExpression = try NSRegularExpression(
-            pattern: "^(@testable )?import (\\S+)$",
-            options: [.anchorsMatchLines]
-        )
+        let importsParser = try ImportsParser()
         
         let moduleEnumerator = FileManager().enumerator(
             at: url,
@@ -149,23 +145,19 @@ public extension PackageTarget {
             if moduleFile.pathExtension != "swift" {
                 continue
             }
+            
             log("    Analyzing \(moduleFile.lastPathComponent)")
+            
             guard try moduleFile.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true else {
                 log("    Skipping \(moduleFile.lastPathComponent): is not regular file")
                 continue
             }
-            let fileContents = try String(contentsOf: moduleFile)
-                .split(separator: "\n")
-                .filter { !$0.starts(with: "//") }
-            for line in fileContents {
-                let matches = importStatementExpression.matches(in: String(line), options: [], range: NSRange(location: 0, length: line.count))
-                guard matches.count == 1 else {
-                    continue
-                }
-                
-                let importedModuleName = (line as NSString).substring(with: matches[0].range(at: 2))
-                importedModules.insert(importedModuleName)
-            }
+            
+            importedModules.formUnion(
+                importsParser.getImportedModuleNames(
+                    sourceCode: try String(contentsOf: moduleFile)
+                )
+            )
         }
         
         return importedModules
