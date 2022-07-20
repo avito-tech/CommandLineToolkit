@@ -30,9 +30,13 @@ public final class SwiftPackageGenerator {
     ) throws {
         for item in generatedContents {
             log("Checking if package contents at \(item.package.location.path) matches expected value")
-            let currentContents = try Data(contentsOf: item.package.packageSwiftUrl)
-            if currentContents != item.contents.data(using: .utf8) {
-                throw ContentMismatchError(packageSwiftFileUrl: item.package.packageSwiftUrl)
+            let currentContents = try String(contentsOf: item.package.packageSwiftUrl)
+            if currentContents != item.contents {
+                throw ContentMismatchError(
+                    packageSwiftFileUrl: item.package.packageSwiftUrl,
+                    currentContents: currentContents,
+                    generatedContents: item.contents
+                )
             }
         }
     }
