@@ -43,8 +43,8 @@ public final class FakeProcessController: ProcessController {
     public func send(signal: Int32) {
         signalsSent.append(signal)
         
-        for listener in terminationListeners {
-            listener(self, {})
+        for listener in signalListeners {
+            listener(self, signal, {})
         }
     }
     

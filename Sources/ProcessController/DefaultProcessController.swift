@@ -212,8 +212,9 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     
     private func forceKillProcess(onKill: () -> ()) {
         if isProcessRunning {
-            onKill()
             send(signal: SIGKILL)
+            process.interrupt()
+            onKill()
         }
     }
     

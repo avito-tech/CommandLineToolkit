@@ -77,19 +77,23 @@ public extension ProcessController {
         restreamStderr()
     }
     
-    func terminateAndForceKillIfNeeded() {
+    func terminateAndForceKillIfNeeded(
+        onKill: @escaping () -> () = {}
+    ) {
         signalAndForceKillIfNeeded(
             terminationSignal: SIGTERM,
             terminationSignalTimeout: 15,
-            onKill: { }
+            onKill: onKill
         )
     }
     
-    func interruptAndForceKillIfNeeded() {
+    func interruptAndForceKillIfNeeded(
+        onKill: @escaping () -> ()
+    ) {
         signalAndForceKillIfNeeded(
             terminationSignal: SIGINT,
             terminationSignalTimeout: 15,
-            onKill: { }
+            onKill: onKill
         )
     }
 }
