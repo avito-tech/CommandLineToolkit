@@ -88,7 +88,7 @@ public extension ProcessController {
     }
     
     func interruptAndForceKillIfNeeded(
-        onKill: @escaping () -> ()
+        onKill: @escaping () -> () = {}
     ) {
         signalAndForceKillIfNeeded(
             terminationSignal: SIGINT,
