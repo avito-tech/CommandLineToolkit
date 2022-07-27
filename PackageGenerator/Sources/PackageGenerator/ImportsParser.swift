@@ -5,7 +5,6 @@ public final class ImportsParser {
     
     public init() throws {
         // https://docs.swift.org/swift-book/ReferenceManual/Declarations.html#grammar_import-declaration
-        let anyWhitespace = #"\s*"#
         let whitespace = #"\s+"#
         let attributesRegex = "@testable"
         let importKindRegex = "(?:typealias|struct|class|enum|protocol|let|var|func)"

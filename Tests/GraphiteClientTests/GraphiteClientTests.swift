@@ -4,9 +4,10 @@ import IO
 import XCTest
 
 final class GraphiteClientTests: XCTestCase {
+#if os(macOS) || os(iOS) || os(tvOS)
     func disabled___test___simple_use_case() throws {
-        let stream = EasyOutputStream(
-            outputStreamProvider: NetworkSocketOutputStreamProvider(host: "host", port: 65432),
+        let stream = AppleEasyOutputStream(
+            outputStreamProvider: AppleNetworkSocketOutputStreamProvider(host: "host", port: 65432),
             batchSize: 1024,
             errorHandler: { _, error in
                 XCTFail("Unexpected error: \(error)")
@@ -20,4 +21,5 @@ final class GraphiteClientTests: XCTestCase {
         
         XCTAssertEqual(stream.waitAndClose(timeout: 5), .successfullyFlushedInTime)
     }
+#endif
 }

@@ -460,7 +460,7 @@ final class DefaultProcessControllerTests: XCTestCase {
             )
             
             let instanceToBeDeallocated = ToDieSoon()
-            instanceToBeDeallocated.onDeinit = deallocated.fulfill
+            instanceToBeDeallocated.onDeinit = { deallocated.fulfill() }
             
             controller.onTermination { _, _ in
                 _ = instanceToBeDeallocated.self

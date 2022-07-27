@@ -107,7 +107,7 @@ extension PlistEntry {
         } else if let dateElement = any as? Date {
             return .date(dateElement)
         } else if let numberElement = any as? NSNumber {
-            if numberElement === kCFBooleanTrue || numberElement === kCFBooleanFalse {
+            if numberElement === true as NSNumber || numberElement === false as NSNumber {
                 return .bool(numberElement.boolValue)
             } else {
                 return .number(numberElement.doubleValue)

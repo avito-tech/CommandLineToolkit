@@ -1,6 +1,7 @@
 import Foundation
 
-public final class NetworkSocketOutputStreamProvider: OutputStreamProvider {
+#if os(macOS) || os(iOS) || os(tvOS)
+public final class AppleNetworkSocketOutputStreamProvider: OutputStreamProvider {
     private let host: String
     private let port: Int
     
@@ -34,3 +35,4 @@ public final class NetworkSocketOutputStreamProvider: OutputStreamProvider {
         return outputStream
     }
 }
+#endif

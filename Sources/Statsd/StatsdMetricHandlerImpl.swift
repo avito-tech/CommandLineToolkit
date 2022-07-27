@@ -1,7 +1,6 @@
 import AtomicModels
 import Foundation
 import IO
-import Network
 import SocketModels
 
 public final class StatsdMetricHandlerImpl: StatsdMetricHandler {
@@ -22,25 +21,18 @@ public final class StatsdMetricHandlerImpl: StatsdMetricHandler {
         self.serialQueue = serialQueue
         
         self.statsdClient.stateUpdateHandler = { [weak self] state in
-            guard let self = self else { return }
+            guard let strongSelf = self else { return }
+            
             switch state {
-            case .setup:
-                break
-            case .waiting:
-                break
-            case .preparing:
+            case .notReady:
                 break
             case .ready:
-                self.metricsBuffer.withExclusiveAccess {
-                    $0.forEach(self.send)
+                strongSelf.metricsBuffer.withExclusiveAccess {
+                    $0.forEach(strongSelf.send)
                     $0.removeAll()
                 }
             case .failed:
-                self.statsdClient.cancel()
-            case .cancelled:
-                break
-            @unknown default:
-                break
+                strongSelf.statsdClient.cancel()
             }
         }
         statsdClient.start(queue: serialQueue)
@@ -49,16 +41,15 @@ public final class StatsdMetricHandlerImpl: StatsdMetricHandler {
     public func handle(metric: StatsdMetric) {
         // swiftlint:disable:next async
         serialQueue.async { [weak self] in
-            guard let self = self else { return }
-            let state = self.statsdClient.state
+            guard let strongSelf = self else { return }
+            let state = strongSelf.statsdClient.state
+            
             switch state {
-            case .cancelled, .failed:
-                break
-            case .waiting, .preparing, .setup:
-                self.metricsBuffer.withExclusiveAccess { $0.append(metric) }
+            case .notReady:
+                strongSelf.metricsBuffer.withExclusiveAccess { $0.append(metric) }
             case .ready:
-                self.send(metric: metric)
-            @unknown default:
+                strongSelf.send(metric: metric)
+            case .failed:
                 break
             }
         }

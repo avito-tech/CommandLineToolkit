@@ -1,5 +1,10 @@
+#if canImport(Darwin)
 import Darwin
+#endif
 import Foundation
+#if canImport(Glibc)
+import Glibc
+#endif
 
 public final class SynchronousWaiter: Waiter {
     public init() {}

@@ -1,6 +1,7 @@
 import Foundation
 import IO
 
+#if os(macOS) || os(iOS) || os(tvOS)
 final class BoundStreamsOutputStreamProvider: OutputStreamProvider {
     
     let inputStream: InputStream
@@ -26,3 +27,4 @@ final class BoundStreamsOutputStreamProvider: OutputStreamProvider {
         return outputStream
     }
 }
+#endif

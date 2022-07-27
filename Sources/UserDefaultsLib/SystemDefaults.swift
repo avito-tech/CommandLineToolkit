@@ -28,7 +28,7 @@ public final class SystemDefaults: Defaults {
     }
     
     public func set(entry: PlistEntry?, key: String) {
-        userDefaults.setValue(entry?.toPlistObject(), forKey: key)
+        userDefaults.set(entry?.toPlistObject(), forKey: key)
     }
     
     public func removeEntryForKey(_ key: String) {

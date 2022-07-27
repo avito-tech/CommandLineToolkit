@@ -437,10 +437,10 @@ public final class JSONReader {
              * When parent context is root, we expect specific child contexts
              */
         case let (.inObject(_, object), .root):
-            eventStream.newObject(NSDictionary(dictionary: object), data: Data(collectedBytes))
+            eventStream.newObject(object, data: Data(collectedBytes))
             collectedBytes.removeAll()
         case let (.inArray(_, array), .root):
-            eventStream.newArray(NSArray(array: array), data: Data(collectedBytes))
+            eventStream.newArray(array, data: Data(collectedBytes))
             collectedBytes.removeAll()
         default:
             throw JSONReaderFatalError.unhandledContextCombination(parent: currentContext, child: popedContext)

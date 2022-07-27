@@ -2,15 +2,15 @@ import IO
 import TestHelpers
 import XCTest
 
-final class EasyOutputStreamTests: XCTestCase {
-    
+#if os(macOS) || os(iOS) || os(tvOS)
+final class AppleEasyOutputStreamTests: XCTestCase {
     let inMemoryOutputStreamProvider = FakeInMemoryOutputStreamProvider()
     
     lazy var data = assertNotNil {
         "hello world!".data(using: .utf8)
     }
     
-    lazy var inMemoryStream = EasyOutputStream(
+    lazy var inMemoryStream = AppleEasyOutputStream(
         outputStreamProvider: inMemoryOutputStreamProvider,
         batchSize: 1024,
         errorHandler: { _, _ in },
@@ -71,7 +71,7 @@ final class EasyOutputStreamTests: XCTestCase {
         
         let streamEndHandlerInvoked = expectation(description: "Invoked end of stream handler")
         
-        let stream = EasyOutputStream(
+        let stream = AppleEasyOutputStream(
             outputStreamProvider: outputStreamProvider,
             batchSize: 1024,
             errorHandler: { _, _ in },
@@ -96,7 +96,7 @@ final class EasyOutputStreamTests: XCTestCase {
         
         let streamErrorHandlerInvoked = expectation(description: "Invoked stream error handler")
         
-        let stream = EasyOutputStream(
+        let stream = AppleEasyOutputStream(
             outputStreamProvider: outputStreamProvider,
             batchSize: 1024,
             errorHandler: { _, _ in streamErrorHandlerInvoked.fulfill() },
@@ -136,3 +136,4 @@ final class EasyOutputStreamTests: XCTestCase {
         outputStreamProvider.inputStream.close()
     }
 }
+#endif

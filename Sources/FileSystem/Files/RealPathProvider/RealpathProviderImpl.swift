@@ -1,4 +1,10 @@
+#if canImport(Darwin)
 import Darwin
+#endif
+#if canImport(Glibc)
+import Glibc
+#endif
+
 import PathLib
 
 /// Resolves all symbolic links, extra "/" characters, and references to /./
@@ -20,7 +26,7 @@ public final class RealpathProviderImpl: RealpathProvider {
     }
 
     public func realpath(path: AbsolutePath) throws -> AbsolutePath {
-        guard let result = Darwin.realpath(path.pathString, nil) else {
+        guard let result = systemRealpath(path.pathString) else {
             throw RealpathError(
                 errno: errno,
                 path: path
@@ -30,5 +36,15 @@ public final class RealpathProviderImpl: RealpathProvider {
         defer { free(result) }
 
         return AbsolutePath(String(cString: result))
+    }
+    
+    private func systemRealpath(_ path: String) -> UnsafeMutablePointer<CChar>! {
+#if canImport(Darwin)
+        return Darwin.realpath(path, nil)
+#elseif canImport(Glibc)
+        return Glibc.realpath(path, nil)
+#else
+        return nil
+#endif
     }
 }

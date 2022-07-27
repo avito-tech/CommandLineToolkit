@@ -1,6 +1,5 @@
 import Foundation
 import MetricsRecording
-import Network
 import Statsd
 import XCTest
 
@@ -8,12 +7,9 @@ final class StatsdMetricHandlerImplTests: XCTestCase {
     lazy var queue = DispatchQueue(label: "test")
     
     func test___handler___doesnt_send_metrics___in_non_ready_states() throws {
-        let states: [NWConnection.State] = [
-            .setup,
-            .preparing,
-            .failed(NWError.posix(.E2BIG)),
-            .waiting(NWError.posix(.E2BIG)),
-            .cancelled,
+        let states: [StatsdClientState] = [
+            .notReady,
+            .failed,
         ]
         
         try states.forEach { state in
@@ -51,10 +47,8 @@ final class StatsdMetricHandlerImplTests: XCTestCase {
     }
     
     func test___handler___buffers_metrics___untill_in_ready_state() throws {
-        let states: [NWConnection.State] = [
-            .setup,
-            .preparing,
-            .waiting(NWError.posix(.E2BIG)),
+        let states: [StatsdClientState] = [
+            .notReady,
         ]
         
         try states.forEach { state in
@@ -106,7 +100,7 @@ final class StatsdMetricHandlerImplTests: XCTestCase {
         
         let connectionCancelledExpectation = XCTestExpectation(description: "connection should be cancelled")
         client.stateUpdateHandler = { targetState in
-            if targetState == .cancelled {
+            if targetState == .notReady {
                 connectionCancelledExpectation.fulfill()
             }
         }

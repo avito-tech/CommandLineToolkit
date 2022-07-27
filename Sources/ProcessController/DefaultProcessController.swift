@@ -80,16 +80,16 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
         }
         
         let process = Process()
-        process.launchPath = pathToExecutable.pathString
+        process.executableURL = pathToExecutable.fileUrl
         process.arguments = Array(arguments.dropFirst())
         process.environment = environment.asStringDictionary
-        process.currentDirectoryPath = workingDirectory.pathString
+        process.currentDirectoryURL = workingDirectory.fileUrl
         try process.setStartsNewProcessGroup(false)
         return process
     }
     
     public var description: String {
-        let executable = process.launchPath ?? "unknown executable"
+        let executable = process.executableURL?.path ?? "unknown executable"
         let args = process.arguments?.joined(separator: " ") ?? ""
         return "<\(type(of: self)): \(executable) \(args) \(processStatus())>"
     }

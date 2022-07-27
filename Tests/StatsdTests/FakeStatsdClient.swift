@@ -1,21 +1,20 @@
 import Foundation
-import Network
 import Statsd
 
 final class FakeStatsdClient: StatsdClient {
-    var state: NWConnection.State
+    var state: StatsdClientState
     
     var sentData: [Data] = []
-    var stateUpdateHandler: ((NWConnection.State) -> ())?
+    var stateUpdateHandler: ((StatsdClientState) -> ())?
     
     var onSend: (Data, @escaping (Error?) -> ()) -> () = { $1(nil) }
     
-    init(initialState: NWConnection.State) {
+    init(initialState: StatsdClientState) {
         state = initialState
     }
     
     func cancel() {
-        update(state: .cancelled)
+        update(state: .notReady)
     }
     
     func start(queue: DispatchQueue) {}
@@ -25,7 +24,7 @@ final class FakeStatsdClient: StatsdClient {
         onSend(content, completion)
     }
     
-    func update(state: NWConnection.State) {
+    func update(state: StatsdClientState) {
         self.state = state
         self.stateUpdateHandler?(state)
     }

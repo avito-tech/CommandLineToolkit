@@ -17,8 +17,9 @@ public final class GraphiteMetricHandlerImpl: GraphiteMetricHandler {
         
         let streamReopener = StreamReopener(maximumAttemptsToReopenStream: 10)
         
-        outputStream = EasyOutputStream(
-            outputStreamProvider: NetworkSocketOutputStreamProvider(
+#if os(macOS) || os(iOS) || os(tvOS)
+        outputStream = AppleEasyOutputStream(
+            outputStreamProvider: AppleNetworkSocketOutputStreamProvider(
                 host: graphiteSocketAddress.host,
                 port: graphiteSocketAddress.port.value
             ),
@@ -29,6 +30,9 @@ public final class GraphiteMetricHandlerImpl: GraphiteMetricHandler {
                 streamReopener.attemptToReopenStream(stream: stream)
             }
         )
+#else
+        outputStream = LinuxEasyOutputStream()
+#endif
         
         streamReopener.streamHasBeenOpened()
         try outputStream.open()

@@ -1,4 +1,9 @@
+#if canImport(Darwin)
 import Darwin
+#endif
+#if canImport(Glibc)
+import Glibc
+#endif
 import Foundation
 import PathLib
 import String

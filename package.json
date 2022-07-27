@@ -33,6 +33,8 @@
       "Darwin",
       "Dispatch",
       "Foundation",
+      "FoundationNetworking",
+      "Glibc",
       "Network",
       "XCTest"
     ]
