@@ -87,7 +87,7 @@ final class AppleEasyOutputStreamTests: XCTestCase {
         
         closeReadingEndAfterReadingSomeData(outputStreamProvider)
         
-        wait(for: [streamEndHandlerInvoked], timeout: 5)
+        wait(for: streamEndHandlerInvoked, timeout: 5)
         stream.close()
     }
     
@@ -110,7 +110,7 @@ final class AppleEasyOutputStreamTests: XCTestCase {
             try stream.enqueueWrite(data: data)
         )
         
-        wait(for: [streamErrorHandlerInvoked], timeout: 5)
+        wait(for: streamErrorHandlerInvoked, timeout: 5)
         stream.close()
     }
     

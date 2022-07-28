@@ -2,30 +2,26 @@ import Foundation
 import Statsd
 
 final class FakeStatsdClient: StatsdClient {
-    var state: StatsdClientState
-    
     var sentData: [Data] = []
-    var stateUpdateHandler: ((StatsdClientState) -> ())?
+    
+    init() {
+        
+    }
+
+    var onTearDown: (DispatchQueue, TimeInterval, @escaping () -> ()) -> () = { queue, _, callback in
+        queue.async {
+            callback()
+        }
+    }
+    
+    func tearDown(queue: DispatchQueue, timeout: TimeInterval, completion: @escaping () -> ()) {
+        onTearDown(queue, timeout, completion)
+    }
     
     var onSend: (Data, @escaping (Error?) -> ()) -> () = { $1(nil) }
-    
-    init(initialState: StatsdClientState) {
-        state = initialState
-    }
-    
-    func cancel() {
-        update(state: .notReady)
-    }
-    
-    func start(queue: DispatchQueue) {}
-    
-    func send(content: Data, completion: @escaping (Error?) -> ()) {
+
+    func send(content: Data, queue: DispatchQueue, completion: @escaping (Error?) -> ()) {
         sentData.append(content)
         onSend(content, completion)
-    }
-    
-    func update(state: StatsdClientState) {
-        self.state = state
-        self.stateUpdateHandler?(state)
     }
 }

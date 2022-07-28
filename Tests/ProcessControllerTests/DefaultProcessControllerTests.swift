@@ -228,7 +228,7 @@ final class DefaultProcessControllerTests: XCTestCase {
         }
         try controller.startAndListenUntilProcessDies()
         
-        wait(for: [handlerInvoked], timeout: 10)
+        wait(for: handlerInvoked, timeout: 10)
     }
     
     func test___termination_listener() throws {
@@ -246,7 +246,7 @@ final class DefaultProcessControllerTests: XCTestCase {
         }
         try controller.startAndListenUntilProcessDies()
         
-        wait(for: [handlerInvoked], timeout: 10)
+        wait(for: handlerInvoked, timeout: 10)
     }
     
     func test___callers_waits_for_process_to_die___all_termination_handlers_invoked_before_returning() throws {
@@ -285,7 +285,7 @@ final class DefaultProcessControllerTests: XCTestCase {
         try controller.start()
         defer { controller.forceKillProcess() }
         
-        wait(for: [listenerCalled], timeout: 10)
+        wait(for: listenerCalled, timeout: 10)
     }
     
     func test___sigint_is_sent___when_silent() throws {
@@ -306,7 +306,7 @@ final class DefaultProcessControllerTests: XCTestCase {
         try controller.start()
         defer { controller.forceKillProcess() }
         
-        wait(for: [listenerCalled], timeout: 10)
+        wait(for: listenerCalled, timeout: 10)
     }
     
     func test___sigint_is_sent___when_running_for_too_long() throws {
@@ -326,7 +326,7 @@ final class DefaultProcessControllerTests: XCTestCase {
         }
         try controller.start()
         defer { controller.forceKillProcess() }
-        wait(for: [listenerCalled], timeout: 10)
+        wait(for: listenerCalled, timeout: 10)
     }
     
     func test___sigterm_is_sent___when_running_for_too_long() throws {
@@ -346,7 +346,7 @@ final class DefaultProcessControllerTests: XCTestCase {
         }
         try controller.start()
         defer { controller.forceKillProcess() }
-        wait(for: [listenerCalled], timeout: 10)
+        wait(for: listenerCalled, timeout: 10)
     }
     
     func test___cancelling_stdout_listener___does_not_invoke_cancelled_listener_anymore() throws {
@@ -408,7 +408,7 @@ final class DefaultProcessControllerTests: XCTestCase {
         }
         try controller.startAndWaitForSuccessfulTermination()
         
-        wait(for: [outputExpectation], timeout: 60)
+        wait(for: outputExpectation, timeout: 60)
     }
     
     func test___throws_objc_exceptions_as_swift_errors() throws {
@@ -468,7 +468,7 @@ final class DefaultProcessControllerTests: XCTestCase {
             try controller.start()
         }
         
-        wait(for: [deallocated], timeout: 15)
+        wait(for: deallocated, timeout: 15)
     }
     
     private func processController(subprocess: Subprocess) throws -> ProcessController {

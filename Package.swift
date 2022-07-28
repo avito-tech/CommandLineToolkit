@@ -49,6 +49,7 @@ let package = Package(
     dependencies: [
         .package(name: "Glob", url: "https://github.com/Bouke/Glob", .exact("1.0.5")),
         .package(name: "Signals", url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.21")),
+        .package(name: "Socket", url: "https://github.com/Kitura/BlueSocket.git", .exact("1.0.52")),
         .package(name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser", from: "1.0.3"),
     ],
     targets: [
@@ -374,8 +375,8 @@ let package = Package(
                 "AtomicModels",
                 "IO",
                 "MetricsUtils",
+                .product(name: "Socket", package: "Socket"),
                 "SocketModels",
-                "Waitable",
             ],
             path: "Sources/Statsd"
         ),
@@ -383,7 +384,10 @@ let package = Package(
             name: "StatsdTests",
             dependencies: [
                 "MetricsRecording",
+                .product(name: "Socket", package: "Socket"),
+                "SocketModels",
                 "Statsd",
+                "TestHelpers",
             ],
             path: "Tests/StatsdTests"
         ),
@@ -427,6 +431,7 @@ let package = Package(
         .target(
             name: "TestHelpers",
             dependencies: [
+                "AtomicModels",
             ],
             path: "Tests/TestHelpers"
         ),

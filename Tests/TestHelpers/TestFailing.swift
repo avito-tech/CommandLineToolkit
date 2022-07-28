@@ -10,5 +10,5 @@ public func failTest(
 #if os(macOS)    
     NSException(name: NSExceptionName(rawValue: message), reason: nil, userInfo: nil).raise()
 #endif
-    fatalError("Failing test with message: \(message)")
+    fatalError(message, file: (file), line: line)
 }

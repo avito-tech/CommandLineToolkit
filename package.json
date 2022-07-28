@@ -28,6 +28,15 @@
                 "ArgumentParser"
             ]
         },
+        "Socket": {
+            "url": "https://github.com/Kitura/BlueSocket.git",
+            "version": {
+                "exact": "1.0.52"
+            },
+            "targetNames": [
+                "Socket"
+            ]
+        },
     },
     "implicitSystemModules" : [
       "Darwin",

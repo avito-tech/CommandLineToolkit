@@ -1,11 +1,16 @@
+import Dispatch
 import Foundation
 
 public protocol StatsdClient: AnyObject {
-    var stateUpdateHandler: ((StatsdClientState) -> ())? { get set }
-    var state: StatsdClientState { get }
+    func send(
+        content: Data,
+        queue: DispatchQueue,
+        completion: @escaping (Error?) -> ()
+    )
     
-    func start(queue: DispatchQueue)
-    func cancel()
-    
-    func send(content: Data, completion: @escaping (Error?) -> ())
+    func tearDown(
+        queue: DispatchQueue,
+        timeout: TimeInterval,
+        completion: @escaping () -> ()
+    )
 }

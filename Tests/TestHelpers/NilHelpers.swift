@@ -12,3 +12,14 @@ public func assertNotNil<T>(
     }
     return value
 }
+
+public func assertNil<T>(
+    file: StaticString = #filePath,
+    line: UInt = #line,
+    work: () throws -> T?
+) rethrows {
+    guard let value = try work() else {
+        return
+    }
+    failTest("Expected nil value, but got \(value)", file: file, line: line)
+}

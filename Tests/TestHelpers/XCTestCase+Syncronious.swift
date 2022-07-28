@@ -23,7 +23,7 @@ extension XCTestCase {
             expectation.fulfill()
         }
         
-        wait(for: [expectation], timeout: timeout)
+        wait(for: expectation, timeout: timeout)
         
         if let result = resultOrNil {
             return result

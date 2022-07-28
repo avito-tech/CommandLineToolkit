@@ -26,6 +26,7 @@ assert {
 
 // Nil
 let string: String = assertNotNil { someArrayOfStrings.first }
+let string: String = assertNil { someArrayOfStrings.first }
 
 // Throws
 assertThrows {
