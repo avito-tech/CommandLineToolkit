@@ -15,7 +15,7 @@ public extension Process {
      * This method uses private API and will throw an error if it won't be able to use the private API.
      */
     func setStartsNewProcessGroup(_ value: Bool) throws {
-#if os(macOS) || os(iOS) || os(tvOS)
+#if os(macOS)
         if let concreteTaskClass = NSClassFromString("NSConcreteTask"), self.isKind(of: concreteTaskClass) {
             self.perform(Selector(("setStartsNewProcessGroup:")), with: value)
         } else {

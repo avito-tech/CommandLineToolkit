@@ -103,9 +103,17 @@ public final class FileSystemModuleDependencies: ModuleDependencies {
             )
         }
         di.register(type: CommonlyUsedPathsProvider.self) { di in
-            try DefaultCommonlyUsedPathsProvider(
+#if os(macOS)
+            try AppleCommonlyUsedPathsProvider(
                 fileManager: di.resolve()
             )
+#elseif os(Linux)
+            try LinuxCommonlyUsedPathsProvider(
+                fileManager: di.resolve()
+            )
+#else
+            #error("Unsupported OS")
+#endif
         }
     }
 }

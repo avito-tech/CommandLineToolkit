@@ -4,7 +4,7 @@ import IO
 import XCTest
 
 final class GraphiteClientTests: XCTestCase {
-#if os(macOS) || os(iOS) || os(tvOS)
+#if os(macOS)
     func disabled___test___simple_use_case() throws {
         let stream = AppleEasyOutputStream(
             outputStreamProvider: AppleNetworkSocketOutputStreamProvider(host: "host", port: 65432),

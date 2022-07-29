@@ -6,7 +6,7 @@ public enum LaunchdSocketActivation {
     /// - Throws:`LaunchdSocketActivationError`
     /// - Returns: a set of file descriptors corresponding to a socket service that launchd(8) has created and advertised on behalf of the job
     public static func activateSocket(name: String) throws -> [Int32] {
-#if os(macOS) || os(iOS) || os(tvOS)
+#if os(macOS)
         var ld_sockets = UnsafeMutablePointer<Int32>.allocate(capacity: 0)
         defer {
             ld_sockets.deallocate()

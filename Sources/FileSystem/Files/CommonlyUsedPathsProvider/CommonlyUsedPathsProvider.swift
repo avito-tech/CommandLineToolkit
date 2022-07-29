@@ -5,6 +5,7 @@ public enum SearchDomain {
     /// User's home directory --- place to install user's personal items (`~`)
     case user
     
+#if os(macOS)
     /// Local to the current machine --- place to install items available to everyone on this machine (`/Library`)
     case local
     
@@ -13,6 +14,7 @@ public enum SearchDomain {
     
     /// Provided by Apple, unmodifiable (/System)
     case system
+#endif
 }
 
 public protocol CommonlyUsedPathsProvider {

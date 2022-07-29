@@ -1,11 +1,14 @@
+#if os(macOS)
 import FileSystem
 import PathLib
 import TestHelpers
 import XCTest
 
-final class DefaultCommonlyUsedPathsProviderTests: XCTestCase {
-    private lazy var defaultCommonlyUsedPathsProvider = DefaultCommonlyUsedPathsProvider(fileManager: fileManager)
-    private let fileManager = FileManager()
+final class AppleCommonlyUsedPathsProviderTests: XCTestCase {
+    private lazy var fileManager = FileManager()
+    private lazy var defaultCommonlyUsedPathsProvider = AppleCommonlyUsedPathsProvider(
+        fileManager: fileManager
+    )
     
     func test___applications() {
         XCTAssertEqual(
@@ -28,3 +31,4 @@ final class DefaultCommonlyUsedPathsProviderTests: XCTestCase {
         )
     }
 }
+#endif

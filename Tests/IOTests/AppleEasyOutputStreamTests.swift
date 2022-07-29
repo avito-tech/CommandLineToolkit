@@ -2,7 +2,7 @@ import IO
 import TestHelpers
 import XCTest
 
-#if os(macOS) || os(iOS) || os(tvOS)
+#if os(macOS)
 final class AppleEasyOutputStreamTests: XCTestCase {
     let inMemoryOutputStreamProvider = FakeInMemoryOutputStreamProvider()
     

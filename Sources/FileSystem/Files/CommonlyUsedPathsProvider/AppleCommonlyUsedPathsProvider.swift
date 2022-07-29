@@ -1,7 +1,8 @@
+#if os(macOS)
 import Foundation
 import PathLib
 
-public final class DefaultCommonlyUsedPathsProvider: CommonlyUsedPathsProvider {
+public final class AppleCommonlyUsedPathsProvider: CommonlyUsedPathsProvider {
     private let fileManager: FileManager
     
     public init(fileManager: FileManager) {
@@ -60,3 +61,4 @@ extension SearchDomain {
         }
     }
 }
+#endif

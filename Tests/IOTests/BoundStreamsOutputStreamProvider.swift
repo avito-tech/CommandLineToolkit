@@ -1,7 +1,7 @@
 import Foundation
 import IO
 
-#if os(macOS) || os(iOS) || os(tvOS)
+#if os(macOS)
 final class BoundStreamsOutputStreamProvider: OutputStreamProvider {
     
     let inputStream: InputStream

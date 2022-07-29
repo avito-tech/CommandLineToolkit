@@ -1,7 +1,7 @@
 import AtomicModels
 import Foundation
 
-#if os(macOS) || os(iOS) || os(tvOS)
+#if os(macOS)
 
 // swiftlint:disable async
 public final class AppleEasyOutputStream: NSObject, EasyOutputStream, StreamDelegate {

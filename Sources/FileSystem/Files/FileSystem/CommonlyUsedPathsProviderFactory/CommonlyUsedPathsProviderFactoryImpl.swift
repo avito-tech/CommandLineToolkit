@@ -8,6 +8,12 @@ public final class CommonlyUsedPathsProviderFactoryImpl: CommonlyUsedPathsProvid
     }
     
     public var commonlyUsedPathsProvider: CommonlyUsedPathsProvider {
-        return DefaultCommonlyUsedPathsProvider(fileManager: fileManager)
+#if os(macOS)
+        return AppleCommonlyUsedPathsProvider(fileManager: fileManager)
+#elseif os(Linux)
+        return LinuxCommonlyUsedPathsProvider(fileManager: fileManager)
+#else
+        #error("Unsupported OS")
+#endif
     }
 }

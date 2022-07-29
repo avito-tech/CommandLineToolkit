@@ -1,4 +1,4 @@
-#if os(macOS) || os(iOS) || os(tvOS)
+#if os(macOS)
 import Foundation
 import Network
 import SocketModels
