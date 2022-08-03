@@ -32,4 +32,16 @@ extension DataWriter {
             ensureDirectoryExists: ensureDirectoryExists
         )
     }
+    
+    public func writeJson<T: Encodable>(
+        encodable: T,
+        filePath: AbsolutePath,
+        ensureDirectoryExists: Bool = true
+    ) throws {
+        try write(
+            data: JSONEncoder().encode(encodable),
+            filePath: filePath,
+            ensureDirectoryExists: ensureDirectoryExists
+        )
+    }
 }
