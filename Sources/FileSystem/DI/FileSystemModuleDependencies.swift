@@ -102,18 +102,14 @@ public final class FileSystemModuleDependencies: ModuleDependencies {
                 fileCreator: di.resolve()
             )
         }
+        di.register(type: CommonlyUsedPathsProviderFactory.self) { di in
+            try CommonlyUsedPathsProviderFactoryImpl(
+                fileManager: di.resolve()
+            )
+        }
         di.register(type: CommonlyUsedPathsProvider.self) { di in
-#if os(macOS)
-            try AppleCommonlyUsedPathsProvider(
-                fileManager: di.resolve()
-            )
-#elseif os(Linux)
-            try LinuxCommonlyUsedPathsProvider(
-                fileManager: di.resolve()
-            )
-#else
-            #error("Unsupported OS")
-#endif
+            let factory = try di.resolve() as CommonlyUsedPathsProviderFactory
+            return factory.commonlyUsedPathsProvider
         }
     }
 }

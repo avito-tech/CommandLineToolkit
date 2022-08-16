@@ -1,4 +1,3 @@
-#if os(macOS)
 import Foundation
 import PathLib
 
@@ -54,11 +53,12 @@ extension SearchDomain {
             return .localDomainMask
         case .user:
             return .userDomainMask
+#if os(macOS)
         case .network:
             return .networkDomainMask
         case .system:
             return .systemDomainMask
+#endif
         }
     }
 }
-#endif
