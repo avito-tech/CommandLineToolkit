@@ -23,7 +23,7 @@ extension FileSystem {
         ensureDirectoryExists: Bool = true
     ) throws {
         if ensureDirectoryExists {
-            try self.ensureDirectoryExists(path: sourcePath)
+            try self.ensureDirectoryExists(path: destinationPath)
         }
         
         try contentEnumerator(forPath: sourcePath, style: .shallow).each { path in
