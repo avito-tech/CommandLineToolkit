@@ -20,5 +20,8 @@ public final class ProcessControllerModuleDependencies: ModuleDependencies {
                 filePropertiesProvider: di.resolve()
             )
         }
+        di.register(type: BashEscapedCommandMaker.self) { _ in
+            try BashEscapedCommandMakerImpl()
+        }
     }
 }
