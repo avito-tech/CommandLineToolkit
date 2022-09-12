@@ -22,7 +22,7 @@
         "swift-argument-parser": {
             "url": "https://github.com/apple/swift-argument-parser",
             "version": {
-                "from": "1.0.3"
+                "from": "1.1.3"
             },
             "targetNames": [
                 "ArgumentParser"
