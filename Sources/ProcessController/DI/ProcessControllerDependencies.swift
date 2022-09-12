@@ -21,7 +21,7 @@ public final class ProcessControllerModuleDependencies: ModuleDependencies {
             )
         }
         di.register(type: BashEscapedCommandMaker.self) { _ in
-            try BashEscapedCommandMakerImpl()
+            BashEscapedCommandMakerImpl()
         }
     }
 }
