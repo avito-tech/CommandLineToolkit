@@ -127,7 +127,8 @@ public extension PackageTarget {
             dependencies: importedModules(url: url),
             path: String(path),
             isTest: isTest,
-            settings: targetSettings
+            settings: targetSettings,
+            conditionalCompilationTargetRequirement: nil
         )
     }
     

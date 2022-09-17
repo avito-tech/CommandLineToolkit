@@ -1,6 +1,7 @@
 @testable import PackageGenerator
 import XCTest
 
+// swiftlint:disable force_unwrapping
 final class StatementGeneratorTests: XCTestCase {
     private lazy var statementGenerator = StatementGenerator(
         filePathResolver: FilePathResolverImpl(
@@ -36,7 +37,8 @@ final class StatementGeneratorTests: XCTestCase {
                             dependencies: [],
                             path: "Sources/TargetA",
                             isTest: false,
-                            settings: TargetSpecificSettings(linkerSettings: LinkerSettings(unsafeFlags: []))
+                            settings: TargetSpecificSettings(linkerSettings: LinkerSettings(unsafeFlags: [])),
+                            conditionalCompilationTargetRequirement: nil
                         )
                     )
                 )
@@ -46,31 +48,36 @@ final class StatementGeneratorTests: XCTestCase {
         let expectedContents = """
         // swift-tools-version:1.2
         import PackageDescription
+
+        var targets = [Target]()
+        // MARK: TargetA
+        targets.append(
+            .target(
+                name: "TargetA",
+                dependencies: [
+                ],
+                path: "Sources/TargetA"
+            )
+        )
+
         let package = Package(
             name: "TestPackage",
             platforms: [
                 .macOS(.v10_15),
             ],
             products: [
-                .library(name: \"TargetA\", targets: [\"TargetA\"]),
+                .library(name: "TargetA", targets: ["TargetA"]),
             ],
             dependencies: [
                 .package(name: "SomeExternalPackage", url: "http://example.com/someexternalpackage", .exact("123")),
             ],
-            targets: [
-                .target(
-                    name: "TargetA",
-                    dependencies: [
-                    ],
-                    path: "Sources/TargetA"
-                ),
-            ]
+            targets: targets
         )
 
         """
         
         XCTAssertEqual(
-            contents.first?.contents,
+            contents.first!.contents,
             expectedContents
         )
     }
@@ -100,7 +107,8 @@ final class StatementGeneratorTests: XCTestCase {
                                         linkerSettings: LinkerSettings(
                                             unsafeFlags: []
                                         )
-                                    )
+                                    ),
+                                    conditionalCompilationTargetRequirement: nil
                                 )
                             ),
                             PackageTargets.single(
@@ -113,7 +121,8 @@ final class StatementGeneratorTests: XCTestCase {
                                         linkerSettings: LinkerSettings(
                                             unsafeFlags: []
                                         )
-                                    )
+                                    ),
+                                    conditionalCompilationTargetRequirement: nil
                                 )
                             )
                         ]
@@ -125,6 +134,27 @@ final class StatementGeneratorTests: XCTestCase {
         let expectedContents = """
         // swift-tools-version:1.2
         import PackageDescription
+
+        var targets = [Target]()
+        // MARK: TargetA
+        targets.append(
+            .target(
+                name: "TargetA",
+                dependencies: [
+                ],
+                path: "Sources/TargetA"
+            )
+        )
+        // MARK: TargetB
+        targets.append(
+            .target(
+                name: "TargetB",
+                dependencies: [
+                ],
+                path: "Sources/TargetB"
+            )
+        )
+
         let package = Package(
             name: "TestPackage",
             platforms: [
@@ -133,26 +163,13 @@ final class StatementGeneratorTests: XCTestCase {
             ],
             dependencies: [
             ],
-            targets: [
-                .target(
-                    name: "TargetA",
-                    dependencies: [
-                    ],
-                    path: "Sources/TargetA"
-                ),
-                .target(
-                    name: "TargetB",
-                    dependencies: [
-                    ],
-                    path: "Sources/TargetB"
-                ),
-            ]
+            targets: targets
         )
 
         """
         
         XCTAssertEqual(
-            contents.first?.contents,
+            contents.first!.contents,
             expectedContents
         )
     }
@@ -180,7 +197,8 @@ final class StatementGeneratorTests: XCTestCase {
                                 linkerSettings: LinkerSettings(
                                     unsafeFlags: ["some", "flags"]
                                 )
-                            )
+                            ),
+                            conditionalCompilationTargetRequirement: nil
                         )
                     )
                 )
@@ -190,6 +208,21 @@ final class StatementGeneratorTests: XCTestCase {
         let expectedContents = """
         // swift-tools-version:1.2
         import PackageDescription
+
+        var targets = [Target]()
+        // MARK: TargetA
+        targets.append(
+            .target(
+                name: "TargetA",
+                dependencies: [
+                ],
+                path: "Sources/TargetA",
+                linkerSettings: [
+                    .unsafeFlags(["some", "flags"]),
+                ]
+            )
+        )
+
         let package = Package(
             name: "TestPackage",
             platforms: [
@@ -198,23 +231,83 @@ final class StatementGeneratorTests: XCTestCase {
             ],
             dependencies: [
             ],
-            targets: [
-                .target(
-                    name: "TargetA",
-                    dependencies: [
-                    ],
-                    path: "Sources/TargetA",
-                    linkerSettings: [
-                        .unsafeFlags(["some", "flags"]),
-                    ]
-                ),
-            ]
+            targets: targets
         )
 
         """
         
         XCTAssertEqual(
-            contents.first?.contents,
+            contents.first!.contents,
+            expectedContents
+        )
+    }
+    
+    func test___os_requirements_for_targets() throws {
+        let contents = try statementGenerator.generatePackageSwiftCode(
+            generatablePackage: GeneratablePackage(
+                location: URL(fileURLWithPath: NSTemporaryDirectory()),
+                packageJsonFile: PackageJsonFile(
+                    swiftToolsVersion: "1.2",
+                    name: "TestPackage",
+                    platforms: [],
+                    products: PackageProducts.explicit([]),
+                    dependencies: PackageDependencies(
+                        implicitSystemModules: [],
+                        external: [:]
+                    ),
+                    targets: PackageTargets.single(
+                        PackageTarget(
+                            name: "TargetA",
+                            dependencies: [],
+                            path: "Sources/TargetA",
+                            isTest: false,
+                            settings: TargetSpecificSettings(
+                                linkerSettings: LinkerSettings(
+                                    unsafeFlags: ["some", "flags"]
+                                )
+                            ),
+                            conditionalCompilationTargetRequirement: .os(.Linux)
+                        )
+                    )
+                )
+            )
+        )
+        
+        let expectedContents = """
+        // swift-tools-version:1.2
+        import PackageDescription
+
+        var targets = [Target]()
+        #if os(Linux)
+        // MARK: TargetA
+        targets.append(
+            .target(
+                name: "TargetA",
+                dependencies: [
+                ],
+                path: "Sources/TargetA",
+                linkerSettings: [
+                    .unsafeFlags(["some", "flags"]),
+                ]
+            )
+        )
+        #endif
+
+        let package = Package(
+            name: "TestPackage",
+            platforms: [
+            ],
+            products: [
+            ],
+            dependencies: [
+            ],
+            targets: targets
+        )
+
+        """
+        
+        XCTAssertEqual(
+            contents.first!.contents,
             expectedContents
         )
     }

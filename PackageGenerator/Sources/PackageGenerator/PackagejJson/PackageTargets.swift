@@ -17,7 +17,7 @@ public indirect enum PackageTargets: Codable, Hashable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         
-        self = try Throwable.perform({
+        self = try FirstNonThrowingResultOf.perform({
             let stringRep = try container.decode(String.self)
             guard stringRep == PackageTargets.discoverAutomaticallyStringRep else {
                 fatalError("The value must be '\(PackageTargets.discoverAutomaticallyStringRep)', but found '\(stringRep)'")

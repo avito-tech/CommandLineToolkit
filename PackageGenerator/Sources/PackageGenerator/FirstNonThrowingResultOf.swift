@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Throwable {
+public enum FirstNonThrowingResultOf {
     private final class NoWorkWasDoneError: Error, CustomStringConvertible {
         var description: String {
             return "Throwable.works expects array with at least one value"

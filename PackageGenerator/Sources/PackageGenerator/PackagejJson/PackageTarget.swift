@@ -18,17 +18,22 @@ public struct PackageTarget: Codable, Hashable {
     /// Various target specific settings
     public let settings: TargetSpecificSettings
     
+    /// `#if` requirements for this target to be included into package
+    public let conditionalCompilationTargetRequirement: ConditionalCompilationTargetRequirement?
+    
     public init(
         name: String,
         dependencies: Set<String>,
         path: String,
         isTest: Bool,
-        settings: TargetSpecificSettings
+        settings: TargetSpecificSettings,
+        conditionalCompilationTargetRequirement: ConditionalCompilationTargetRequirement?
     ) {
         self.name = name
         self.dependencies = dependencies
         self.path = path
         self.isTest = isTest
         self.settings = settings
+        self.conditionalCompilationTargetRequirement = conditionalCompilationTargetRequirement
     }
 }

@@ -18,7 +18,7 @@ public enum ExternalPackageVersion: Codable, Hashable {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self = try Throwable.perform({
+        self = try FirstNonThrowingResultOf.perform({
             .upToNextMajor(try container.decode(String.self, forKey: .upToNextMajor))
         }, {
             .exact(try container.decode(String.self, forKey: .exact))

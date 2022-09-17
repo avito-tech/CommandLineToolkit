@@ -28,6 +28,105 @@ public final class StatementGenerator {
         
         output.append("// swift-tools-version:" + generatablePackage.packageJsonFile.swiftToolsVersion)
         output.append("import PackageDescription")
+        output.append("")
+        
+        output.append("var targets = [Target]()")
+        let targetStatements: [String] = try packageTargets.flatMap { target -> [String] in
+            var statements = [String]()
+            if let conditionalCompilationTargetRequirement = target.conditionalCompilationTargetRequirement {
+                statements.append("#if " + conditionalCompilationTargetRequirement.statement)
+            }
+            statements.append("// MARK: \(target.name)")
+            statements.append("targets.append(")
+            statements.append("    " + (!target.isTest ? ".target(" : ".testTarget("))
+            statements.append("        name: \"\(target.name)\",")
+            statements.append("        dependencies: [")
+            statements.append(
+                contentsOf: try target.dependencies
+                    .compactMap { importedModuleName -> ImportedDependency? in
+                        if generatablePackage.packageJsonFile.dependencies.implicitSystemModules.contains(importedModuleName) {
+                            return nil
+                        }
+                        
+                        for (externalPackageName, requirement) in generatablePackage.packageJsonFile.dependencies.external {
+                            if let cachedValue = importedDependencyCache[importedModuleName] {
+                                return cachedValue
+                            }
+                            
+                            switch requirement {
+                            case let .url(_, _, importMappings, targetNames):
+                                switch targetNames {
+                                case let .targetNames(targetNames):
+                                    if targetNames.contains(importedModuleName) {
+                                        let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, importMappings: importMappings, packageName: externalPackageName)
+                                        importedDependencyCache[importedModuleName] = result
+                                        return result
+                                    }
+                                case .generated:
+                                    let externalCheckoutPath = generatablePackage.checkout(forPackage: externalPackageName)
+                                    let anotherPackage = try GeneratablePackage(location: externalCheckoutPath)
+                                    anotherPackagesReferencedByPackageBeingGenerated.insert(anotherPackage)
+                                    if let importedDependency = try importedDependency(
+                                        forImportedModuleName: importedModuleName,
+                                        requiredBy: generatablePackage.packageJsonFile,
+                                        ifProvidedByAnotherGeneratablePackage: anotherPackage
+                                    ) {
+                                        importedDependencyCache[importedModuleName] = importedDependency
+                                        return importedDependency
+                                    }
+                                }
+                                continue
+                            case let .local(path, targetNames):
+                                switch targetNames {
+                                case let .targetNames(providedTargetNames):
+                                    if providedTargetNames.contains(importedModuleName) {
+                                        let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, importMappings: [:], packageName: externalPackageName)
+                                        importedDependencyCache[importedModuleName] = result
+                                        return result
+                                    }
+                                case .generated:
+                                    let onDiskGeneratablePackagePath = generatablePackage.location.appendingPathComponent(path, isDirectory: true)
+                                    let anotherPackage = try GeneratablePackage(location: onDiskGeneratablePackagePath)
+                                    anotherPackagesReferencedByPackageBeingGenerated.insert(anotherPackage)
+                                    if let importedDependency = try importedDependency(
+                                        forImportedModuleName: importedModuleName,
+                                        requiredBy: generatablePackage.packageJsonFile,
+                                        ifProvidedByAnotherGeneratablePackage: anotherPackage
+                                    ) {
+                                        importedDependencyCache[importedModuleName] = importedDependency
+                                        return importedDependency
+                                    }
+                                }
+                                continue
+                            }
+                        }
+                        
+                        let result = ImportedDependency.fromSamePackage(moduleName: importedModuleName)
+                        importedDependencyCache[importedModuleName] = result
+                        return result
+                    }
+                    .sorted()
+                    .map { IndentedStatement(level: 3, string: $0.statement + ",").statement }
+            )
+            statements.append("        ],")
+            statements.append("        path: \"\(target.path)\"" + (target.settings.linkerSettings.isDefined ? "," : ""))
+            
+            if target.settings.linkerSettings.isDefined {
+                statements.append("        linkerSettings: [")
+                statements.append(contentsOf: target.settings.linkerSettings.statements.map { "            " + $0 + "," })
+                statements.append("        ]")
+            }
+            
+            statements.append("    )")
+            statements.append(")")
+            if target.conditionalCompilationTargetRequirement != nil {
+                statements.append("#endif")
+            }
+            return statements
+        }
+        output.append(contentsOf: targetStatements.map { IndentedStatement(level: 0, string: $0).statement })
+        
+        output.append("")
         output.append("let package = Package(")
         output.append("    name: \"\(generatablePackage.packageJsonFile.name)\",")
         output.append("    platforms: [")
@@ -39,91 +138,7 @@ public final class StatementGenerator {
         output.append("    dependencies: [")
         output.append(contentsOf: generatablePackage.packageJsonFile.dependencies.statements.map { IndentedStatement(level: 2, string: $0 + ",").statement })
         output.append("    ],")
-        output.append("    targets: [")
-        let targetStatements: [String] = try packageTargets.flatMap { target -> [String] in
-            var statements = [String]()
-            statements.append(!target.isTest ? ".target(" : ".testTarget(")
-            statements.append("    name: \"\(target.name)\",")
-            statements.append("    dependencies: [")
-            statements.append(
-                contentsOf: try target.dependencies.compactMap { importedModuleName -> ImportedDependency? in
-                    if generatablePackage.packageJsonFile.dependencies.implicitSystemModules.contains(importedModuleName) {
-                        return nil
-                    }
-                    
-                    for (externalPackageName, requirement) in generatablePackage.packageJsonFile.dependencies.external {
-                        if let cachedValue = importedDependencyCache[importedModuleName] {
-                            return cachedValue
-                        }
-                        
-                        switch requirement {
-                        case let .url(_, _, importMappings, targetNames):
-                            switch targetNames {
-                            case let .targetNames(targetNames):
-                                if targetNames.contains(importedModuleName) {
-                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, importMappings: importMappings, packageName: externalPackageName)
-                                    importedDependencyCache[importedModuleName] = result
-                                    return result
-                                }
-                            case .generated:
-                                let externalCheckoutPath = generatablePackage.checkout(forPackage: externalPackageName)
-                                let anotherPackage = try GeneratablePackage(location: externalCheckoutPath)
-                                anotherPackagesReferencedByPackageBeingGenerated.insert(anotherPackage)
-                                if let importedDependency = try importedDependency(
-                                    forImportedModuleName: importedModuleName,
-                                    requiredBy: generatablePackage.packageJsonFile,
-                                    ifProvidedByAnotherGeneratablePackage: anotherPackage
-                                ) {
-                                    importedDependencyCache[importedModuleName] = importedDependency
-                                    return importedDependency
-                                }
-                            }
-                            continue
-                        case let .local(path, targetNames):
-                            switch targetNames {
-                            case let .targetNames(providedTargetNames):
-                                if providedTargetNames.contains(importedModuleName) {
-                                    let result = ImportedDependency.fromExternalPackage(moduleName: importedModuleName, importMappings: [:], packageName: externalPackageName)
-                                    importedDependencyCache[importedModuleName] = result
-                                    return result
-                                }
-                            case .generated:
-                                let onDiskGeneratablePackagePath = generatablePackage.location.appendingPathComponent(path, isDirectory: true)
-                                let anotherPackage = try GeneratablePackage(location: onDiskGeneratablePackagePath)
-                                anotherPackagesReferencedByPackageBeingGenerated.insert(anotherPackage)
-                                if let importedDependency = try importedDependency(
-                                    forImportedModuleName: importedModuleName,
-                                    requiredBy: generatablePackage.packageJsonFile,
-                                    ifProvidedByAnotherGeneratablePackage: anotherPackage
-                                ) {
-                                    importedDependencyCache[importedModuleName] = importedDependency
-                                    return importedDependency
-                                }
-                            }
-                            continue
-                        }
-                    }
-                    
-                    let result = ImportedDependency.fromSamePackage(moduleName: importedModuleName)
-                    importedDependencyCache[importedModuleName] = result
-                    return result
-                }.sorted().map { IndentedStatement(level: 2, string: $0.statement + ",").statement }
-            )
-            statements.append("    ],")
-            statements.append("    path: \"\(target.path)\"" + (target.settings.linkerSettings.isDefined ? "," : ""))
-            
-            if target.settings.linkerSettings.isDefined {
-                statements.append("    linkerSettings: [")
-                statements.append(contentsOf: target.settings.linkerSettings.statements.map { "        " + $0 + "," })
-                statements.append("    ]")
-            }
-            
-            statements.append("),")
-            return statements
-        }
-        output.append(contentsOf: targetStatements.map { IndentedStatement(level: 2, string: $0).statement })
-        output.append("    ]")
-        
+        output.append("    targets: targets")
         output.append(")")
         output.append("")
         
@@ -283,15 +298,5 @@ public final class StatementGenerator {
         static func < (left: Self, right: Self) -> Bool {
             left.moduleName < right.moduleName
         }
-    }
-}
-
-public extension LinkerSettings {
-    var statements: [String] {
-        var result = [String]()
-        if !unsafeFlags.isEmpty {
-            result.append(".unsafeFlags([" + unsafeFlags.map { "\"\($0)\"" }.joined(separator: ", ") + "])")
-        }
-        return result
     }
 }
