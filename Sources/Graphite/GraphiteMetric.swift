@@ -25,8 +25,8 @@ open class GraphiteMetric: CustomStringConvertible, Hashable {
         fixedComponents: [StaticString],
         variableComponents: [String],
         value: Double,
-        timestamp: Date)
-    {
+        timestamp: Date
+    ) {
         self.components = (fixedComponents.map { $0.description } + variableComponents).map { $0.suitableForMetric }
         self.value = value
         self.timestamp = timestamp
@@ -37,14 +37,20 @@ open class GraphiteMetric: CustomStringConvertible, Hashable {
     }
 
     public static func ==(left: GraphiteMetric, right: GraphiteMetric) -> Bool {
-        return left.components == right.components
-            && left.value == right.value
-            && left.timestamp == right.timestamp
+        left.components == right.components &&
+        left.value.isCloseTo(right.value) &&
+        left.timestamp == right.timestamp
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(components)
-        hasher.combine(value)
+        hasher.combine(round(value))
         hasher.combine(timestamp)
+    }
+}
+
+extension Double {
+    func isCloseTo(_ other: Self, precision: Double = 0.001) -> Bool {
+        abs(self - other) < precision
     }
 }

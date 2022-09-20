@@ -18,6 +18,7 @@ let package = Package(
         .library(name: "FileSystemTestHelpers", targets: ["FileSystemTestHelpers"]),
         .library(name: "Graphite", targets: ["Graphite"]),
         .library(name: "GraphiteClient", targets: ["GraphiteClient"]),
+        .library(name: "GraphiteTestHelpers", targets: ["GraphiteTestHelpers"]),
         .library(name: "IO", targets: ["IO"]),
         .library(name: "JSONStream", targets: ["JSONStream"]),
         .library(name: "LaunchdUtils", targets: ["LaunchdUtils"]),
@@ -170,6 +171,13 @@ let package = Package(
                 "IO",
             ],
             path: "Tests/GraphiteClientTests"
+        ),
+        .target(
+            name: "GraphiteTestHelpers",
+            dependencies: [
+                "Graphite",
+            ],
+            path: "Tests/GraphiteTestHelpers"
         ),
         .target(
             name: "IO",
