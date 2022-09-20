@@ -1,8 +1,8 @@
+import CLTExtensions
 import Foundation
 import ProcessController
 import PathLib
 import FileSystem
-import String
 
 public final class GitRepoRootProvider: RepoRootProvider {
     private let processControllerProvider: ProcessControllerProvider

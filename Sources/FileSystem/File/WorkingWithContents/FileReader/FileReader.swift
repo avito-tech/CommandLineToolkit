@@ -1,6 +1,6 @@
+import CLTExtensions
 import Foundation
 import PathLib
-import String
 
 public protocol FileReader {
     func contents(filePath: AbsolutePath) throws -> Data

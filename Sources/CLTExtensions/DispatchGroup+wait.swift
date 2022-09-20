@@ -1,5 +1,4 @@
 import Foundation
-import String
 
 public extension DispatchGroup {
     @discardableResult

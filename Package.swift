@@ -1,9 +1,9 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.5
 import PackageDescription
 let package = Package(
     name: "CommandLineToolkit",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v11),
     ],
     products: [
         .library(name: "AtomicModels", targets: ["AtomicModels"]),
@@ -13,7 +13,6 @@ let package = Package(
         .library(name: "DI", targets: ["DI"]),
         .library(name: "DateProvider", targets: ["DateProvider"]),
         .library(name: "DateProviderTestHelpers", targets: ["DateProviderTestHelpers"]),
-        .library(name: "DispatchGroup", targets: ["DispatchGroup"]),
         .library(name: "Environment", targets: ["Environment"]),
         .library(name: "FileSystem", targets: ["FileSystem"]),
         .library(name: "FileSystemTestHelpers", targets: ["FileSystemTestHelpers"]),
@@ -33,7 +32,6 @@ let package = Package(
         .library(name: "SignalHandling", targets: ["SignalHandling"]),
         .library(name: "SocketModels", targets: ["SocketModels"]),
         .library(name: "Statsd", targets: ["Statsd"]),
-        .library(name: "String", targets: ["String"]),
         .library(name: "SynchronousWaiter", targets: ["SynchronousWaiter"]),
         .library(name: "TestHelpers", targets: ["TestHelpers"]),
         .library(name: "Timer", targets: ["Timer"]),
@@ -109,13 +107,6 @@ let package = Package(
             path: "Tests/DateProviderTestHelpers"
         ),
         .target(
-            name: "DispatchGroup",
-            dependencies: [
-                "String",
-            ],
-            path: "Sources/DispatchGroup"
-        ),
-        .target(
             name: "Environment",
             dependencies: [
                 "CLTExtensions",
@@ -127,10 +118,10 @@ let package = Package(
         .target(
             name: "FileSystem",
             dependencies: [
+                "CLTExtensions",
                 "DI",
                 .product(name: "Glob", package: "Glob"),
                 "PathLib",
-                "String",
             ],
             path: "Sources/FileSystem"
         ),
@@ -327,12 +318,12 @@ let package = Package(
         .target(
             name: "RepoRoot",
             dependencies: [
+                "CLTExtensions",
                 "DI",
                 "Environment",
                 "FileSystem",
                 "PathLib",
                 "ProcessController",
-                "String",
             ],
             path: "Sources/RepoRoot"
         ),
@@ -393,19 +384,6 @@ let package = Package(
             path: "Tests/StatsdTests"
         ),
         .target(
-            name: "String",
-            dependencies: [
-            ],
-            path: "Sources/String"
-        ),
-        .testTarget(
-            name: "StringTests",
-            dependencies: [
-                "String",
-            ],
-            path: "Tests/StringTests"
-        ),
-        .target(
             name: "SynchronousWaiter",
             dependencies: [
                 "AtomicModels",
@@ -446,8 +424,8 @@ let package = Package(
         .target(
             name: "Tmp",
             dependencies: [
+                "CLTExtensions",
                 "PathLib",
-                "String",
             ],
             path: "Sources/Tmp"
         ),

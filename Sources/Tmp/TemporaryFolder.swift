@@ -1,3 +1,4 @@
+import CLTExtensions
 #if canImport(Darwin)
 import Darwin
 #endif
@@ -6,7 +7,6 @@ import Glibc
 #endif
 import Foundation
 import PathLib
-import String
 
 public final class TemporaryFolder {
     public let absolutePath: AbsolutePath
