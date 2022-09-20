@@ -8,7 +8,10 @@ action___generate() {
 }
 
 action___open() {
+    __close_spm_package_in_xcode_saving_changes
+    
     action___generate
+    
     perform_inside_project open Package.swift
 }
 

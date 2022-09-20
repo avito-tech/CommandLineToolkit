@@ -70,3 +70,27 @@ __make_swift_build_arch_options() {
     done
     echo "${arch_options[@]}"
 }
+
+__close_spm_package_in_xcode_saving_changes() {
+    local xcode_app_name; xcode_app_name=$(xcode-select -p | grep -oE "([^/]+.app)" | sed 's/\.app//')
+    local package_directory_path_absolute=$PROJECT_DIR
+    
+    # Note: to get API of Xcode, open "Script Editor", select "File" -> "Open Dictionary...", select Xcode
+    osascript -e '
+        tell application "'"$xcode_app_name"'"
+            if count of workspace documents > 0 then
+                repeat with index_of_document from 0 to count of workspace documents
+                    set document_path to path of workspace document index_of_document
+
+                    considering case
+                        if document_path = "'"$package_directory_path_absolute"'" then
+                            tell workspace document index_of_document
+                                close saving yes
+                            end tell
+                            exit repeat
+                        end if
+                    end considering
+                end repeat
+            end if
+        end tell'
+}
