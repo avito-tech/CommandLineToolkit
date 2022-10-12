@@ -20,7 +20,8 @@ public protocol FilePropertiesContainer {
     func permissions() throws -> Int16
     func set(permissions: Int16) throws
     
-    func size() throws -> Int
+    func fileSize() throws -> Int
+    func totalFileAllocatedSize() throws -> Int
 }
 
 extension FilePropertiesContainer {

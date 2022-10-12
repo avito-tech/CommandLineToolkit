@@ -69,6 +69,6 @@ extension FilePropertiesProvider {
     // MARK: -
     
     public func size(for path: AbsolutePath) throws -> Int {
-        try properties(forFileAtPath: path).size()
+        try properties(forFileAtPath: path).fileSize()
     }
 }

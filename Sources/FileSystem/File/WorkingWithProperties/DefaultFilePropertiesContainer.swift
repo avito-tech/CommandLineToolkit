@@ -10,11 +10,10 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     }
     
     public func modificationDate() throws -> Date {
-        let values = try path.fileUrl.resourceValues(forKeys: [.contentModificationDateKey])
-        guard let value = values.contentModificationDate else {
-            throw FilePropertiesContainerError.emptyValue(path, .contentModificationDateKey)
-        }
-        return value
+        try resourceValue(
+            key: .contentModificationDateKey,
+            keyPath: \.contentModificationDate
+        )
     }
     
     public func set(modificationDate: Date) throws {
@@ -25,11 +24,10 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     }
     
     public func isExecutable() throws -> Bool {
-        let values = try path.fileUrl.resourceValues(forKeys: [.isExecutableKey])
-        guard let value = values.isExecutable else {
-            throw FilePropertiesContainerError.emptyValue(path, .isExecutableKey)
-        }
-        return value
+        try resourceValue(
+            key: .isExecutableKey,
+            keyPath: \.isExecutable
+        )
     }
     
     public func permissions() throws -> Int16 {
@@ -59,43 +57,45 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     }
     
     public func isDirectory() throws -> Bool {
-        let values = try path.fileUrl.resourceValues(forKeys: [.isDirectoryKey])
-        guard let value = values.isDirectory else {
-            throw FilePropertiesContainerError.emptyValue(path, .isDirectoryKey)
-        }
-        return value
+        try resourceValue(
+            key: .isDirectoryKey,
+            keyPath: \.isDirectory
+        )
     }
     
     public func isRegularFile() throws -> Bool {
-        let values = try path.fileUrl.resourceValues(forKeys: [.isRegularFileKey])
-        guard let value = values.isRegularFile else {
-            throw FilePropertiesContainerError.emptyValue(path, .isRegularFileKey)
-        }
-        return value
+        try resourceValue(
+            key: .isRegularFileKey,
+            keyPath: \.isRegularFile
+        )
     }
     
     public func isHidden() throws -> Bool {
-        let values = try path.fileUrl.resourceValues(forKeys: [.isHiddenKey])
-        guard let value = values.isHidden else {
-            throw FilePropertiesContainerError.emptyValue(path, .isHiddenKey)
-        }
-        return value
+        try resourceValue(
+            key: .isHiddenKey,
+            keyPath: \.isHidden
+        )
     }
     
-    public func size() throws -> Int {
-        let values = try path.fileUrl.resourceValues(forKeys: [.fileSizeKey])
-        guard let value = values.fileSize else {
-            throw FilePropertiesContainerError.emptyValue(path, .fileSizeKey)
-        }
-        return value
+    public func fileSize() throws -> Int {
+        try resourceValue(
+            key: .fileSizeKey,
+            keyPath: \.fileSize
+        )
+    }
+    
+    public func totalFileAllocatedSize() throws -> Int {
+        try resourceValue(
+            key: .totalFileAllocatedSizeKey,
+            keyPath: \.totalFileAllocatedSize
+        )
     }
     
     public func isSymbolicLink() throws -> Bool {
-        let values = try path.fileUrl.resourceValues(forKeys: [.isSymbolicLinkKey])
-        guard let value = values.isSymbolicLink else {
-            throw FilePropertiesContainerError.emptyValue(path, .isSymbolicLinkKey)
-        }
-        return value
+        try resourceValue(
+            key: .isSymbolicLinkKey,
+            keyPath: \.isSymbolicLink
+        )
     }
     
     public func isBrokenSymbolicLink() throws -> Bool {
@@ -142,5 +142,16 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
             return nil
         }
         return DefaultFilePropertiesContainer(path: symbolicLinkPath)
+    }
+    
+    private func resourceValue<T>(
+        key: URLResourceKey,
+        keyPath: KeyPath<URLResourceValues, T?>
+    ) throws -> T {
+        let values = try path.fileUrl.resourceValues(forKeys: [key])
+        guard let value = values[keyPath: keyPath] else {
+            throw FilePropertiesContainerError.emptyValue(path, key)
+        }
+        return value
     }
 }

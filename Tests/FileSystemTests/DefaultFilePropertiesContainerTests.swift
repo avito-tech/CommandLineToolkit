@@ -90,7 +90,13 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
     func test___size() throws {
         temporaryFile.fileHandleForWriting.write(Data([0x00, 0x01, 0x02]))
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
-        XCTAssertEqual(try properties.size(), 3)
+        XCTAssertEqual(try properties.fileSize(), 3)
+    }
+    
+    func test___totalFileAllocatedSize() throws {
+        temporaryFile.fileHandleForWriting.write(Data([0x00, 0x01, 0x02]))
+        let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
+        XCTAssertEqual(try properties.totalFileAllocatedSize(), 4096)
     }
     
     func test___symbolic_link___for_absolute_directory() throws {

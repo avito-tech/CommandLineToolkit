@@ -32,8 +32,11 @@ open class FakeFilePropertiesContainer: FilePropertiesContainer {
     public var hidden = false
     public func isHidden() throws -> Bool { hidden }
     
-    public var fileSize = 0
-    public func size() throws -> Int { fileSize }
+    public var fileSizeStub = 0
+    public func fileSize() throws -> Int { fileSizeStub }
+    
+    public var totalFileAllocatedSizeStub = 0
+    public func totalFileAllocatedSize() throws -> Int { totalFileAllocatedSizeStub }
     
     public var symbolicLink = false
     public func isSymbolicLink() throws -> Bool { symbolicLink }
