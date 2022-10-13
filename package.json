@@ -1,5 +1,9 @@
 {
   "dependencies" : {
+    "mirrorFilePath": {
+        "root": "repoRoot",
+        "relativePath": "ci_automation/swift/spm_mirrors.json"
+    },
     "external" : {
         "Signals": {
             "url": "https://github.com/IBM-Swift/BlueSignals.git",

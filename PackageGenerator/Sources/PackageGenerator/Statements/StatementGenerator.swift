@@ -183,19 +183,50 @@ public final class StatementGenerator {
             from: sourcePath,
             generatablePackageLocation: generatablePackage.location
         )
-        
+
         try FileManager().createDirectory(
             at: generatablePackage.mirrorsFile_xcode13_3.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
         
-        log("Copying \(path.path) to \(generatablePackage.mirrorsFile_xcode13_3.path)")
-        try? FileManager().removeItem(at: generatablePackage.mirrorsFile_xcode13_3)
-        try FileManager().copyItem(at: path, to: generatablePackage.mirrorsFile_xcode13_3)
+        struct Mirrors: Codable {
+            let object: [ObjectItem]
+            let version: Int
+        }
         
-        log("Copying \(path.path) to \(generatablePackage.mirrorsFile_pre_xcode13_3.path)")
+        struct ObjectItem: Codable {
+            let mirror: String
+            let original: String
+        }
+        
+        let mirrors = try JSONDecoder().decode(
+            Mirrors.self,
+            from: try Data(contentsOf: path)
+        )
+        
+        let newObject = mirrors.object.flatMap { objectItem in
+            ["", "/", ".git", ".git/"].map { suffix in
+                ObjectItem(
+                    mirror: objectItem.mirror,
+                    original: objectItem.original + suffix
+                )
+            }
+        }
+        
+        let newMirrors = Mirrors(
+            object: newObject,
+            version: mirrors.version
+        )
+        
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+        let newMirrorsData = try encoder.encode(newMirrors)
+        
+        try? FileManager().removeItem(at: generatablePackage.mirrorsFile_xcode13_3)
+        try newMirrorsData.write(to: generatablePackage.mirrorsFile_xcode13_3, options: .atomic)
+        
         try? FileManager().removeItem(at: generatablePackage.mirrorsFile_pre_xcode13_3)
-        try FileManager().copyItem(at: path, to: generatablePackage.mirrorsFile_pre_xcode13_3)
+        try newMirrorsData.write(to: generatablePackage.mirrorsFile_pre_xcode13_3, options: .atomic)
     }
     
     private func importedDependency(
