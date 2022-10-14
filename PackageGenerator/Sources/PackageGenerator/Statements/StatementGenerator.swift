@@ -195,8 +195,8 @@ public final class StatementGenerator {
         }
         
         struct ObjectItem: Codable {
-            let mirror: String
-            let original: String
+            let mirror: URL
+            let original: URL
         }
         
         let mirrors = try JSONDecoder().decode(
@@ -204,11 +204,25 @@ public final class StatementGenerator {
             from: try Data(contentsOf: path)
         )
         
-        let newObject = mirrors.object.flatMap { objectItem in
-            ["", "/", ".git", ".git/"].map { suffix in
-                ObjectItem(
+        let newObject = try mirrors.object.flatMap { (objectItem: ObjectItem) -> [ObjectItem] in
+            // order of suffixes matters, each suffix should be a substring of some previous one
+            let suffixes = [".git/", ".git", "/", ""]
+            
+            var originalURLAbsoluteString = objectItem.original.absoluteString
+            
+            if let suffixRange = suffixes.compactMap({ suffix in
+                objectItem.original.absoluteString.range(of: suffix)
+            }).first {
+                originalURLAbsoluteString.removeSubrange(suffixRange)
+            }
+            
+            return try suffixes.map { suffix in
+                guard let original = URL(string: originalURLAbsoluteString + suffix) else {
+                    throw "URL(string: \(originalURLAbsoluteString + suffix)) returned nil"
+                }
+                return ObjectItem(
                     mirror: objectItem.mirror,
-                    original: objectItem.original + suffix
+                    original: original
                 )
             }
         }
