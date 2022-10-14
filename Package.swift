@@ -35,7 +35,9 @@ targets.append(
     .testTarget(
         name: "CLTExtensionsTests",
         dependencies: [
+            "CLTCollections",
             "CLTExtensions",
+            "TestHelpers",
         ],
         path: "Tests/CLTExtensionsTests"
     )
