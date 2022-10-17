@@ -3,12 +3,14 @@ import Foundation
 public extension FileManager {
     func createDirectory(
         atPath path: AbsolutePath,
-        withIntermediateDirectories: Bool = true
+        withIntermediateDirectories: Bool = true,
+        attributes: [FileAttributeKey: Any]? = nil
     ) throws {
         if !directoryExists(path: path) {
             try createDirectory(
                 atPath: path.pathString,
-                withIntermediateDirectories: withIntermediateDirectories
+                withIntermediateDirectories: withIntermediateDirectories,
+                attributes: attributes
             )
         }
     }

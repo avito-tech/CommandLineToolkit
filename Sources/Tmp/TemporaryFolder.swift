@@ -50,23 +50,23 @@ public final class TemporaryFolder {
     }
     
     @discardableResult
-    public func createDirectory(components: [String]) throws -> AbsolutePath {
+    public func createDirectory(components: [String], attributes: [FileAttributeKey: Any]? = nil) throws -> AbsolutePath {
         let path = pathWith(components: components)
-        try FileManager.default.createDirectory(atPath: path)
+        try FileManager.default.createDirectory(atPath: path, attributes: attributes)
         return path
     }
     
     @discardableResult
-    public func createFile(components: [String] = [], filename: String, contents: Data? = nil) throws -> AbsolutePath {
+    public func createFile(components: [String] = [], filename: String, contents: Data? = nil, attributes: [FileAttributeKey: Any]? = nil) throws -> AbsolutePath {
         let container = try createDirectory(components: components)
         let path = container.appending(filename)
-        FileManager.default.createFile(atPath: path.pathString, contents: contents)
+        FileManager.default.createFile(atPath: path.pathString, contents: contents, attributes: attributes)
         return path
     }
     
     @discardableResult
-    public func createFile(components: [String] = [], filename: String, contents: String) throws -> AbsolutePath {
-        return try createFile(components: components, filename: filename, contents: contents.dataUsingUtf8())
+    public func createFile(components: [String] = [], filename: String, contents: String, attributes: [FileAttributeKey: Any]? = nil) throws -> AbsolutePath {
+        return try createFile(components: components, filename: filename, contents: contents.dataUsingUtf8(), attributes: attributes)
     }
     
     public func createSymbolicLink(at path: RelativePath, destination: Path) throws -> AbsolutePath {
