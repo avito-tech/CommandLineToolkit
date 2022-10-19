@@ -7,11 +7,8 @@ public struct GeneratedPackageContents: Hashable {
 
 public final class StatementGenerator {
     private var packageTargetCache = [URL: [PackageTarget]]()
-    private let filePathResolver: FilePathResolver
     
-    public init(filePathResolver: FilePathResolver) {
-        self.filePathResolver = filePathResolver
-    }
+    public init() {}
     
     public func generatePackageSwiftCode(
         generatablePackage: GeneratablePackage
@@ -142,9 +139,7 @@ public final class StatementGenerator {
         output.append(")")
         output.append("")
         
-        if let mirrorFile = generatablePackage.packageJsonFile.dependencies.mirrorFilePath {
-            try prepareMirrorFile(sourcePath: mirrorFile, generatablePackage: generatablePackage)
-        }
+        try prepareMirrorsFileIfNeeded(generatablePackage: generatablePackage)
         
         try didGenerate(generatablePackage: generatablePackage)
         
@@ -178,12 +173,11 @@ public final class StatementGenerator {
         }
     }
     
-    private func prepareMirrorFile(sourcePath: FilePath, generatablePackage: GeneratablePackage) throws {
-        let path = try filePathResolver.absoluteUrl(
-            from: sourcePath,
-            generatablePackageLocation: generatablePackage.location
-        )
-
+    private func prepareMirrorsFileIfNeeded(generatablePackage: GeneratablePackage) throws {
+        guard let mirrorsFilePath = generatablePackage.packageJsonFile.dependencies.mirrorsFilePath
+                ?? defaultMirrorsFilePathIfExists(generatablePackage: generatablePackage)
+        else { return }
+        
         try FileManager().createDirectory(
             at: generatablePackage.mirrorsFile_xcode13_3.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -199,9 +193,11 @@ public final class StatementGenerator {
             let original: URL
         }
         
+        let mirrorsFileData = try Data(contentsOf: URL(fileURLWithPath: mirrorsFilePath, isDirectory: false))
+        
         let mirrors = try JSONDecoder().decode(
             Mirrors.self,
-            from: try Data(contentsOf: path)
+            from: mirrorsFileData
         )
         
         let newObject = try mirrors.object.flatMap { (objectItem: ObjectItem) -> [ObjectItem] in
@@ -241,6 +237,19 @@ public final class StatementGenerator {
         
         try? FileManager().removeItem(at: generatablePackage.mirrorsFile_pre_xcode13_3)
         try newMirrorsData.write(to: generatablePackage.mirrorsFile_pre_xcode13_3, options: .atomic)
+    }
+    
+    private func defaultMirrorsFilePathIfExists(generatablePackage: GeneratablePackage) -> String? {
+        let allDirectoriesFromPackageToRoot = sequence(first: generatablePackage.location.standardizedFileURL) {
+            let next = $0.deletingLastPathComponent()
+            return next == URL(fileURLWithPath: "/..", isDirectory: true) ? nil : next
+        }
+        
+        let defaultMirrorsFilePath = allDirectoriesFromPackageToRoot
+            .map{ $0.appendingPathComponent(PackageDependencies.defaultMirrorsFileName, isDirectory: false) }
+            .first { (try? $0.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true }
+        
+        return defaultMirrorsFilePath?.absoluteString.replacingOccurrences(of: "file://", with: "")
     }
     
     private func importedDependency(

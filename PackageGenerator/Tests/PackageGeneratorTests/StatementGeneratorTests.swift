@@ -3,11 +3,7 @@ import XCTest
 
 // swiftlint:disable force_unwrapping
 final class StatementGeneratorTests: XCTestCase {
-    private lazy var statementGenerator = StatementGenerator(
-        filePathResolver: FilePathResolverImpl(
-            repoRootProvider: RepoRootProviderImpl()
-        )
-    )
+    private lazy var statementGenerator = StatementGenerator()
     
     func test() throws {
         let contents = try statementGenerator.generatePackageSwiftCode(
@@ -29,7 +25,8 @@ final class StatementGeneratorTests: XCTestCase {
                                 importMappings: [:],
                                 targetNames: .targetNames(["SomeExternalModule"])
                             )
-                        ]
+                        ],
+                        mirrorsFilePath: nil
                     ),
                     targets: PackageTargets.single(
                         PackageTarget(
@@ -93,7 +90,8 @@ final class StatementGeneratorTests: XCTestCase {
                     products: PackageProducts.explicit([]),
                     dependencies: PackageDependencies(
                         implicitSystemModules: [],
-                        external: [:]
+                        external: [:],
+                        mirrorsFilePath: nil
                     ),
                     targets: .multiple(
                         [
@@ -185,7 +183,8 @@ final class StatementGeneratorTests: XCTestCase {
                     products: PackageProducts.explicit([]),
                     dependencies: PackageDependencies(
                         implicitSystemModules: [],
-                        external: [:]
+                        external: [:],
+                        mirrorsFilePath: nil
                     ),
                     targets: PackageTargets.single(
                         PackageTarget(
@@ -253,7 +252,8 @@ final class StatementGeneratorTests: XCTestCase {
                     products: PackageProducts.explicit([]),
                     dependencies: PackageDependencies(
                         implicitSystemModules: [],
-                        external: [:]
+                        external: [:],
+                        mirrorsFilePath: nil
                     ),
                     targets: PackageTargets.single(
                         PackageTarget(

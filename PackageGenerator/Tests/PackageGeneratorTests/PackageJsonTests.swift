@@ -25,7 +25,8 @@ final class PackageJsonTests: XCTestCase {
                         importMappings: [:],
                         targetNames: .targetNames(["ExternalPackageName"])
                     ),
-                ]
+                ],
+                mirrorsFilePath: nil
             ),
             targets: .discoverAutomatically
         )
@@ -82,7 +83,8 @@ final class PackageJsonTests: XCTestCase {
                         importMappings: [:],
                         targetNames: .targetNames(["ExternalPackageName"])
                     ),
-                ]
+                ],
+                mirrorsFilePath: nil
             ),
             targets: .single(
                 PackageTarget(
@@ -143,6 +145,71 @@ final class PackageJsonTests: XCTestCase {
                         "os": "Linux"
                     }
                 }
+            }
+            """
+        )
+    }
+    
+    func test___mirrors_file_path___when_explicitly_set() throws {
+        let jsonFile = PackageJsonFile(
+            swiftToolsVersion: "",
+            name: "",
+            platforms: [],
+            products: .explicit([]),
+            dependencies: PackageDependencies(
+                implicitSystemModules: [],
+                external: [:],
+                mirrorsFilePath: "/Users/test/my_project/my_mirrors.json"
+            ),
+            targets: .multiple([])
+        )
+        
+        try assert(
+            jsonFile: jsonFile,
+            equalsJsonRepresentation: """
+             {
+                "dependencies": {
+                    "mirrorsFilePath": "/Users/test/my_project/my_mirrors.json",
+                    "external": {},
+                    "implicitSystemModules": []
+                },
+                "name": "",
+                "platforms": [],
+                "products": [],
+                "swiftToolsVersion": "",
+                "targets": [],
+            }
+            """
+        )
+    }
+    
+    func test___mirrors_file_path___when_not_explicitly_set() throws {
+        let jsonFile = PackageJsonFile(
+            swiftToolsVersion: "",
+            name: "",
+            platforms: [],
+            products: .explicit([]),
+            dependencies: PackageDependencies(
+                implicitSystemModules: [],
+                external: [:],
+                mirrorsFilePath: nil
+            ),
+            targets: .multiple([])
+        )
+        
+        try assert(
+            jsonFile: jsonFile,
+            equalsJsonRepresentation: """
+             {
+                "dependencies": {
+                    "external": {},
+                    "implicitSystemModules": []
+                },
+                "name": "",
+                "platforms": [],
+                "products": [],
+                "swiftToolsVersion": "",
+                "targets": [],
             }
             """
         )
