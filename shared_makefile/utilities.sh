@@ -63,7 +63,7 @@ __make_swift_build_arch_options() {
       arm64
       x86_64
     )
-    local archs=("${input_archs[@]:-${all_archs[@]}}") # all_archs if input_archs are empty, otherwise input_archs
+    local archs=("${input_archs[@]+${all_archs[@]}}") # all_archs if input_archs are empty, otherwise input_archs
     local arch_options=()
     for arch in "${archs[@]}"; do
         arch_options+=("--arch $arch")
