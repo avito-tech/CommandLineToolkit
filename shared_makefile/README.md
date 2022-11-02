@@ -56,6 +56,16 @@ action___install() {
 
 There's also `utilities.sh` for more low level functions.
 
+## Custom help message
+
+Adding custom help message (for default action `help`) for a specific action:
+
+```
+action_help___foo() {
+    echo 'Use this for bla-bla'
+}
+```
+
 ## How it works
 
 - Makefile gets targets via calling `make.sh --project-dir <...> --targets`

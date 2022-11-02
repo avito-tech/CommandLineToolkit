@@ -6,6 +6,8 @@ shared_make_sh_path := "$(shared_makefile_dir)/make.sh"
 
 targets := $(shell "$(shared_make_sh_path)" --project-dir "$(project_dir)" --targets)
 
+__first_target_aka_default_target__: help
+
 $(targets):
-	bash "${shared_make_sh_path}" --project-dir "${project_dir}" $@
+	@bash "${shared_make_sh_path}" --project-dir "${project_dir}" $@
 .PHONY: $(targets)

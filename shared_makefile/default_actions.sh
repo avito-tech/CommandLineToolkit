@@ -49,3 +49,22 @@ action___run_ci_tests() {
     export SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED=true
     action___test --enable-code-coverage -Xswiftc -DTEST
 }
+
+action___help() {
+    echo
+    echo "We know the following actions:"
+    echo
+    for action_name in $(__list_all_action_functions | __convert_from_action_function_to_action_name); do
+        local action_help_function_name; action_help_function_name="$(__action_help_function_name "$action_name")"
+        if __function_exists "$action_help_function_name"; then
+            echo "- $action_name: $($action_help_function_name | __indent_lines_except_first)"
+        else
+            echo "- $action_name"
+        fi
+    done
+    echo
+}
+
+__indent_lines_except_first() {
+    perl -pe 's/\n/\n    /'
+}

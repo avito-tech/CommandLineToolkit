@@ -1,12 +1,12 @@
 ACTION_PREFIX="action___"
+ACTION_HELP_PREFIX="action_help___"
 
 # Removes action from list of available actions.
 # If for some reason default action doesn't work or make sense, it can be removed.
 __disable_action() {
     local action_name=$1
-    local action_function="${ACTION_PREFIX}${action_name}"
     
-    unset -f "$action_function"
+    unset -f "$(__action_function_name "$action_name")"
 }
 
 __execute_action() {
@@ -17,13 +17,31 @@ __execute_action() {
     shift
     shift
     
-    local action_function="${ACTION_PREFIX}${action_name}"
+    local action_function; action_function="$(__action_function_name "$action_name")"
 
     if __list_all_action_functions | grep --quiet --extended-regexp "^$action_function$"; then
         "$action_function" "$@"
     else
         __fatal_error "Action ${action_name} is not defined. You can add ${action_function} to \`custom_actions.sh\` in your project dir (PROJECT_DIR: ${project_dir})"
     fi
+}
+
+__action_function_name() {
+    local action_name=$1
+    
+    echo "${ACTION_PREFIX}${action_name}"
+}
+
+__action_help_function_name() {
+    local action_name=$1
+    
+    echo "${ACTION_HELP_PREFIX}${action_name}"
+}
+
+__function_exists() {
+    local function_name=$1
+    
+    [[ $(type -t "$function_name") == "function" ]]
 }
 
 __all_actions() {
