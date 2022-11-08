@@ -25,22 +25,24 @@ public final class CommandDiValidator {
     public func validate(
         commandType: ParsableCommand.Type
     ) throws {
-        // May contain DI resolves
-        let commandLogicProviderOrNil = try self.commandLogicProvider(
-            commandType: commandType
-        )
-        
-        if let commandLogicProvider = commandLogicProviderOrNil {
-            try validate(commandLogicProvider: commandLogicProvider)
-        }
-        
-        // May contain DI resolves (can crash)
-        _ = commandType.helpMessage()
-        
-        try commandType.configuration.subcommands.forEach {
-            try validate(
-                commandType: $0
+        try wrapError(message: "Failed to validate command: \(commandType)") {
+            // May contain DI resolves
+            let commandLogicProviderOrNil = try self.commandLogicProvider(
+                commandType: commandType
             )
+            
+            if let commandLogicProvider = commandLogicProviderOrNil {
+                try validate(commandLogicProvider: commandLogicProvider)
+            }
+            
+            // May contain DI resolves (can crash)
+            _ = commandType.helpMessage()
+            
+            try commandType.configuration.subcommands.forEach {
+                try validate(
+                    commandType: $0
+                )
+            }
         }
     }
     
@@ -89,7 +91,6 @@ public final class CommandDiValidator {
         do {
             return try body()
         } catch {
-            
             throw Error(description: "\(message): \(error)")
         }
     }
