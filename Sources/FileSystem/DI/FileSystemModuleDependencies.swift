@@ -43,7 +43,8 @@ public final class FileSystemModuleDependencies: ModuleDependencies {
                 filePropertiesProvider: di.resolve(),
                 fileSystemPropertiesProvider: di.resolve(),
                 commonlyUsedPathsProviderFactory: di.resolve(),
-                fileToucher: di.resolve()
+                fileToucher: di.resolve(),
+                pathLinker: di.resolve()
             )
         }
         di.register(type: FileSystemEnumeratorFactory.self) { di in
@@ -110,6 +111,13 @@ public final class FileSystemModuleDependencies: ModuleDependencies {
         di.register(type: CommonlyUsedPathsProvider.self) { di in
             let factory = try di.resolve() as CommonlyUsedPathsProviderFactory
             return factory.commonlyUsedPathsProvider
+        }
+        di.register(type: PathLinker.self) { di in
+            try PathLinkerImpl(
+                fileManager: di.resolve(),
+                pathDeleter: di.resolve(),
+                directoryCreator: di.resolve()
+            )
         }
     }
 }
