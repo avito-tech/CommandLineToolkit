@@ -1,7 +1,7 @@
 import Environment
 import PathLib
 
-// When executable is insude repo or program is running from Xcode
+// When executable is inside repo or program is running from Xcode
 // and sources are in repo
 public final class CurrentExecutableRepoRootProvider: RepoRootProvider {
     private let repoRootProviderFactory: RepoRootProviderFactory
