@@ -50,7 +50,7 @@ Note that you can use functions from `actions_support.sh`, for example, to expor
 ```
 action___install() {
     action___build
-    build_and_export_executable "avito-codegen" "$PROJECT_DIR"
+    build_and_deploy_executable_to_local_path "avito-codegen" "$PROJECT_DIR"
 }
 ```
 

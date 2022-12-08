@@ -1,4 +1,4 @@
-build_and_export_executable() {
+build_and_deploy_executable_to_local_path() {
     local executable_name=$1 # basename of file in release build folder
     local destination_path=$2 # exact file path or folder
     local archs_to_build=("${@:3}") # architectures to build into fat binary
@@ -13,14 +13,16 @@ build_and_export_executable() {
     fi
     
     action___build ${archs_to_build[@]+"${archs_to_build[@]}"}
-    export_executable "$executable_path" "$destination_path"
+
+    prepare_executable_and_deploy_to_local_path "$executable_path" "$destination_path"
 }
 
-export_executable() {
+prepare_executable_and_deploy_to_local_path() {
     local executable_path=$1
     local destination_path=$2
 
     strip "$executable_path"
+    /usr/bin/codesign --force --sign - --timestamp=none "$executable_path"
     mv -f "$executable_path" "$destination_path"
 }
 
@@ -51,7 +53,7 @@ perform_ignoring_nonzero_exit_status_if_stderr_contains() {
 	$@ 2> >(tee -a "$stderr_path" >&2) || result=$?
 
     if [ $result != 0 ]; then
-        if grep "no tests found" "$stderr_path" 1>/dev/null; then
+        if grep "$grep_pattern" "$stderr_path" 1>/dev/null; then
             # ok
             return 0
         else
