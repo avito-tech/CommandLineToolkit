@@ -61,3 +61,52 @@ perform_ignoring_nonzero_exit_status_if_stderr_contains() {
         fi
     fi
 }
+
+# Note: to make `xcscheme.template` for another project, create it first in Xcode,
+# copy it from .swiftpm directory (see `__get_target_schemes_directory`),
+# modify it the same way as for other xcsheme templates, and add
+# code to project's `custom_action.sh` the same way as for other project's `custom_action.sh`
+generate_scheme() {
+    local default_scheme_template_path="$PROJECT_DIR/xcscheme.template"
+
+    local scheme_name=$1
+    local render_template_function=$2  # should process template from stdin and render scheme to stdout
+    local scheme_template_path=${3:-$default_scheme_template_path}
+
+    body() {
+        local target_schemes_directory; target_schemes_directory=$(__get_target_schemes_directory)
+
+        local target_scheme="$target_schemes_directory/$scheme_name.xcscheme"
+        mkdir -p "$(dirname "$target_scheme")"
+
+        "$render_template_function" < "$scheme_template_path" > "$target_scheme"
+    }
+
+    perform_inside_project \
+        with_internal_field_separator $'\n' \
+        body
+}
+
+remove_old_schemes() {
+    rm -f "$(__get_target_schemes_directory)"/*.xcscheme
+}
+
+# Arguments: command line arguments.
+# Renders XML to stdout.
+# Example:
+# ```
+# make_command_line_arguments_plist_entry my_project_command --my-project-command-argument
+# ```
+make_command_line_arguments_plist_entry() {
+    while [ $# -gt 0 ]; do
+        echo "         <CommandLineArgument"
+        echo "            argument = \"$1\""
+        echo "            isEnabled = \"YES\">"
+        echo "         </CommandLineArgument>"
+        shift
+    done
+}
+
+__get_target_schemes_directory() {
+    echo "$PROJECT_DIR/.swiftpm/xcode/xcshareddata/xcschemes/"
+}

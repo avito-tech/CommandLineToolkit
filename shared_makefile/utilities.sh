@@ -94,3 +94,18 @@ __close_spm_package_in_xcode_saving_changes() {
             end if
         end tell'
 }
+
+# Code of escaping is from here: https://stackoverflow.com/a/10467453 (for example, you can replace `/` special characters)
+replace() {
+    local string=$1
+    local replacement=$2
+
+    sed "s/$(__escape_string_for_sed "$string")/$(__escape_replacement_for_sed "$replacement")/g"
+}
+
+__escape_string_for_sed() {
+    echo $1 | sed -e 's/\([[\/.*]\|\]\)/\\&/g'
+}
+__escape_replacement_for_sed() {
+    echo $1 | sed -e 's/[\/&]/\\&/g'
+}
