@@ -246,7 +246,7 @@ public final class StatementGenerator {
         }
         
         let defaultMirrorsFilePath = allDirectoriesFromPackageToRoot
-            .map{ $0.appendingPathComponent(PackageDependencies.defaultMirrorsFileName, isDirectory: false) }
+            .map { $0.appendingPathComponent(PackageDependencies.defaultMirrorsFileName, isDirectory: false) }
             .first { (try? $0.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true }
         
         return defaultMirrorsFilePath?.absoluteString.replacingOccurrences(of: "file://", with: "")
