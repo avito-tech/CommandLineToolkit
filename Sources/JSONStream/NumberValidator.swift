@@ -19,7 +19,9 @@ class NumberValidator {
     }
     
     static func validateStringRepresentationOfNumber(_ string: String) throws -> NSNumber {
-        guard string.rangeOfCharacter(from: unsupportedCharacterSet) == nil else { throw Error.invalidNumber(string) }
+        guard string.rangeOfCharacter(from: unsupportedCharacterSet) == nil else {
+            throw Error.invalidNumber(string)
+        }
         
         let parts = string.components(separatedBy: ".")
         

@@ -130,7 +130,9 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     }
     
     public func waitForProcessToDie() {
-        openPipeFileHandleGroup.wait()
+        if waitForOpenPipeFileHandleGroup {
+            openPipeFileHandleGroup.wait()
+        }
         processTerminationHandlerGroup.wait()
     }
     
@@ -251,6 +253,17 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     
     // MARK: - Processing Output
     
+    private var waitForOpenPipeFileHandleGroup: Bool {
+        // https://github.com/apple/swift-corelibs-foundation/issues/3275
+#if os(macOS)
+        return true
+#elseif os(Linux)
+        return false
+#else
+        #error("Unsupported OS")
+#endif
+    }
+    
     private func streamFromPipeIntoHandle(
         pipe: Pipe,
         onNewData: @escaping (Data) -> (),
@@ -260,7 +273,9 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
             let data = handle.availableData
             if data.isEmpty {
                 handle.readabilityHandler = nil
+#if os(macOS)
                 pipe.fileHandleForReading.closeFile()
+#endif
                 onEndOfData()
             } else {
                 onNewData(data)

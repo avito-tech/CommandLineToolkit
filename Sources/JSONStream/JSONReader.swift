@@ -392,7 +392,9 @@ public final class JSONReader {
         case let (.inNumericValue(key, storage), .inObject(_, object)):
             // case: {"key": -123.45e-3}
             guard let key = key else { throw JSONReaderFatalError.objectMustHaveKey(parent: currentContext, child: popedContext) }
-            guard let parsedNumber = storage.parsedNumber else { throw JSONReaderError.invalidNumberValue(storage.bytes) }
+            guard let parsedNumber = storage.parsedNumber else {
+                throw JSONReaderError.invalidNumberValue(storage.bytes)
+            }
             object[key] = parsedNumber
             
             /**
@@ -430,7 +432,9 @@ public final class JSONReader {
         case let (.inNumericValue(key, storage), .inArray(_, array)):
             // case: [-123.45e-3]
             // arrays do not have keys so key must be nil
-            guard key == nil, let parsedNumber = storage.parsedNumber else { throw JSONReaderError.invalidNumberValue(storage.bytes) }
+            guard key == nil, let parsedNumber = storage.parsedNumber else {
+                throw JSONReaderError.invalidNumberValue(storage.bytes)
+            }
             array.add(parsedNumber)
             
             /**

@@ -56,18 +56,24 @@ class JSONReaderNumberEdgeCaseTests: XCTestCase {
     }
     
     func testNegativeNumberWithWrongMinusMinusxponentialPartFails() throws {
+        try XCTSkipIf(shouldSkipDueToNumberFormatDifferences())
+        
         let jsonStream = FakeJSONStream(string: "[-0.1e--1]")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
         XCTAssertThrowsError(try reader.start())
     }
     
     func testNegativeNumberWithWrongPlusPlusExponentialPartFails() throws {
+        try XCTSkipIf(shouldSkipDueToNumberFormatDifferences())
+        
         let jsonStream = FakeJSONStream(string: "[-0.1e++1]")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
         XCTAssertThrowsError(try reader.start())
     }
     
     func testNegativeNumberWithWrongPlusMinusExponentialPartFails() throws {
+        try XCTSkipIf(shouldSkipDueToNumberFormatDifferences())
+
         let jsonStream = FakeJSONStream(string: "[0.1e+-1]")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
         XCTAssertThrowsError(try reader.start())
@@ -80,6 +86,8 @@ class JSONReaderNumberEdgeCaseTests: XCTestCase {
     }
     
     func testNumberWithEmptyExponentialPlusPartFails() throws {
+        try XCTSkipIf(shouldSkipDueToNumberFormatDifferences())
+        
         let jsonStream = FakeJSONStream(string: "[0.3e+]")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
         XCTAssertThrowsError(try reader.start())
@@ -89,5 +97,16 @@ class JSONReaderNumberEdgeCaseTests: XCTestCase {
         let jsonStream = FakeJSONStream(string: "[+1]")
         let reader = JSONReader(inputStream: jsonStream, eventStream: eventStream)
         XCTAssertThrowsError(try reader.start())
+    }
+    
+    private func shouldSkipDueToNumberFormatDifferences() -> Bool {
+        // https://github.com/apple/swift-corelibs-foundation/issues/4680
+#if os(macOS)
+        return false
+#elseif os(Linux)
+        return true
+#else
+        #error("Unsupported OS")
+#endif
     }
 }
