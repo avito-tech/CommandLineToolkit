@@ -163,11 +163,6 @@ final class DefaultProcessControllerTests: XCTestCase {
     }
     
     func test___capturing_stdout_from_multiple_processes() throws {
-#if os(Linux)
-        // Disabled because of this not-a-bug without known workaround:
-        // https://github.com/apple/swift-corelibs-foundation/issues/3275
-        return
-#endif
         let queue = OperationQueue()
         
         for _ in 0...500 {

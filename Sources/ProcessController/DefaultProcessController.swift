@@ -130,10 +130,12 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     }
     
     public func waitForProcessToDie() {
-        if waitForOpenPipeFileHandleGroup {
-            openPipeFileHandleGroup.wait()
-        }
         processTerminationHandlerGroup.wait()
+        if canInfinitelyWaitForOpenPipeFileHandleGroup {
+            openPipeFileHandleGroup.wait()
+        } else {
+            _ = openPipeFileHandleGroup.wait(timeout: .now() + 0.5)
+        }
     }
     
     public func processStatus() -> ProcessStatus {
@@ -253,7 +255,7 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     
     // MARK: - Processing Output
     
-    private var waitForOpenPipeFileHandleGroup: Bool {
+    private var canInfinitelyWaitForOpenPipeFileHandleGroup: Bool {
         // https://github.com/apple/swift-corelibs-foundation/issues/3275
 #if os(macOS)
         return true
