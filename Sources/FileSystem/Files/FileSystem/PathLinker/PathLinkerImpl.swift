@@ -5,7 +5,7 @@ public final class PathLinkerImpl: PathLinker {
     private let fileManager: FileManager
     private let destinationPreparer: DestinationPreparer
     
-    init(
+    public init(
         fileManager: FileManager,
         pathDeleter: PathDeleter,
         directoryCreator: DirectoryCreator
