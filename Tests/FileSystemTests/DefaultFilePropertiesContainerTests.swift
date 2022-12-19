@@ -12,7 +12,7 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
     
     func test___modificationDate() {
         XCTAssertEqual(
-            try filePropertiesContainer.modificationDate(),
+            try filePropertiesContainer.modificationDate.get(),
             try temporaryFile.absolutePath.fileUrl.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
         )
     }
@@ -20,7 +20,7 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
     func test___setting_modificationDate() throws {
         let date = Date(timeIntervalSince1970: 1000)
         
-        try filePropertiesContainer.set(modificationDate: date)
+        try filePropertiesContainer.modificationDate.set(date)
         
         XCTAssertEqual(
             try temporaryFile.absolutePath.fileUrl.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate,
@@ -31,7 +31,7 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
     func test___properties_for_nonexisting_file() {
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath.appending("nonexisting"))
         assertThrows {
-            try properties.modificationDate()
+            try properties.modificationDate.get()
         }
     }
     
@@ -42,7 +42,7 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
         )
         
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
-        XCTAssertFalse(try properties.isExecutable())
+        XCTAssertFalse(try properties.isExecutable)
     }
     
     func test___is_executable___when_executable() throws {
@@ -52,19 +52,19 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
         )
         
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
-        XCTAssertTrue(try properties.isExecutable())
+        XCTAssertTrue(try properties.isExecutable)
     }
     
     func test___modifying_permissions() throws {
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
         
-        let originalPermissions = try properties.permissions()
+        let originalPermissions = try properties.permissions.get()
         
-        try properties.set(permissions: 0o707)
-        XCTAssertEqual(try properties.permissions(), 0o707)
+        try properties.permissions.set(0o707)
+        XCTAssertEqual(try properties.permissions.get(), 0o707)
         
-        try properties.set(permissions: originalPermissions)
-        XCTAssertEqual(try properties.permissions(), originalPermissions)
+        try properties.permissions.set(originalPermissions)
+        XCTAssertEqual(try properties.permissions.get(), originalPermissions)
     }
     
     func test___exists___when_exists() throws {
@@ -79,18 +79,18 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
     
     func test___is_directory___for_directory() throws {
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath.removingLastComponent)
-        XCTAssertTrue(try properties.isDirectory())
+        XCTAssertTrue(try properties.isDirectory)
     }
     
     func test___is_not_directory___for_non_directories() throws {
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
-        XCTAssertFalse(try properties.isDirectory())
+        XCTAssertFalse(try properties.isDirectory)
     }
     
     func test___size() throws {
         temporaryFile.fileHandleForWriting.write(Data([0x00, 0x01, 0x02]))
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
-        XCTAssertEqual(try properties.fileSize(), 3)
+        XCTAssertEqual(try properties.fileSize, 3)
     }
     
     func test___totalFileAllocatedSize() throws {
@@ -101,7 +101,7 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
 #endif
         temporaryFile.fileHandleForWriting.write(Data([0x00, 0x01, 0x02]))
         let properties = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
-        XCTAssertEqual(try properties.totalFileAllocatedSize(), 4096)
+        XCTAssertEqual(try properties.totalFileAllocatedSize, 4096)
     }
     
     func test___symbolic_link___for_absolute_directory() throws {
@@ -114,11 +114,11 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
             destination: destination
         )
         let properties = DefaultFilePropertiesContainer(path: symbolicLinkPath)
-        XCTAssertTrue(try properties.isSymbolicLink())
-        XCTAssertFalse(try properties.isBrokenSymbolicLink())
-        XCTAssertTrue(try properties.isSymbolicLinkToDirectory())
-        XCTAssertFalse(try properties.isSymbolicLinkToFile())
-        XCTAssertEqual(try properties.symbolicLinkPath(), destination)
+        XCTAssertTrue(try properties.isSymbolicLink)
+        XCTAssertFalse(try properties.isBrokenSymbolicLink)
+        XCTAssertTrue(try properties.isSymbolicLinkToDirectory)
+        XCTAssertFalse(try properties.isSymbolicLinkToFile)
+        XCTAssertEqual(try properties.symbolicLinkPath, destination)
     }
     
     func test___symbolic_link___for_relative_directory() throws {
@@ -129,11 +129,11 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
             destination: RelativePath(directoryName)
         )
         let properties = DefaultFilePropertiesContainer(path: symbolicLinkPath)
-        XCTAssertTrue(try properties.isSymbolicLink())
-        XCTAssertFalse(try properties.isBrokenSymbolicLink())
-        XCTAssertTrue(try properties.isSymbolicLinkToDirectory())
-        XCTAssertFalse(try properties.isSymbolicLinkToFile())
-        XCTAssertEqual(try properties.symbolicLinkPath(), directoryPath)
+        XCTAssertTrue(try properties.isSymbolicLink)
+        XCTAssertFalse(try properties.isBrokenSymbolicLink)
+        XCTAssertTrue(try properties.isSymbolicLinkToDirectory)
+        XCTAssertFalse(try properties.isSymbolicLinkToFile)
+        XCTAssertEqual(try properties.symbolicLinkPath, directoryPath)
     }
     
     func test___symbolic_link___for_relative_file() throws {
@@ -144,21 +144,21 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
             destination: RelativePath(filename)
         )
         let properties = DefaultFilePropertiesContainer(path: symbolicLinkPath)
-        XCTAssertTrue(try properties.isSymbolicLink())
-        XCTAssertFalse(try properties.isBrokenSymbolicLink())
-        XCTAssertFalse(try properties.isSymbolicLinkToDirectory())
-        XCTAssertTrue(try properties.isSymbolicLinkToFile())
-        XCTAssertEqual(try properties.symbolicLinkPath(), filePath)
+        XCTAssertTrue(try properties.isSymbolicLink)
+        XCTAssertFalse(try properties.isBrokenSymbolicLink)
+        XCTAssertFalse(try properties.isSymbolicLinkToDirectory)
+        XCTAssertTrue(try properties.isSymbolicLinkToFile)
+        XCTAssertEqual(try properties.symbolicLinkPath, filePath)
     }
     
     func test___not_symbolic_link() throws {
         let filePath = try temporaryFolder.createFile(filename: "file")
         let properties = DefaultFilePropertiesContainer(path: filePath)
-        XCTAssertFalse(try properties.isSymbolicLink())
-        XCTAssertFalse(try properties.isBrokenSymbolicLink())
-        XCTAssertFalse(try properties.isSymbolicLinkToDirectory())
-        XCTAssertFalse(try properties.isSymbolicLinkToFile())
-        XCTAssertEqual(try properties.symbolicLinkPath(), nil)
+        XCTAssertFalse(try properties.isSymbolicLink)
+        XCTAssertFalse(try properties.isBrokenSymbolicLink)
+        XCTAssertFalse(try properties.isSymbolicLinkToDirectory)
+        XCTAssertFalse(try properties.isSymbolicLinkToFile)
+        XCTAssertEqual(try properties.symbolicLinkPath, nil)
     }
     
     func test___broken_symbolic_link() throws {
@@ -167,11 +167,11 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
             destination: RelativePath("nonexisting")
         )
         let properties = DefaultFilePropertiesContainer(path: symbolicLinkPath)
-        XCTAssertTrue(try properties.isSymbolicLink())
-        XCTAssertTrue(try properties.isBrokenSymbolicLink())
-        XCTAssertFalse(try properties.isSymbolicLinkToDirectory())
-        XCTAssertFalse(try properties.isSymbolicLinkToFile())
-        XCTAssertEqual(try properties.symbolicLinkPath(), temporaryFolder.absolutePath.appending("nonexisting"))
+        XCTAssertTrue(try properties.isSymbolicLink)
+        XCTAssertTrue(try properties.isBrokenSymbolicLink)
+        XCTAssertFalse(try properties.isSymbolicLinkToDirectory)
+        XCTAssertFalse(try properties.isSymbolicLinkToFile)
+        XCTAssertEqual(try properties.symbolicLinkPath, temporaryFolder.absolutePath.appending("nonexisting"))
     }
     
 }

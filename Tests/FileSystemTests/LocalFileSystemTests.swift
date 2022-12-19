@@ -10,10 +10,10 @@ final class FilePropertiesProviderImplTests: XCTestCase {
     func test___properties() throws {
         let path = try tempFolder.createFile(filename: "file")
         
-        let properties = provider.properties(forFileAtPath: path)
+        let properties = provider.properties(path: path)
         
         XCTAssertEqual(
-            try properties.modificationDate(),
+            try properties.modificationDate.get(),
             try fileManager.attributesOfItem(atPath: path.pathString)[.modificationDate] as? Date
         )
     }

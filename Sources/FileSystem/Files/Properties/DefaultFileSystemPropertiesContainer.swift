@@ -10,7 +10,7 @@ public final class DefaultFileSystemPropertiesContainer: FileSystemPropertiesCon
     public func systemFreeSize() throws -> Int64 {
         let attributes = try FileManager().attributesOfFileSystem(forPath: path.pathString)
         guard let value = attributes[.systemFreeSize], let number = value as? NSNumber else {
-            throw FilePropertiesContainerError.emptyFileAttributeValue(path, .systemFreeSize)
+            throw FilePropertiesContainerError.emptyFileAttributeValue(path: path, key: .systemFreeSize)
         }
         return number.int64Value
     }

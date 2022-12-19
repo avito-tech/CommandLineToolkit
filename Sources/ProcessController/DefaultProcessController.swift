@@ -73,9 +73,9 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     ) throws -> Process {
         let pathToExecutable = AbsolutePath(arguments[0])
         
-        let executableProperties = filePropertiesProvider.properties(forFileAtPath: pathToExecutable)
+        let executableProperties = filePropertiesProvider.properties(path: pathToExecutable)
         
-        guard try executableProperties.isExecutable() else {
+        guard try executableProperties.isExecutable else {
             throw ProcessControllerError.fileIsNotExecutable(path: pathToExecutable)
         }
         

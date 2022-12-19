@@ -414,7 +414,7 @@ final class DefaultProcessControllerTests: XCTestCase {
     func test___throws_objc_exceptions_as_swift_errors() throws {
         let tempFile = assertDoesNotThrow { try TemporaryFile() }
         
-        try filePropertiesProvider.properties(forFileAtPath: tempFile.absolutePath).set(permissions: 0o755)
+        try filePropertiesProvider.properties(path: tempFile.absolutePath).permissions.set(0o755)
         
         assertThrows {
             try processController(

@@ -26,11 +26,10 @@ public final class DeepFollowSymlinksFileSystemEnumerator: FileSystemEnumerator 
             path: path
         ).each { [filePropertiesProvider, fileManager] path in
             try iterator(path)
-            guard try filePropertiesProvider.isDirectory(
-                path: path
-            ) || filePropertiesProvider.isSymbolicLinkToDirectory(
-                path: path
-            ) else {
+            
+            let properties = filePropertiesProvider.properties(path: path)
+            
+            guard try properties.isDirectory || properties.isSymbolicLinkToDirectory else {
                 return
             }
             try DeepFollowSymlinksFileSystemEnumerator(

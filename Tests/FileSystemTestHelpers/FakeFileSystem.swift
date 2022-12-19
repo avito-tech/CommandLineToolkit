@@ -67,7 +67,8 @@ open class FakeFileSystem: FileSystem {
     }
     
     public var propertiesProvider: (AbsolutePath) -> FilePropertiesContainer = { _ in FakeFilePropertiesContainer() }
-    public func properties(forFileAtPath path: AbsolutePath) -> FilePropertiesContainer {
+    
+    public func properties(path: AbsolutePath) -> FilePropertiesContainer {
         propertiesProvider(path)
     }
     

@@ -104,6 +104,7 @@ targets.append(
             "DI",
             .product(name: "Glob", package: "Glob"),
             "PathLib",
+            "Types",
         ],
         path: "Sources/FileSystem"
     )
@@ -115,6 +116,7 @@ targets.append(
         dependencies: [
             "FileSystem",
             "PathLib",
+            "Types",
         ],
         path: "Tests/FileSystemTestHelpers"
     )

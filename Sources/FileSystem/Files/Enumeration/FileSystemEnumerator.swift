@@ -22,6 +22,16 @@ public extension FileSystemEnumerator {
         return paths
     }
     
+    func filter(isIncluded: (AbsolutePath) throws -> Bool) throws -> [AbsolutePath] {
+        var paths = [AbsolutePath]()
+        try each { path in
+            if try isIncluded(path) {
+                paths.append(path)
+            }
+        }
+        return paths
+    }
+    
     func reduce<T>(_ initialResult: T, _ nextPartialResult: (T, AbsolutePath) throws -> T) throws -> T {
         var result = initialResult
         try each { path in

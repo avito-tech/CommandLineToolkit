@@ -112,8 +112,8 @@ public final class LocalFileSystem: FileSystem {
         )
     }
     
-    public func properties(forFileAtPath: AbsolutePath) -> FilePropertiesContainer {
-        return filePropertiesProvider.properties(forFileAtPath: forFileAtPath)
+    public func properties(path: AbsolutePath) -> FilePropertiesContainer {
+        return filePropertiesProvider.properties(path: path)
     }
     
     public var commonlyUsedPathsProvider: CommonlyUsedPathsProvider {

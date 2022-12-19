@@ -1,61 +1,51 @@
 import FileSystem
 import Foundation
 import PathLib
+import Types
 
 open class FakeFilePropertiesContainer: FilePropertiesContainer {
+    public var pathExists: Bool
+    
     public init(
         pathExists: Bool = true
     ) {
         self.pathExists = pathExists
     }
     
-    public var mdate = Date(timeIntervalSince1970: 500)
-    public func modificationDate() throws -> Date { mdate }
-    public func set(modificationDate: Date) throws { mdate = modificationDate }
+    public var modificationDate: ThrowingPropertyOf<Date> = FakeThrowingProperty(
+        value: Date(timeIntervalSince1970: 500)
+    )
     
-    public var executable = false
-    public func isExecutable() throws -> Bool { executable }
+    public var isExecutable = false
+    public var isDirectory = false
+    public var isRegularFile = true
+    public var isHidden = false
+    public var fileSize = 0
+    public var totalFileAllocatedSize = 0
     
-    public var pathExists: Bool
     public func exists() -> Bool { pathExists }
     
-    public var posixPermissions: Int16 = 0o755
-    public func permissions() throws -> Int16 { posixPermissions }
-    public func set(permissions: Int16) throws { posixPermissions = permissions }
+    public var permissions: ThrowingPropertyOf<Int16> = FakeThrowingProperty(
+        value: 0o755
+    )
     
-    public var directory = false
-    public func isDirectory() throws -> Bool { directory }
+    public var userId: ThrowingPropertyOf<Int> = FakeThrowingProperty(
+        value: 0
+    )
     
-    public var regularFile = true
-    public func isRegularFile() throws -> Bool { regularFile }
+    public var isSymbolicLink = false
     
-    public var hidden = false
-    public func isHidden() throws -> Bool { hidden }
+    public var isBrokenSymbolicLink = false
     
-    public var fileSizeStub = 0
-    public func fileSize() throws -> Int { fileSizeStub }
+    public var isSymbolicLinkToDirectory = false
     
-    public var totalFileAllocatedSizeStub = 0
-    public func totalFileAllocatedSize() throws -> Int { totalFileAllocatedSizeStub }
+    public var isSymbolicLinkToFile = false
     
-    public var symbolicLink = false
-    public func isSymbolicLink() throws -> Bool { symbolicLink }
+    public var symbolicLinkPath: AbsolutePath?
     
-    public var brokenSymbolicLink = false
-    public func isBrokenSymbolicLink() throws -> Bool { brokenSymbolicLink }
-    
-    public var symbolicLinkToDirectory = false
-    public func isSymbolicLinkToDirectory() throws -> Bool { symbolicLinkToDirectory }
-    
-    public var symbolicLinkToFile = false
-    public func isSymbolicLinkToFile() throws -> Bool { symbolicLinkToFile }
-    
-    public var symbolicLinkPathValue: AbsolutePath?
-    public func symbolicLinkPath() throws -> AbsolutePath? { symbolicLinkPathValue }
-    
-    public func existence() -> FileExistence {
+    public var existence: FileExistence {
         if pathExists {
-            if directory {
+            if isDirectory {
                 return .isDirectory
             } else {
                 return .isFile

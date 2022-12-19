@@ -1,42 +1,44 @@
 import Foundation
 import PathLib
+import Types
 
 public protocol FilePropertiesContainer {
-    func existence() -> FileExistence
-    func isExecutable() throws -> Bool
-    func isDirectory() throws -> Bool
-    func isRegularFile() throws -> Bool
-    func isHidden() throws -> Bool
+    // Non-modifiable
+    var existence: FileExistence { get }
     
-    func isSymbolicLink() throws -> Bool
-    func isBrokenSymbolicLink() throws -> Bool
-    func isSymbolicLinkToDirectory() throws -> Bool
-    func isSymbolicLinkToFile() throws -> Bool
-    func symbolicLinkPath() throws -> AbsolutePath?
+    var isExecutable: Bool { get throws } // note: relies not just on file permissions, but also on current user
+    var isDirectory: Bool { get throws }
+    var isRegularFile: Bool { get throws }
+    var isHidden: Bool { get throws } // I think, it's theoretically modifiable, but not for all file systems
     
-    func modificationDate() throws -> Date
-    func set(modificationDate: Date) throws
+    var isSymbolicLink: Bool { get throws }
+    var isBrokenSymbolicLink: Bool { get throws }
+    var isSymbolicLinkToDirectory: Bool { get throws }
+    var isSymbolicLinkToFile: Bool { get throws }
+    var symbolicLinkPath: AbsolutePath? { get throws }
     
-    func permissions() throws -> Int16
-    func set(permissions: Int16) throws
+    var fileSize: Int { get throws }
+    var totalFileAllocatedSize: Int { get throws }
     
-    func fileSize() throws -> Int
-    func totalFileAllocatedSize() throws -> Int
+    // Modifiable
+    var modificationDate: ThrowingPropertyOf<Date> { get }
+    var permissions: ThrowingPropertyOf<Int16> { get }
+    var userId: ThrowingPropertyOf<Int> { get }
 }
 
 extension FilePropertiesContainer {
     public func touch() throws {
-        try set(modificationDate: Date())
+        try modificationDate.set(Date())
     }
     
     public func exists(type: FileExistenceCheckType = .any) -> Bool {
         switch type {
         case .any:
-            return existence().exists
+            return existence.exists
         case .directory:
-            return existence().isDirectory
+            return existence.isDirectory
         case .file:
-            return existence().isFile
+            return existence.isFile
         }
     }
 }

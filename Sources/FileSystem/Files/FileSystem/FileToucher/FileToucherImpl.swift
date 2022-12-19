@@ -14,7 +14,7 @@ public final class FileToucherImpl: FileToucher {
     
     public func touch(path: AbsolutePath) throws {
         if filePropertiesProvider.existence(path: path).exists {
-            try filePropertiesProvider.properties(forFileAtPath: path).touch()
+            try filePropertiesProvider.properties(path: path).touch()
         } else {
             try fileCreator.createFile(path: path, data: nil)
         }
