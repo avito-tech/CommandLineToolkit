@@ -72,9 +72,9 @@ __make_swift_build_arch_options() {
 }
 
 __close_spm_package_in_xcode_saving_changes() {
-    local xcode_app_name; xcode_app_name=$(xcode-select -p | grep -oE "([^/]+.app)" | sed 's/\.app//')
+    local xcode_app_name; xcode_app_name=$(__get_currently_selected_xcode_app_name)
     local package_directory_path_absolute=$PROJECT_DIR
-    
+
     # Note: to get API of Xcode, open "Script Editor", select "File" -> "Open Dictionary...", select Xcode
     osascript -e '
         tell application "'"$xcode_app_name"'"
@@ -108,4 +108,8 @@ __escape_string_for_sed() {
 }
 __escape_replacement_for_sed() {
     echo $1 | sed -e 's/[\/&]/\\&/g'
+}
+
+__get_currently_selected_xcode_app_name() {
+    xcode-select -p | grep -oE "([^/]+.app)" | sed 's/\.app//' || __fatal_error "Failed to get Xcode app name, xcode-select -p: $(xcode-select -p)"
 }
