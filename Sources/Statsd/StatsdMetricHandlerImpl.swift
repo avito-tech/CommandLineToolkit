@@ -1,6 +1,5 @@
 import AtomicModels
 import Foundation
-import IO
 import SocketModels
 
 public final class StatsdMetricHandlerImpl: StatsdMetricHandler {

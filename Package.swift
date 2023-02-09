@@ -42,6 +42,61 @@ targets.append(
         path: "Tests/CLTExtensionsTests"
     )
 )
+// MARK: CLTLogging
+targets.append(
+    .target(
+        name: "CLTLogging",
+        dependencies: [
+            "AtomicModels",
+            "CLTLoggingModels",
+            "DateProvider",
+            "FileSystem",
+            "Kibana",
+            "KibanaModels",
+            "PathLib",
+            "ProcessController",
+            "Tmp",
+        ],
+        path: "Sources/CLTLogging"
+    )
+)
+// MARK: CLTLoggingModels
+targets.append(
+    .target(
+        name: "CLTLoggingModels",
+        dependencies: [
+        ],
+        path: "Sources/CLTLoggingModels"
+    )
+)
+// MARK: CLTLoggingTestHelpers
+targets.append(
+    .target(
+        name: "CLTLoggingTestHelpers",
+        dependencies: [
+            "CLTLogging",
+            "CLTLoggingModels",
+        ],
+        path: "Tests/CLTLoggingTestHelpers"
+    )
+)
+// MARK: CLTLoggingTests
+targets.append(
+    .testTarget(
+        name: "CLTLoggingTests",
+        dependencies: [
+            "CLTLogging",
+            "CLTLoggingModels",
+            "CLTLoggingTestHelpers",
+            "DateProviderTestHelpers",
+            "Kibana",
+            "KibanaTestHelpers",
+            "TestHelpers",
+            "Tmp",
+        ],
+        path: "Tests/CLTLoggingTests"
+    )
+)
 // MARK: CommandSupport
 targets.append(
     .target(
@@ -140,35 +195,11 @@ targets.append(
     .target(
         name: "Graphite",
         dependencies: [
-            "GraphiteClient",
-            "IO",
             "MetricsUtils",
+            .product(name: "Socket", package: "Socket"),
             "SocketModels",
         ],
         path: "Sources/Graphite"
-    )
-)
-// MARK: GraphiteClient
-targets.append(
-    .target(
-        name: "GraphiteClient",
-        dependencies: [
-            "AtomicModels",
-            "IO",
-        ],
-        path: "Sources/GraphiteClient"
-    )
-)
-// MARK: GraphiteClientTests
-targets.append(
-    .testTarget(
-        name: "GraphiteClientTests",
-        dependencies: [
-            "AtomicModels",
-            "GraphiteClient",
-            "IO",
-        ],
-        path: "Tests/GraphiteClientTests"
     )
 )
 // MARK: GraphiteTestHelpers
@@ -179,27 +210,6 @@ targets.append(
             "Graphite",
         ],
         path: "Tests/GraphiteTestHelpers"
-    )
-)
-// MARK: IO
-targets.append(
-    .target(
-        name: "IO",
-        dependencies: [
-            "AtomicModels",
-        ],
-        path: "Sources/IO"
-    )
-)
-// MARK: IOTests
-targets.append(
-    .testTarget(
-        name: "IOTests",
-        dependencies: [
-            "IO",
-            "TestHelpers",
-        ],
-        path: "Tests/IOTests"
     )
 )
 // MARK: JSONStream
@@ -221,6 +231,51 @@ targets.append(
             "TestHelpers",
         ],
         path: "Tests/JSONStreamTests"
+    )
+)
+// MARK: Kibana
+targets.append(
+    .target(
+        name: "Kibana",
+        dependencies: [
+            "CLTExtensions",
+            "DateProvider",
+            "SocketModels",
+        ],
+        path: "Sources/Kibana"
+    )
+)
+// MARK: KibanaModels
+targets.append(
+    .target(
+        name: "KibanaModels",
+        dependencies: [
+        ],
+        path: "Sources/KibanaModels"
+    )
+)
+// MARK: KibanaTestHelpers
+targets.append(
+    .target(
+        name: "KibanaTestHelpers",
+        dependencies: [
+            "Kibana",
+        ],
+        path: "Tests/KibanaTestHelpers"
+    )
+)
+// MARK: KibanaTests
+targets.append(
+    .testTarget(
+        name: "KibanaTests",
+        dependencies: [
+            "DateProviderTestHelpers",
+            "Kibana",
+            "SocketModels",
+            "TestHelpers",
+            "URLSessionTestHelpers",
+        ],
+        path: "Tests/KibanaTests"
     )
 )
 // MARK: LaunchdUtils
@@ -286,7 +341,6 @@ targets.append(
     .target(
         name: "MetricsUtils",
         dependencies: [
-            "IO",
         ],
         path: "Sources/MetricsUtils"
     )
@@ -443,7 +497,6 @@ targets.append(
         name: "Statsd",
         dependencies: [
             "AtomicModels",
-            "IO",
             "MetricsUtils",
             .product(name: "Socket", package: "Socket"),
             "SocketModels",
@@ -559,6 +612,15 @@ targets.append(
         path: "Tests/TypesTests"
     )
 )
+// MARK: URLSessionTestHelpers
+targets.append(
+    .target(
+        name: "URLSessionTestHelpers",
+        dependencies: [
+        ],
+        path: "Tests/URLSessionTestHelpers"
+    )
+)
 // MARK: UserDefaultsLib
 targets.append(
     .target(
@@ -650,6 +712,9 @@ let package = Package(
         .library(name: "AtomicModels", targets: ["AtomicModels"]),
         .library(name: "CLTCollections", targets: ["CLTCollections"]),
         .library(name: "CLTExtensions", targets: ["CLTExtensions"]),
+        .library(name: "CLTLogging", targets: ["CLTLogging"]),
+        .library(name: "CLTLoggingModels", targets: ["CLTLoggingModels"]),
+        .library(name: "CLTLoggingTestHelpers", targets: ["CLTLoggingTestHelpers"]),
         .library(name: "CommandSupport", targets: ["CommandSupport"]),
         .library(name: "DI", targets: ["DI"]),
         .library(name: "DateProvider", targets: ["DateProvider"]),
@@ -658,10 +723,11 @@ let package = Package(
         .library(name: "FileSystem", targets: ["FileSystem"]),
         .library(name: "FileSystemTestHelpers", targets: ["FileSystemTestHelpers"]),
         .library(name: "Graphite", targets: ["Graphite"]),
-        .library(name: "GraphiteClient", targets: ["GraphiteClient"]),
         .library(name: "GraphiteTestHelpers", targets: ["GraphiteTestHelpers"]),
-        .library(name: "IO", targets: ["IO"]),
         .library(name: "JSONStream", targets: ["JSONStream"]),
+        .library(name: "Kibana", targets: ["Kibana"]),
+        .library(name: "KibanaModels", targets: ["KibanaModels"]),
+        .library(name: "KibanaTestHelpers", targets: ["KibanaTestHelpers"]),
         .library(name: "LaunchdUtils", targets: ["LaunchdUtils"]),
         .library(name: "MetricsRecording", targets: ["MetricsRecording"]),
         .library(name: "MetricsTestHelpers", targets: ["MetricsTestHelpers"]),
@@ -680,6 +746,7 @@ let package = Package(
         .library(name: "Tmp", targets: ["Tmp"]),
         .library(name: "TmpTestHelpers", targets: ["TmpTestHelpers"]),
         .library(name: "Types", targets: ["Types"]),
+        .library(name: "URLSessionTestHelpers", targets: ["URLSessionTestHelpers"]),
         .library(name: "UserDefaultsLib", targets: ["UserDefaultsLib"]),
         .library(name: "UserDefaultsLibTestHelpers", targets: ["UserDefaultsLibTestHelpers"]),
         .library(name: "Waitable", targets: ["Waitable"]),
