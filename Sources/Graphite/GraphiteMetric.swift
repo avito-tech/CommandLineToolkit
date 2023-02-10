@@ -1,7 +1,7 @@
 import Foundation
 import MetricsUtils
 
-open class GraphiteMetric: CustomStringConvertible, Hashable {
+open class GraphiteMetric: CustomStringConvertible, Equatable, Hashable {
     /// Components that form a fully qualified name of a metric.
     public let components: [String]
     
@@ -38,19 +38,13 @@ open class GraphiteMetric: CustomStringConvertible, Hashable {
 
     public static func ==(left: GraphiteMetric, right: GraphiteMetric) -> Bool {
         left.components == right.components &&
-        left.value.isCloseTo(right.value) &&
+        left.value == right.value &&
         left.timestamp == right.timestamp
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(components)
-        hasher.combine(round(value))
+        hasher.combine(value)
         hasher.combine(timestamp)
-    }
-}
-
-extension Double {
-    func isCloseTo(_ other: Self, precision: Double = 0.001) -> Bool {
-        abs(self - other) < precision
     }
 }
