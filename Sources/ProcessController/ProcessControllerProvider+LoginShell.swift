@@ -12,8 +12,41 @@ public extension ProcessControllerProvider {
         outputStreaming: OutputStreaming = .restream,
         automaticManagement: AutomaticManagement = .noManagement
     ) throws {
+        try loginShell(
+            command,
+            interpreter: "/bin/bash",
+            currentWorkingDirectory: currentWorkingDirectory,
+            outputStreaming: outputStreaming,
+            automaticManagement: automaticManagement
+        )
+    }
+    
+    func zsh(
+        _ command: String,
+        environment: Environment = .current,
+        currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
+        outputStreaming: OutputStreaming = .restream,
+        automaticManagement: AutomaticManagement = .noManagement
+    ) throws {
+        try loginShell(
+            command,
+            interpreter: "/bin/zsh",
+            currentWorkingDirectory: currentWorkingDirectory,
+            outputStreaming: outputStreaming,
+            automaticManagement: automaticManagement
+        )
+    }
+        
+    func loginShell(
+        _ command: String,
+        interpreter: String,
+        environment: Environment = .current,
+        currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
+        outputStreaming: OutputStreaming = .restream,
+        automaticManagement: AutomaticManagement = .noManagement
+    ) throws {
         let subprocess = Subprocess(
-            arguments: ["/bin/bash", "-l", "-c", command],
+            arguments: [interpreter, "-l", "-c", command],
             environment: environment,
             automaticManagement: automaticManagement,
             workingDirectory: currentWorkingDirectory
