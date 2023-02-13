@@ -393,6 +393,7 @@ targets.append(
             "AtomicModels",
             "DI",
             "DateProvider",
+            "Environment",
             "FileSystem",
             "PathLib",
             "SignalHandling",

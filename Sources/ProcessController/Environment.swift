@@ -1,7 +1,8 @@
 import Foundation
+import Environment
 
 public struct Environment: ExpressibleByDictionaryLiteral, CustomStringConvertible {
-    public let values: [String: EnvironmentValue]
+    public var values: [String: EnvironmentValue]
     
     public init(_ values: [String: EnvironmentValue]) {
         self.values = values
@@ -11,7 +12,7 @@ public struct Environment: ExpressibleByDictionaryLiteral, CustomStringConvertib
         Environment(ProcessInfo.processInfo.environment)
     }
     
-    public func merge(with values: [String: EnvironmentValue]) -> Environment {
+    public func merging(with values: [String: EnvironmentValue]) -> Environment {
         var result = self.values
         result.merge(values) { _, new -> EnvironmentValue in new }
         return Environment(result)
@@ -37,5 +38,22 @@ public struct Environment: ExpressibleByDictionaryLiteral, CustomStringConvertib
             values[element.0] = element.1
         }
         self.values = values
+    }
+}
+
+extension Environment {
+    public func get<Value>(_ key: EnvironmentKey<Value>) throws -> Value? {
+        guard let value = values[key.key] else {
+            return nil
+        }
+
+        return try key.conversion.apply(value.value)
+    }
+
+    public mutating func set<Value>(
+        _ key: EnvironmentKey<Value>,
+        to value: Value
+    ) throws {
+        values[key.key] = try key.conversion.unapply(value)
     }
 }
