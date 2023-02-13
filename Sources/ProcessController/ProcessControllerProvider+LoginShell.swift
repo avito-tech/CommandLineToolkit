@@ -15,6 +15,7 @@ public extension ProcessControllerProvider {
         try loginShell(
             command,
             interpreter: "/bin/bash",
+            environment: environment,
             currentWorkingDirectory: currentWorkingDirectory,
             outputStreaming: outputStreaming,
             automaticManagement: automaticManagement
@@ -31,6 +32,7 @@ public extension ProcessControllerProvider {
         try loginShell(
             command,
             interpreter: "/bin/zsh",
+            environment: environment,
             currentWorkingDirectory: currentWorkingDirectory,
             outputStreaming: outputStreaming,
             automaticManagement: automaticManagement
