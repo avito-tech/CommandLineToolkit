@@ -5,23 +5,28 @@
 import Foundation
 import Socket
 import SocketModels
+import Concurrency
 
 public final class SocketGraphiteMetricHandler: GraphiteMetricHandler {
     private let graphiteDomain: [String]
-    private let socket: Socket
+    private let lazySocket: ThrowingThreadSafeLazy<Socket>
     
     public init(
         graphiteDomain: [String],
         graphiteSocketAddress: SocketAddress
-    ) throws {
+    ) {
         self.graphiteDomain = graphiteDomain
 
-        self.socket = try Socket.create(family: .inet, type: .stream, proto: .tcp)
-        
-        try self.socket.connect(
-            to: graphiteSocketAddress.host,
-            port: Int32(graphiteSocketAddress.port.value)
-        )
+        self.lazySocket = ThrowingThreadSafeLazy {
+            let socket = try Socket.create(family: .inet, type: .stream, proto: .tcp)
+            
+            try socket.connect(
+                to: graphiteSocketAddress.host,
+                port: Int32(graphiteSocketAddress.port.value)
+            )
+            
+            return socket
+        }
     }
     
     public func handle(metric: GraphiteMetric) {
@@ -46,7 +51,13 @@ public final class SocketGraphiteMetricHandler: GraphiteMetricHandler {
     }
     
     public func tearDown(timeout: TimeInterval) {
-        socket.close()
+        try? socket.close()
+    }
+    
+    private var socket: Socket {
+        get throws {
+            try lazySocket.value
+        }
     }
 }
 

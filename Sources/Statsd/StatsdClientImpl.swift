@@ -19,7 +19,7 @@ public final class StatsdClientImpl: StatsdClient {
     
     public init(
         statsdSocketAddress: SocketAddress
-    ) throws {
+    ) {
         self.statsdSocketAddress = statsdSocketAddress
     }
     

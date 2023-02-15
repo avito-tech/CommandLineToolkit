@@ -12,7 +12,7 @@ public final class StatsdMetricHandlerImpl: StatsdMetricHandler {
         statsdDomain: [String],
         statsdClient: StatsdClient,
         serialQueue: DispatchQueue = DispatchQueue(label: "StatsdMetricHandlerImpl.serialQueue")
-    ) throws {
+    ) {
         self.statsdDomain = statsdDomain
         self.statsdClient = statsdClient
         self.serialQueue = serialQueue

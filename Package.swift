@@ -109,6 +109,16 @@ targets.append(
         path: "Sources/CommandSupport"
     )
 )
+// MARK: Concurrency
+targets.append(
+    .target(
+        name: "Concurrency",
+        dependencies: [
+            "PathLib",
+        ],
+        path: "Sources/Concurrency"
+    )
+)
 // MARK: DI
 targets.append(
     .target(
@@ -195,6 +205,7 @@ targets.append(
     .target(
         name: "Graphite",
         dependencies: [
+            "Concurrency",
             "MetricsUtils",
             .product(name: "Socket", package: "Socket"),
             "SocketModels",
@@ -717,6 +728,7 @@ let package = Package(
         .library(name: "CLTLoggingModels", targets: ["CLTLoggingModels"]),
         .library(name: "CLTLoggingTestHelpers", targets: ["CLTLoggingTestHelpers"]),
         .library(name: "CommandSupport", targets: ["CommandSupport"]),
+        .library(name: "Concurrency", targets: ["Concurrency"]),
         .library(name: "DI", targets: ["DI"]),
         .library(name: "DateProvider", targets: ["DateProvider"]),
         .library(name: "DateProviderTestHelpers", targets: ["DateProviderTestHelpers"]),
