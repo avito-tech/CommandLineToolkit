@@ -2,6 +2,8 @@
 # - action___foo_bar is for overriding
 # - default_action___foo_bar is not for overriding, but can be reused in overriden functions
 
+# `make generate` - generates project for building (via command line, for example)
+#
 # shellcheck disable=SC2120
 action___generate() { default_action___generate ${@+"$@"}; }
 default_action___generate() {
@@ -13,20 +15,29 @@ default_action___generate() {
     swift run --package-path "${toolkit_dirname}/PackageGenerator/" package-gen "$PROJECT_DIR"
 }
 
+# `make generate_for_development` - generates project for development (in IDE, for example, may set up things for IDE)
+action___generate_for_development() { default_action___generate_for_development ${@+"$@"}; }
+default_action___generate_for_development() {
+    action___generate
+}
+
+# `make open` - same as `generate_for_development`, but also opens project in IDE
 action___open() { default_action___open ${@+"$@"}; }
 default_action___open() {
     __close_spm_package_in_xcode_saving_changes
     
-    action___generate
+    action___generate_for_development
     
     perform_inside_project open Package.swift
 }
 
+# `make clean` - removes build artifacts/caches
 action___clean() { default_action___clean ${@+"$@"}; }
 default_action___clean() {
     perform_inside_project rm -rf .build/
 }
 
+# `make build` - builds with release configuration
 action___build() { default_action___build ${@+"$@"}; }
 default_action___build() {
     action___generate
@@ -34,6 +45,7 @@ default_action___build() {
     perform_inside_project swift build $arch_options -c release -Xswiftc -Osize
 }
 
+# `make build_debug` - builds with debug configuration
 action___build_debug() { default_action___build_debug ${@+"$@"}; }
 default_action___build_debug() {
     action___generate
@@ -41,6 +53,7 @@ default_action___build_debug() {
     perform_inside_project swift build $arch_options -c debug -Xswiftc -Onone
 }
 
+# `make test` - runs tests (for usage on local machine)
 action___test() { default_action___test ${@+"$@"}; }
 default_action___test() {
     action___generate
@@ -55,6 +68,7 @@ default_action___test() {
     fi
 }
 
+# `make run_ci_tests` - runs tests (for usage on CI machine)
 action___run_ci_tests() { default_action___run_ci_tests ${@+"$@"}; }
 default_action___run_ci_tests() {
     export ON_CI=true
@@ -62,6 +76,7 @@ default_action___run_ci_tests() {
     action___test --enable-code-coverage -Xswiftc -DTEST
 }
 
+# `make test` - prints help
 action___help() { default_action___help ${@+"$@"}; }
 default_action___help() {
     echo
