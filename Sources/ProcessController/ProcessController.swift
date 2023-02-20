@@ -24,12 +24,17 @@ public protocol ProcessController: AnyObject {
 }
 
 public enum ProcessTerminationError: Error, CustomStringConvertible {
-    case unexpectedProcessStatus(name: String, pid: Int32, processStatus: ProcessStatus)
+    case unexpectedProcessStatus(
+        name: String,
+        arguments: [SubprocessArgument],
+        pid: Int32,
+        processStatus: ProcessStatus
+    )
     
     public var description: String {
         switch self {
-        case let .unexpectedProcessStatus(name, pid, status):
-            return "Process \(name)[\(pid)] has finished with unexpected status: \(status)"
+        case let .unexpectedProcessStatus(name, arguments, pid, status):
+            return "Process \(name)[\(pid)] has finished with unexpected status: \(status). Process arguments: \(arguments.map { "\($0)" }.debugDescription)"
         }
     }
 }
@@ -52,7 +57,12 @@ public extension ProcessController {
         try startAndListenUntilProcessDies()
         let status = processStatus()
         guard status == .terminated(exitCode: 0) else {
-            throw ProcessTerminationError.unexpectedProcessStatus(name: processName, pid: processId, processStatus: status)
+            throw ProcessTerminationError.unexpectedProcessStatus(
+                name: processName,
+                arguments: subprocess.arguments,
+                pid: processId,
+                processStatus: status
+            )
         }
     }
     
