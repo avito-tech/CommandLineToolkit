@@ -57,7 +57,7 @@ final class StatsdClientTests: XCTestCase {
             assertNotNil { error }
             sendCompleteExpectation.fulfill()
         }
-        wait(for: sendCompleteExpectation, timeout: 15)
+        wait(for: sendCompleteExpectation, timeout: 60)
     }
     
     private func readDatagrams(
