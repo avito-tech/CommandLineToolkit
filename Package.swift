@@ -381,6 +381,9 @@ targets.append(
     .target(
         name: "PlistLib",
         dependencies: [
+            "DI",
+            "FileSystem",
+            "PathLib",
         ],
         path: "Sources/PlistLib"
     )
