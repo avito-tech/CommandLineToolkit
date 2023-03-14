@@ -19,8 +19,8 @@ final class ProcessControllerProviderBashTests: XCTestCase {
         try tempFolder.createFile(filename: "hello")
         
         let capturedOutput = CapturedOutputStreams()
-        try processControllerProvider.bash(
-            "ls",
+        try processControllerProvider.subprocess(
+            arguments: ["/bin/ls"],
             currentWorkingDirectory: tempFolder.absolutePath,
             outputStreaming: capturedOutput.outputStreaming
         )
@@ -34,8 +34,8 @@ final class ProcessControllerProviderBashTests: XCTestCase {
         let uniqueString = ProcessInfo.processInfo.globallyUniqueString
         let capturedOutput = CapturedOutputStreams()
         assertThrows {
-            try processControllerProvider.bash(
-                "ls \(uniqueString)",
+            try processControllerProvider.subprocess(
+                arguments: ["/bin/ls", uniqueString],
                 currentWorkingDirectory: tempFolder.absolutePath,
                 outputStreaming: capturedOutput.outputStreaming
             )

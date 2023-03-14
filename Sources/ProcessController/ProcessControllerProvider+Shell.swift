@@ -4,17 +4,20 @@ import PathLib
 
 // swiftlint:disable multiple_closures_with_trailing_closure
 
-public extension ProcessControllerProvider {
-    func bash(
+// Suggestion: avoid using shells if not needed, consider using `func subprocess` for running processes.
+extension ProcessControllerProvider {
+    public func bash(
         _ command: String,
+        isLoginShell: Bool, // suggestion: avoid "true" as much as possible if you want to achieve more predictable behavior
         environment: Environment = .current,
         currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
         outputStreaming: OutputStreaming = .restream,
         automaticManagement: AutomaticManagement = .noManagement
     ) throws {
-        try loginShell(
+        try bashOrZsh(
             command,
-            interpreter: "/bin/bash",
+            interpreterPath: "/bin/bash",
+            isLoginShell: isLoginShell,
             environment: environment,
             currentWorkingDirectory: currentWorkingDirectory,
             outputStreaming: outputStreaming,
@@ -22,41 +25,50 @@ public extension ProcessControllerProvider {
         )
     }
     
-    func zsh(
+    public func zsh(
         _ command: String,
+        isLoginShell: Bool, // suggestion: avoid "true" as much as possible if you want to achieve more predictable behavior
         environment: Environment = .current,
         currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
         outputStreaming: OutputStreaming = .restream,
         automaticManagement: AutomaticManagement = .noManagement
     ) throws {
-        try loginShell(
+        try bashOrZsh(
             command,
-            interpreter: "/bin/zsh",
+            interpreterPath: "/bin/zsh",
+            isLoginShell: isLoginShell,
             environment: environment,
             currentWorkingDirectory: currentWorkingDirectory,
             outputStreaming: outputStreaming,
             automaticManagement: automaticManagement
         )
     }
-        
-    func loginShell(
+    
+    // bash and zsh share "-l" option (note that it may be not true for different interpreters or options)
+    private func bashOrZsh(
         _ command: String,
-        interpreter: String,
+        interpreterPath: AbsolutePath,
+        isLoginShell: Bool,
         environment: Environment = .current,
         currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
         outputStreaming: OutputStreaming = .restream,
         automaticManagement: AutomaticManagement = .noManagement
     ) throws {
-        let subprocess = Subprocess(
-            arguments: [interpreter, "-l", "-c", command],
+        var arguments = [interpreterPath.pathString]
+        
+        if isLoginShell {
+            arguments += ["-l"]
+        }
+        
+        arguments.append(contentsOf: ["-c", command])
+        
+        try subprocess(
+            arguments: arguments,
             environment: environment,
-            automaticManagement: automaticManagement,
-            workingDirectory: currentWorkingDirectory
+            currentWorkingDirectory: currentWorkingDirectory,
+            outputStreaming: outputStreaming,
+            automaticManagement: automaticManagement
         )
-        let processController = try createProcessController(subprocess: subprocess)
-        processController.onStdout { _, data, _ in outputStreaming.stdout(data) }
-        processController.onStderr { _, data, _ in outputStreaming.stderr(data) }
-        try processController.startAndWaitForSuccessfulTermination()
     }
 }
 
