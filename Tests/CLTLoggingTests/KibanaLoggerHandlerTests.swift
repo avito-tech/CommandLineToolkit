@@ -65,8 +65,8 @@ final class KibanaLoggerHandlerTests: XCTestCase {
         
         let impactQueue = DispatchQueue(label: "impactQueue")
         impactQueue.asyncAfter(deadline: .now() + 0.05) {
-            event.completion(nil)
-            completionInvoked.fulfill()
+            completionInvoked.fulfill() // expectation needs to be set (fulfilled) before unlocking handler (if we wait with zero timeout after `handler.tearDownLogging`)
+            event.completion(nil) // unlocks synchronization in handler
         }
         
         handler.tearDownLogging(timeout: 15)
