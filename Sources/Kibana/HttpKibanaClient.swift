@@ -2,6 +2,8 @@
  * Copyright (c) Avito Tech LLC
  */
 
+import CLTExtensions
+import CLTTypes
 import DateProvider
 import Foundation
 #if canImport(FoundationNetworking)
@@ -13,6 +15,7 @@ public final class HttpKibanaClient: KibanaClient {
     private let endpoints: [KibanaHttpEndpoint]
     private let indexPattern: String
     private let urlSession: URLSession
+    private let authorization: HttpAuthorizationScheme?
     private let jsonEncoder = JSONEncoder()
     
     private let timestampDateFormatter: DateFormatter = {
@@ -26,7 +29,8 @@ public final class HttpKibanaClient: KibanaClient {
         dateProvider: DateProvider,
         endpoints: [KibanaHttpEndpoint],
         indexPattern: String,
-        urlSession: URLSession
+        urlSession: URLSession,
+        authorization: HttpAuthorizationScheme?
     ) throws {
         guard !endpoints.isEmpty else { throw KibanaClientEndpointError() }
         
@@ -34,6 +38,7 @@ public final class HttpKibanaClient: KibanaClient {
         self.endpoints = endpoints
         self.indexPattern = indexPattern
         self.urlSession = urlSession
+        self.authorization = authorization
     }
     
     public struct KibanaClientEndpointError: Error, CustomStringConvertible {
@@ -68,6 +73,9 @@ public final class HttpKibanaClient: KibanaClient {
         request.httpMethod = "POST"
         request.httpBody = try jsonEncoder.encode(params)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let authorization = authorization {
+            request.setValue(try authorization.httpHeaderValue(), forHTTPHeaderField: "Authorization")
+        }
         
         let task = urlSession.dataTask(with: request) { _, _, error in
             completion(error)

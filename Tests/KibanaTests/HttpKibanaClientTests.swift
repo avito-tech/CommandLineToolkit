@@ -15,7 +15,8 @@ final class HttpKibanaClientTests: XCTestCase {
             dateProvider: dateProvider,
             endpoints: [.http(SocketAddress(host: "example.com", port: 42))],
             indexPattern: "index-pattern-thing",
-            urlSession: urlSession
+            urlSession: urlSession,
+            authorization: .bearer(token: "test-auth-token")
         )
     }
     lazy var dateProvider = DateProviderFixture(Date(timeIntervalSince1970: 100))
@@ -47,6 +48,7 @@ final class HttpKibanaClientTests: XCTestCase {
         
         XCTAssertEqual(request?.httpMethod, "POST")
         XCTAssertEqual(request?.url?.absoluteString, "http://example.com:42/index-pattern-thing/_doc")
+        XCTAssertEqual(request?.value(forHTTPHeaderField: "Authorization"), "Bearer test-auth-token")
         
         let bodyPayload = try JSONDecoder().decode([String: String].self, from: assertNotNil { request?.httpBody })
         

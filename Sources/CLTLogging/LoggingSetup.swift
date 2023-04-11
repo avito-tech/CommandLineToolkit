@@ -84,7 +84,8 @@ public final class LoggingSetup {
                 dateProvider: dateProvider,
                 endpoints: try kibanaConfiguration.endpoints.map { try KibanaHttpEndpoint.from(url: $0) },
                 indexPattern: kibanaConfiguration.indexPattern,
-                urlSession: .shared
+                urlSession: .shared,
+                authorization: kibanaConfiguration.authorization
             )
         )
         pluggableLoggerHandlerForKibana.setTarget(handler)

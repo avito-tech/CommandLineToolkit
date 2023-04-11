@@ -97,6 +97,16 @@ targets.append(
         path: "Tests/CLTLoggingTests"
     )
 )
+// MARK: CLTTypes
+targets.append(
+    .target(
+        name: "CLTTypes",
+        dependencies: [
+            "CLTExtensions",
+        ],
+        path: "Sources/CLTTypes"
+    )
+)
 // MARK: CommandSupport
 targets.append(
     .target(
@@ -250,6 +260,7 @@ targets.append(
         name: "Kibana",
         dependencies: [
             "CLTExtensions",
+            "CLTTypes",
             "DateProvider",
             "SocketModels",
         ],
@@ -261,6 +272,7 @@ targets.append(
     .target(
         name: "KibanaModels",
         dependencies: [
+            "CLTTypes",
         ],
         path: "Sources/KibanaModels"
     )
@@ -730,6 +742,7 @@ let package = Package(
         .library(name: "CLTLogging", targets: ["CLTLogging"]),
         .library(name: "CLTLoggingModels", targets: ["CLTLoggingModels"]),
         .library(name: "CLTLoggingTestHelpers", targets: ["CLTLoggingTestHelpers"]),
+        .library(name: "CLTTypes", targets: ["CLTTypes"]),
         .library(name: "CommandSupport", targets: ["CommandSupport"]),
         .library(name: "Concurrency", targets: ["Concurrency"]),
         .library(name: "DI", targets: ["DI"]),
