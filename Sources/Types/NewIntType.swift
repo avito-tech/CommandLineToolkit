@@ -1,6 +1,7 @@
 import Foundation
 
-open class NewIntType: ExpressibleByIntegerLiteral, Codable, Hashable, CustomStringConvertible, Comparable {
+open class NewIntType: ExpressibleByIntegerLiteral, Codable, Hashable, CustomStringConvertible, Comparable,
+        CodingKeyRepresentable {
     public typealias IntegerLiteralType = Int
 
     public let value: Int
@@ -33,6 +34,17 @@ open class NewIntType: ExpressibleByIntegerLiteral, Codable, Hashable, CustomStr
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(value)
+    }
+
+    @available(macOS 12.3, iOS 15.4, watchOS 8.5, tvOS 15.4, *)
+    public required init?<T: CodingKey>(codingKey: T) {
+        guard let value = Int(codingKey: codingKey) else { return nil }
+        self.value = value
+    }
+
+    @available(macOS 12.3, iOS 15.4, watchOS 8.5, tvOS 15.4, *)
+    public var codingKey: CodingKey {
+        value.codingKey
     }
     
     public static func < (left: NewIntType, right: NewIntType) -> Bool {

@@ -1,6 +1,7 @@
 import Foundation
 
-open class NewStringType: ExpressibleByStringLiteral, Codable, Hashable, CustomStringConvertible, CustomDebugStringConvertible, Comparable {
+open class NewStringType: ExpressibleByStringLiteral, Codable, Hashable, CustomStringConvertible, CustomDebugStringConvertible, Comparable,
+        CodingKeyRepresentable {
     public typealias StringLiteralType = String
 
     public let value: String
@@ -36,6 +37,17 @@ open class NewStringType: ExpressibleByStringLiteral, Codable, Hashable, CustomS
     public required init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         value = try container.decode(String.self)
+    }
+
+    @available(macOS 12.3, iOS 15.4, watchOS 8.5, tvOS 15.4, *)
+    public required init?<T: CodingKey>(codingKey: T) {
+        guard let value = String(codingKey: codingKey) else { return nil }
+        self.value = value
+    }
+
+    @available(macOS 12.3, iOS 15.4, watchOS 8.5, tvOS 15.4, *)
+    public var codingKey: CodingKey {
+        value.codingKey
     }
 
     public func encode(to encoder: Encoder) throws {
