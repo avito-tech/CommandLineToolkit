@@ -1,15 +1,14 @@
-import Foundation
-
+/// Allows to chain execution of nested ``CommandLogic``'s
 public final class CompoundCommandLogic: CommandLogic {
     private let commandLogics: [CommandLogic]
-    
+
     public init(_ commandLogics: [CommandLogic]) {
         self.commandLogics = commandLogics
     }
-    
+
     public func run() throws {
-        try commandLogics.forEach {
-            try $0.run()
+        for logic in commandLogics {
+            try logic.run()
         }
     }
 }

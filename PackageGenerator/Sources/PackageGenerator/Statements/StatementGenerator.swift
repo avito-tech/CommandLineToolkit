@@ -33,9 +33,19 @@ public final class StatementGenerator {
             if let conditionalCompilationTargetRequirement = target.conditionalCompilationTargetRequirement {
                 statements.append("#if " + conditionalCompilationTargetRequirement.statement)
             }
+
+            let targetMethodName: String
+            if target.isTest {
+                targetMethodName = ".testTarget("
+            } else if isExecutableTarget(target: target, products: packageProducts) {
+                targetMethodName = ".executableTarget("
+            } else {
+                targetMethodName = ".target("
+            }
+
             statements.append("// MARK: \(target.name)")
             statements.append("targets.append(")
-            statements.append("    " + (!target.isTest ? ".target(" : ".testTarget("))
+            statements.append("    " + targetMethodName)
             statements.append("        name: \"\(target.name)\",")
             statements.append("        dependencies: [")
             statements.append(
@@ -102,8 +112,9 @@ public final class StatementGenerator {
                         importedDependencyCache[importedModuleName] = result
                         return result
                     }
-                    .sorted()
                     .map { IndentedStatement(level: 3, string: $0.statement + ",").statement }
+                    .removeDuplicates()
+                    .sorted()
             )
             statements.append("        ],")
             statements.append("        path: \"\(target.path)\"" + (target.settings.linkerSettings.isDefined ? "," : ""))
@@ -304,6 +315,14 @@ public final class StatementGenerator {
             packageTargetCache[generatablePackageLocation] = result
             return result
         }
+    }
+
+    private func isExecutableTarget(target: PackageTarget, products: [PackageProduct]) -> Bool {
+        return products.lazy
+            .filter { $0.productType == .executable }
+            .contains { product in
+                product.targets.contains(target.name)
+            }
     }
 
     private func obtainPackageProducts(

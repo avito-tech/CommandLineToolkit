@@ -112,9 +112,9 @@ targets.append(
     .target(
         name: "CommandSupport",
         dependencies: [
-            .product(name: "ArgumentParser", package: "swift-argument-parser"),
             "DI",
             "PathLib",
+            .product(name: "ArgumentParser", package: "swift-argument-parser"),
         ],
         path: "Sources/CommandSupport"
     )
@@ -177,9 +177,9 @@ targets.append(
         dependencies: [
             "CLTExtensions",
             "DI",
-            .product(name: "Glob", package: "Glob"),
             "PathLib",
             "Types",
+            .product(name: "Glob", package: "Glob"),
         ],
         path: "Sources/FileSystem"
     )
@@ -217,8 +217,8 @@ targets.append(
         dependencies: [
             "Concurrency",
             "MetricsUtils",
-            .product(name: "Socket", package: "Socket"),
             "SocketModels",
+            .product(name: "Socket", package: "Socket"),
         ],
         path: "Sources/Graphite"
     )
@@ -491,8 +491,8 @@ targets.append(
     .target(
         name: "SignalHandling",
         dependencies: [
-            .product(name: "Signals", package: "Signals"),
             "Types",
+            .product(name: "Signals", package: "Signals"),
         ],
         path: "Sources/SignalHandling"
     )
@@ -525,8 +525,8 @@ targets.append(
         dependencies: [
             "AtomicModels",
             "MetricsUtils",
-            .product(name: "Socket", package: "Socket"),
             "SocketModels",
+            .product(name: "Socket", package: "Socket"),
         ],
         path: "Sources/Statsd"
     )
@@ -537,10 +537,10 @@ targets.append(
         name: "StatsdTests",
         dependencies: [
             "MetricsRecording",
-            .product(name: "Socket", package: "Socket"),
             "SocketModels",
             "Statsd",
             "TestHelpers",
+            .product(name: "Socket", package: "Socket"),
         ],
         path: "Tests/StatsdTests"
     )

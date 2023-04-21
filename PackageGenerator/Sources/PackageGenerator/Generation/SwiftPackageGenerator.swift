@@ -43,6 +43,8 @@ public final class SwiftPackageGenerator {
         for item in generatedContents {
             log("Storing generated package contents at \(item.package.packageSwiftUrl.path)")
             do {
+                let currentContents = try String(contentsOf: item.package.packageSwiftUrl)
+                guard currentContents != item.contents else { continue }
                 try item.contents
                     .data(using: .utf8)?
                     .write(to: item.package.packageSwiftUrl)
