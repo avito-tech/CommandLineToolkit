@@ -2,14 +2,12 @@ import PathLib
 import Foundation
 
 public final class PathDeleterImpl: PathDeleter {
-    private let fileManager: FileManager
+    private let fileManager = FileManager()
     private let filePropertiesProvider: FilePropertiesProvider
     
     public init(
-        fileManager: FileManager,
         filePropertiesProvider: FilePropertiesProvider
     ) {
-        self.fileManager = fileManager
         self.filePropertiesProvider = filePropertiesProvider
     }
     

@@ -27,3 +27,16 @@ public func assertThrows<T>(
         return
     }
 }
+
+@discardableResult
+public func skipThrownErrors<T>(
+    file: StaticString = #filePath,
+    line: UInt = #line,
+    work: () throws -> (T)
+) -> T? {
+    do {
+        return try work()
+    } catch {
+        return nil
+    }
+}

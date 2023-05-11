@@ -1,17 +1,14 @@
 import Foundation
 
 public final class CommonlyUsedPathsProviderFactoryImpl: CommonlyUsedPathsProviderFactory {
-    private let fileManager: FileManager
-    
-    public init(fileManager: FileManager) {
-        self.fileManager = fileManager
+    public init() {
     }
     
     public var commonlyUsedPathsProvider: CommonlyUsedPathsProvider {
 #if os(macOS)
-        return AppleCommonlyUsedPathsProvider(fileManager: fileManager)
+        return AppleCommonlyUsedPathsProvider()
 #elseif os(Linux)
-        return LinuxCommonlyUsedPathsProvider(fileManager: fileManager)
+        return LinuxCommonlyUsedPathsProvider()
 #else
         #error("Unsupported OS")
 #endif

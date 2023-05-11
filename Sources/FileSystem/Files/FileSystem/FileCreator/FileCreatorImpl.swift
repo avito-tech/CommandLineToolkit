@@ -2,19 +2,21 @@ import PathLib
 import Foundation
 
 public final class FileCreatorImpl: FileCreator {
-    private enum FileCreatorError: Error {
-        case failedToCreateFile(AbsolutePath)
+    public struct FileCreatorError: Error, CustomStringConvertible {
+        public let path: AbsolutePath
+        public var description: String {
+            "Couldn't create or overwrite an existing file at: \(path)"
+        }
     }
     
-    private let fileManager: FileManager
+    private let fileManager = FileManager()
     
-    public init(fileManager: FileManager) {
-        self.fileManager = fileManager
+    public init() {
     }
     
     public func createFile(path: AbsolutePath, data: Data?) throws {
         if !fileManager.createFile(atPath: path.pathString, contents: data) {
-            throw FileCreatorError.failedToCreateFile(path)
+            throw FileCreatorError(path: path)
         }
     }
 }

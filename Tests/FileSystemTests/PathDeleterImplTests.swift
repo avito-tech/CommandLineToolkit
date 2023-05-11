@@ -6,7 +6,6 @@ final class PathDeleterImplTests: XCTestCase {
     private lazy var fileManager = FileManager()
     private lazy var tempFolder = createTempFolder()
     private let pathDeleter = PathDeleterImpl(
-        fileManager: FileManager(),
         filePropertiesProvider: FilePropertiesProviderImpl()
     )
     

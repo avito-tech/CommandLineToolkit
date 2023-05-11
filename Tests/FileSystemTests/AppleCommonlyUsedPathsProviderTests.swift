@@ -6,9 +6,7 @@ import XCTest
 
 final class AppleCommonlyUsedPathsProviderTests: XCTestCase {
     private lazy var fileManager = FileManager()
-    private lazy var defaultCommonlyUsedPathsProvider = AppleCommonlyUsedPathsProvider(
-        fileManager: fileManager
-    )
+    private lazy var defaultCommonlyUsedPathsProvider = AppleCommonlyUsedPathsProvider()
     
     func test___applications() {
         XCTAssertEqual(

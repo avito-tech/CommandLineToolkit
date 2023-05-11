@@ -283,11 +283,11 @@ class JSONReaderTests: XCTestCase {
 
     func testComplexStream() throws {
         let dict: [String: Any] = [
-            "key": [true, false, NSNull()],
+            "key": [true, false, NSNull()] as [Any],
             "second_key": [
                 "subobject_key1": 12,
                 "subobject_key2": "string with spaces"
-            ]
+            ] as [String: Any]
         ]
         let array: [Any] = ["string!", dict, false, 12e2]
 

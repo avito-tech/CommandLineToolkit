@@ -20,7 +20,7 @@ final class XcodeLocatorTests: XCTestCase {
         fileSystem.propertiesProvider = { DefaultFilePropertiesContainer(path: $0) }
         
         fileSystem.fakeContentEnumerator = { args in
-            ShallowFileSystemEnumerator(fileManager: FileManager(), path: args.path)
+            ShallowFileSystemEnumerator(path: args.path)
         }
 
         let locator = XcodeLocatorImpl(

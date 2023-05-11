@@ -2,15 +2,13 @@ import Foundation
 import PathLib
 
 public final class PathLinkerImpl: PathLinker {
-    private let fileManager: FileManager
+    private let fileManager = FileManager()
     private let destinationPreparer: DestinationPreparer
     
     public init(
-        fileManager: FileManager,
         pathDeleter: PathDeleter,
         directoryCreator: DirectoryCreator
     ) {
-        self.fileManager = fileManager
         self.destinationPreparer = DestinationPreparer(
             pathDeleter: pathDeleter,
             directoryCreator: directoryCreator

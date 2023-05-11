@@ -12,19 +12,17 @@ final class StatsdClientTests: XCTestCase {
     private let port = ValueOf<SocketModels.Port>()
     private let queue = OperationQueue()
     
-    private lazy var client = assertDoesNotThrow {
-        try StatsdClientImpl(
-            statsdSocketAddress: SocketAddress(
-                host: "127.0.0.1",
-                port: assertDoesNotThrow {
-                    try resolvePort(
-                        queue: queue,
-                        timeout: 10
-                    )
-                }
-            )
+    private lazy var client = StatsdClientImpl(
+        statsdSocketAddress: SocketAddress(
+            host: "127.0.0.1",
+            port: assertDoesNotThrow {
+                try resolvePort(
+                    queue: queue,
+                    timeout: 10
+                )
+            }
         )
-    }
+    )
     
     func test___writing_data_to_socket() throws {
         var dataStream = Data()

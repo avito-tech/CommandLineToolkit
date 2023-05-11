@@ -7,7 +7,6 @@ final class DirectoryCreatorImplTests: XCTestCase {
     private let fileManager = FileManager()
     private lazy var tempFolder = createTempFolder()
     private let directoryCreator = DirectoryCreatorImpl(
-        fileManager: FileManager(),
         filePropertiesProvider: FilePropertiesProviderImpl()
     )
     

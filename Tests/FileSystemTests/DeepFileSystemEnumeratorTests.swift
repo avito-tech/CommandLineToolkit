@@ -12,7 +12,6 @@ final class DeepFileSystemEnumeratorTests: XCTestCase {
         let expectedPaths = try createTestDataForEnumeration(tempFolder: tempFolder)
         
         let enumerator = DeepFileSystemEnumerator(
-            fileManager: FileManager(),
             path: tempFolder.absolutePath
         )
         

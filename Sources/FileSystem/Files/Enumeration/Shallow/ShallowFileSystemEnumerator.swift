@@ -3,17 +3,11 @@ import PathLib
 
 public final class ShallowFileSystemEnumerator: FileSystemEnumerator {
     private let path: AbsolutePath
-    private let fileManager: FileManager
-    
-    public enum EnumerationError: Error {
-        case enumeratorFailure
-    }
+    private let fileManager = FileManager()
     
     public init(
-        fileManager: FileManager,
         path: AbsolutePath
     ) {
-        self.fileManager = fileManager
         self.path = path
     }
     

@@ -2,10 +2,9 @@ import Foundation
 import PathLib
 
 public final class AppleCommonlyUsedPathsProvider: CommonlyUsedPathsProvider {
-    private let fileManager: FileManager
+    private let fileManager = FileManager()
     
-    public init(fileManager: FileManager) {
-        self.fileManager = fileManager
+    public init() {
     }
     
     public func applications(inDomain domain: SearchDomain, create: Bool) throws -> AbsolutePath {

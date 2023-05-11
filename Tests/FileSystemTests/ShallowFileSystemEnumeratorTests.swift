@@ -13,7 +13,6 @@ final class ShallowFileSystemEnumeratorTests: XCTestCase {
         }
         
         let enumerator = ShallowFileSystemEnumerator(
-            fileManager: FileManager(),
             path: tempFolder.absolutePath
         )
         
