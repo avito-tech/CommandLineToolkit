@@ -245,9 +245,6 @@ public final class StatementGenerator {
         
         try? FileManager().removeItem(at: generatablePackage.mirrorsFile_xcode13_3)
         try newMirrorsData.write(to: generatablePackage.mirrorsFile_xcode13_3, options: .atomic)
-        
-        try? FileManager().removeItem(at: generatablePackage.mirrorsFile_pre_xcode13_3)
-        try newMirrorsData.write(to: generatablePackage.mirrorsFile_pre_xcode13_3, options: .atomic)
     }
     
     private func defaultMirrorsFilePathIfExists(generatablePackage: GeneratablePackage) -> String? {
