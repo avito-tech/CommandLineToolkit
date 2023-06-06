@@ -1,4 +1,4 @@
-@testable import ProcessController
+import ProcessController
 import Foundation
 import Tmp
 
