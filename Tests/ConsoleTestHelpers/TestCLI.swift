@@ -1,0 +1,122 @@
+@testable import Console
+import Logging
+
+enum MockCLIError: Error {
+    case noStubbedInput(title: String)
+}
+
+struct MockTraceProgressUpdator: TraceProgressUpdator {
+    let handler: MockCLIHandler
+    let name: String
+
+    func update(progress: Progress) async {
+        handler.traceProgressUpdates[name, default: []].append(progress)
+    }
+}
+
+struct MockLogSink: LogSink {
+    func append(line: String) {
+
+    }
+
+    func append(lines: [String]) {
+
+    }
+
+    func finish() {
+
+    }
+}
+
+public final class MockCLIHandler: ConsoleHandler {
+    public var isAtTTY: Bool = false
+
+    public var isInteractive: Bool = false
+
+    public var logLevel: Logging.Logger.Level = .trace
+
+    public init() {}
+
+    public var traceProgressUpdates: [String: [Progress]] = [:]
+    public func trace<Value>(
+        level: Logger.Level,
+        name: String,
+        mode: TraceMode,
+        file: StaticString,
+        line: UInt,
+        work: (TraceProgressUpdator) async throws -> Value
+    ) async throws -> Value where Value: Sendable {
+        return try await work(MockTraceProgressUpdator(handler: self, name: name))
+    }
+
+    public var selectionResults: [String: [Any]] = [:]
+    public func select<Value>(
+        title: String,
+        values: [Selectable<Value>],
+        mode: SelectionMode,
+        options: SelectionOptions,
+        file: StaticString,
+        line: UInt
+    ) async throws -> [Value] {
+        guard let selection = selectionResults[title] as? [Value] else {
+            throw MockCLIError.noStubbedInput(title: title)
+        }
+        return selection
+    }
+
+    public var inputs: [String: String] = [:]
+    public func input(
+        title: String,
+        defaultValue: String?,
+        file: StaticString,
+        line: UInt
+    ) async throws -> String {
+        guard let input = inputs[title] ?? defaultValue else {
+            throw MockCLIError.noStubbedInput(title: title)
+        }
+        return input
+    }
+
+    public var questionAnswers: [String: Bool] = [:]
+    public func question(
+        title: String,
+        defaultAnswer: Bool,
+        file: StaticString,
+        line: UInt
+    ) async throws -> Bool {
+        guard let input = questionAnswers[title] else {
+            throw MockCLIError.noStubbedInput(title: title)
+        }
+        return input
+    }
+
+    public var logEntries: [LogComponentState] = []
+    public func log(
+        level: Logger.Level,
+        message: Logger.Message,
+        metadata: Logger.Metadata,
+        source: String,
+        file: String,
+        function: String,
+        line: UInt
+    ) {
+        logEntries.append(LogComponentState(
+            level: level,
+            message: message,
+            metadata: metadata,
+            source: source,
+            file: file,
+            function: function,
+            line: line
+        ))
+    }
+
+    public func logStream(
+        level: Logger.Level,
+        name: String,
+        file: StaticString,
+        line: UInt
+    ) async throws -> LogSink {
+        MockLogSink()
+    }
+}

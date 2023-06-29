@@ -129,6 +129,40 @@ targets.append(
         path: "Sources/Concurrency"
     )
 )
+// MARK: Console
+targets.append(
+    .target(
+        name: "Console",
+        dependencies: [
+            "DI",
+            "SignalHandling",
+            .product(name: "Logging", package: "swift-log"),
+            .product(name: "Yams", package: "Yams"),
+        ],
+        path: "Sources/Console"
+    )
+)
+// MARK: ConsoleTestHelpers
+targets.append(
+    .target(
+        name: "ConsoleTestHelpers",
+        dependencies: [
+            "Console",
+            .product(name: "Logging", package: "swift-log"),
+        ],
+        path: "Tests/ConsoleTestHelpers"
+    )
+)
+// MARK: ConsoleTests
+targets.append(
+    .testTarget(
+        name: "ConsoleTests",
+        dependencies: [
+            "Console",
+        ],
+        path: "Tests/ConsoleTests"
+    )
+)
 // MARK: DI
 targets.append(
     .target(
@@ -745,6 +779,8 @@ let package = Package(
         .library(name: "CLTTypes", targets: ["CLTTypes"]),
         .library(name: "CommandSupport", targets: ["CommandSupport"]),
         .library(name: "Concurrency", targets: ["Concurrency"]),
+        .library(name: "Console", targets: ["Console"]),
+        .library(name: "ConsoleTestHelpers", targets: ["ConsoleTestHelpers"]),
         .library(name: "DI", targets: ["DI"]),
         .library(name: "DateProvider", targets: ["DateProvider"]),
         .library(name: "DateProviderTestHelpers", targets: ["DateProviderTestHelpers"]),
@@ -786,7 +822,9 @@ let package = Package(
         .package(name: "Glob", url: "https://github.com/Bouke/Glob", .exact("1.0.5")),
         .package(name: "Signals", url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.21")),
         .package(name: "Socket", url: "https://github.com/Kitura/BlueSocket.git", .exact("1.0.52")),
+        .package(name: "Yams", url: "https://github.com/jpsim/Yams.git", from: "4.0.6"),
         .package(name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser", from: "1.1.3"),
+        .package(name: "swift-log", url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     ],
     targets: targets
 )

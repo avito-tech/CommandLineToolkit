@@ -1,0 +1,16 @@
+extension String {
+    static let noBlockSymbol: Self = "╶"
+    static let blockStartSymbol: Self = "╭"
+    static let blockBorderSymbol: Self = "│"
+    static let blockBorderJunction: Self = "├"
+    static let blockEndSymbol: Self = "╰"
+    static let blockHorizontalBorder: Self = "─"
+    static let dashSpacerSymbol: Self = "⸱"
+    static let spaceSpacerSymbol: Self = " "
+    static let successSymbol: Self = "✔"
+    static let failureSymbol: Self = "✘"
+    static let activeSymbol: Self = "▶"
+    static let inputSymbol: Self = "❯"
+    static let selectedSymbol: Self = "●"
+    static let unselectedSymbol: Self = "○"
+}

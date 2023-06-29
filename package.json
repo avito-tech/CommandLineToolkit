@@ -28,6 +28,15 @@
                 "ArgumentParser"
             ]
         },
+        "swift-log": {
+            "url": "https://github.com/apple/swift-log.git",
+            "version": {
+                "from": "1.0.0"
+            },
+            "targetNames": [
+                "Logging"
+            ]
+        },
         "Socket": {
             "url": "https://github.com/Kitura/BlueSocket.git",
             "version": {
@@ -35,6 +44,15 @@
             },
             "targetNames": [
                 "Socket"
+            ]
+        },
+        "Yams": {
+            "url": "https://github.com/jpsim/Yams.git",
+            "version": {
+                "from": "4.0.6"
+            },
+            "targetNames": [
+                "Yams"
             ]
         },
     },
