@@ -619,6 +619,7 @@ targets.append(
         dependencies: [
             "AtomicModels",
             "CLTExtensions",
+            "PathLib",
         ],
         path: "Tests/TestHelpers"
     )
