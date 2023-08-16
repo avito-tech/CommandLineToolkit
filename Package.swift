@@ -600,6 +600,17 @@ targets.append(
         path: "Tests/SynchronousWaiterTests"
     )
 )
+// MARK: TeamcityMessaging
+targets.append(
+    .target(
+        name: "TeamcityMessaging",
+        dependencies: [
+            "CLTExtensions",
+            "DI",
+        ],
+        path: "Sources/TeamcityMessaging"
+    )
+)
 // MARK: TemporaryStuffTests
 targets.append(
     .testTarget(
@@ -807,6 +818,7 @@ let package = Package(
         .library(name: "SocketModels", targets: ["SocketModels"]),
         .library(name: "Statsd", targets: ["Statsd"]),
         .library(name: "SynchronousWaiter", targets: ["SynchronousWaiter"]),
+        .library(name: "TeamcityMessaging", targets: ["TeamcityMessaging"]),
         .library(name: "TestHelpers", targets: ["TestHelpers"]),
         .library(name: "Timer", targets: ["Timer"]),
         .library(name: "Tmp", targets: ["Tmp"]),
