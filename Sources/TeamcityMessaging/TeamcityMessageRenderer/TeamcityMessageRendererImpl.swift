@@ -96,7 +96,7 @@ public final class TeamcityMessageRendererImpl: TeamcityMessageRenderer {
             "]": "|]",
         ]
         
-        return string.flatMap { character in
+        return string.compactMap { character in
             escapeSequenceByCharacter[character] ?? String(character)
         }.joined(separator: "")
     }
