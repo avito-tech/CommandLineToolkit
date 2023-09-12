@@ -14,9 +14,9 @@ public final class ValueOf<T> {
         self.expectation = expectation
     }
     
-    public struct ValueIsNilError<T>: Error, CustomStringConvertible {
+    public struct ValueIsNilError<Value>: Error, CustomStringConvertible {
         public var description: String {
-            "Value of type \(type(of: T.self)) was not yet set"
+            "Value of type \(type(of: Value.self)) was not yet set"
         }
     }
     

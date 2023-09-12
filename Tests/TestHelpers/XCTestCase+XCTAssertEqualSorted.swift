@@ -11,10 +11,10 @@ public extension XCTestCase {
         line: UInt = #line
     ) rethrows {
         let array1 = try expression1().sorted { lhs, rhs in
-            try lhs[keyPath: keyPath] < rhs[keyPath: keyPath]
+            lhs[keyPath: keyPath] < rhs[keyPath: keyPath]
         }
         let array2 = try expression2().sorted { lhs, rhs in
-            try lhs[keyPath: keyPath] < rhs[keyPath: keyPath]
+            lhs[keyPath: keyPath] < rhs[keyPath: keyPath]
         }
         XCTAssertEqual(array1, array2, message(), file: file, line: line)
     }
