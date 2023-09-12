@@ -165,11 +165,11 @@ public extension PackageTarget {
     }
     
     private static func loadTargetSpecificSettings(url: URL) throws -> TargetSpecificSettings {
-        let file = url.appendingPathComponent("target.json", isDirectory: false)
+        let file = url.appendingPathComponent(TargetSpecificSettings.targetSpecificSettingsFile, isDirectory: false)
         guard FileManager().fileExists(atPath: file.path) else {
             return TargetSpecificSettings(linkerSettings: LinkerSettings(unsafeFlags: []))
         }
-        return try JSONDecoder().decode(TargetSpecificSettings.self, from: Data(contentsOf: file))
+        return try JSONDecoder().decodeExplaining(TargetSpecificSettings.self, from: Data(contentsOf: file), context: file.path)
     }
     
     private static func subdirectriesEnumerator(url: URL) -> FileManager.DirectoryEnumerator {
