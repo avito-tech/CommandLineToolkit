@@ -139,7 +139,11 @@ targets.append(
             .product(name: "Logging", package: "swift-log"),
             .product(name: "Yams", package: "Yams"),
         ],
-        path: "Sources/Console"
+        path: "Sources/Console",
+        exclude: [
+            "ANSI/README.md",
+            "target.json",
+        ]
     )
 )
 // MARK: ConsoleTestHelpers
@@ -169,7 +173,11 @@ targets.append(
         name: "DI",
         dependencies: [
         ],
-        path: "Sources/DI"
+        path: "Sources/DI",
+        exclude: [
+            "README.md",
+            "target.json",
+        ]
     )
 )
 // MARK: DateProvider
@@ -274,7 +282,11 @@ targets.append(
         dependencies: [
             "AtomicModels",
         ],
-        path: "Sources/JSONStream"
+        path: "Sources/JSONStream",
+        exclude: [
+            "README.md",
+            "target.json",
+        ]
     )
 )
 // MARK: JSONStreamTests
@@ -431,7 +443,11 @@ targets.append(
             "FileSystem",
             "PathLib",
         ],
-        path: "Sources/PlistLib"
+        path: "Sources/PlistLib",
+        exclude: [
+            "README.md",
+            "target.json",
+        ]
     )
 )
 // MARK: PlistLibTests
@@ -632,7 +648,11 @@ targets.append(
             "CLTExtensions",
             "PathLib",
         ],
-        path: "Tests/TestHelpers"
+        path: "Tests/TestHelpers",
+        exclude: [
+            "README.md",
+            "target.json",
+        ]
     )
 )
 // MARK: Timer
@@ -701,7 +721,11 @@ targets.append(
         dependencies: [
             "PlistLib",
         ],
-        path: "Sources/UserDefaultsLib"
+        path: "Sources/UserDefaultsLib",
+        exclude: [
+            "README.md",
+            "target.json",
+        ]
     )
 )
 // MARK: UserDefaultsLibTestHelpers
