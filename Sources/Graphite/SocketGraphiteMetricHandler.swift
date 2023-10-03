@@ -5,43 +5,45 @@
 import Foundation
 import Socket
 import SocketModels
-import Concurrency
 
 public final class SocketGraphiteMetricHandler: GraphiteMetricHandler {
     private let graphiteDomain: [String]
-    private let lazySocket: ThrowingThreadSafeLazy<Socket>
+    private let socketConnection: LazySocketConnection
+    private let retriesLimit: Int
+    private let syncQueue: DispatchQueue
+
+    private var stopped = false
     
     public init(
         graphiteDomain: [String],
-        graphiteSocketAddress: SocketAddress
+        graphiteSocketAddress: SocketAddress,
+        retriesLimit: Int = 1,
+        syncQueue: DispatchQueue = .init(label: "clt.SocketGraphiteMetricHandler")
     ) {
         self.graphiteDomain = graphiteDomain
-
-        self.lazySocket = ThrowingThreadSafeLazy {
-            let socket = try Socket.create(family: .inet, type: .stream, proto: .tcp)
-            
-            try socket.connect(
-                to: graphiteSocketAddress.host,
-                port: Int32(graphiteSocketAddress.port.value)
-            )
-            
-            return socket
-        }
+        socketConnection = LazySocketConnection(
+            socketAddress: graphiteSocketAddress,
+            socketFactory: { try Socket.create(family: .inet, type: .stream, proto: .tcp) }
+        )
+        self.retriesLimit = retriesLimit
+        self.syncQueue = syncQueue
     }
     
     public func handle(metric: GraphiteMetric) {
-        try? send(
-            path: graphiteDomain + metric.components,
-            value: metric.value,
-            timestamp: metric.timestamp
-        )
+        syncQueue.async { [self] in
+            try? send(
+                path: graphiteDomain + metric.components,
+                value: metric.value,
+                timestamp: metric.timestamp
+            )
+        }
     }
     
     private func send(path: [String], value: Double, timestamp: Date) throws {
+        guard !stopped else { return }
+
         let entry = try InternalGraphiteMetric(path: path, value: value, timestamp: timestamp)
-        
-        let data = data(internalMetric: entry)
-        try socket.write(from: data)
+        try socketConnection.send(data: data(internalMetric: entry), retriesLimit: retriesLimit)
     }
     
     private func data(internalMetric: InternalGraphiteMetric) -> Data {
@@ -51,12 +53,11 @@ public final class SocketGraphiteMetricHandler: GraphiteMetricHandler {
     }
     
     public func tearDown(timeout: TimeInterval) {
-        try? socket.close()
-    }
-    
-    private var socket: Socket {
-        get throws {
-            try lazySocket.value
+        syncQueue.async { [self] in
+            guard !stopped else { return }
+            stopped = true
+
+            socketConnection.close()
         }
     }
 }

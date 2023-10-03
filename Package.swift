@@ -257,7 +257,6 @@ targets.append(
     .target(
         name: "Graphite",
         dependencies: [
-            "Concurrency",
             "MetricsUtils",
             "SocketModels",
             .product(name: "Socket", package: "Socket"),
@@ -273,6 +272,20 @@ targets.append(
             "Graphite",
         ],
         path: "Tests/GraphiteTestHelpers"
+    )
+)
+// MARK: GraphiteTests
+targets.append(
+    .testTarget(
+        name: "GraphiteTests",
+        dependencies: [
+            "AtomicModels",
+            "Graphite",
+            "SocketModels",
+            "TestHelpers",
+            .product(name: "Socket", package: "Socket"),
+        ],
+        path: "Tests/GraphiteTests"
     )
 )
 // MARK: JSONStream
