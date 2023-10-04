@@ -130,9 +130,6 @@ public struct ANSIConsoleHandler: ConsoleHandler {
                 defer { terminal.disableNonBlockingTerminal() }
 
                 do {
-                    terminal.enableAlternateBuffer()
-                    defer { terminal.disableAlternateBuffer() }
-
                     repeat {
                         guard let event = getControlEvent(state: &state) else {
                             continue
