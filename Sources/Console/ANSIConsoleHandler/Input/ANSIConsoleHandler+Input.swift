@@ -20,7 +20,7 @@ extension ANSIConsoleHandler {
 
     private func nonInteractiveInput(title: String, defaultValue: String? = nil) -> String {
         let indent = indentString()
-        terminal.write(indent, title, "\n", indent, "> ")
+        terminal.write(indent, title, defaultValue.map { " [\($0)]" } ?? "", "\n", indent, "> ")
         let value = readLine(strippingNewline: true) ?? ""
         if value.isEmpty {
             return defaultValue ?? value

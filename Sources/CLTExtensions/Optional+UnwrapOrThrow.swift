@@ -64,6 +64,20 @@ extension Optional {
             line: line
         )
     }
+
+    public func unwrap(buildDefault: () throws -> Wrapped) rethrows -> Wrapped {
+        guard let self else {
+            return try buildDefault()
+        }
+        return self
+    }
+
+    public func unwrap(buildDefault: () async throws -> Wrapped) async rethrows -> Wrapped {
+        guard let self else {
+            return try await buildDefault()
+        }
+        return self
+    }
     
     private static func defaultError(
         file: StaticString,
