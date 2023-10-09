@@ -33,7 +33,7 @@ struct SelectComponentRenderer<Value>: Renderer {
                 "\(.blockBorderSymbol)   \("Ничего не найдено", style: .error)",
             ]
         } else {
-            let nonDataLineCount = 5
+            let nonDataLineCount = 7
             let window = state.window(maxSize: (preferredSize?.rows ?? 10) - nonDataLineCount)
             rows = (window.minimum...window.maximum).map { offset in
                 let selectable = state.filteredValues[offset]
