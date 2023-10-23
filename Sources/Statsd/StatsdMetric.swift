@@ -2,7 +2,7 @@ import Foundation
 import MetricsUtils
 
 // https://github.com/statsd/statsd/blob/master/docs/metric_types.md
-open class StatsdMetric: CustomStringConvertible, Hashable {
+public struct StatsdMetric: CustomStringConvertible, Hashable {
     public enum Value: Hashable {
         case gauge(Int)
         case time(TimeInterval)
@@ -40,15 +40,5 @@ open class StatsdMetric: CustomStringConvertible, Hashable {
     
     public var description: String {
         return "<\(type(of: self)) components=\(components), value=\(value)"
-    }
-
-    public static func ==(left: StatsdMetric, right: StatsdMetric) -> Bool {
-        return left.components == right.components
-            && left.value == right.value
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(components)
-        hasher.combine(value)
     }
 }
