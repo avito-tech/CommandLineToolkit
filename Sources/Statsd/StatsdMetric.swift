@@ -2,8 +2,8 @@ import Foundation
 import MetricsUtils
 
 // https://github.com/statsd/statsd/blob/master/docs/metric_types.md
-public struct StatsdMetric: CustomStringConvertible, Hashable {
-    public enum Value: Hashable {
+public struct StatsdMetric: CustomStringConvertible, Hashable, Codable {
+    public enum Value: Hashable, Codable {
         case gauge(Int)
         case time(TimeInterval)
         case count(Int)
