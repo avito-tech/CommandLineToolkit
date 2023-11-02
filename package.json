@@ -55,6 +55,15 @@
                 "Yams"
             ]
         },
+        "Alamofire": {
+            "url": "https://github.com/Alamofire/Alamofire",
+            "version": {
+              "exact": "5.5.0"
+            },
+            "targetNames": [
+              "Alamofire"
+            ]
+        }
     },
     "implicitSystemModules" : [
       "Darwin",

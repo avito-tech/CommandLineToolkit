@@ -200,6 +200,19 @@ targets.append(
         path: "Tests/DateProviderTestHelpers"
     )
 )
+// MARK: Downloader
+targets.append(
+    .target(
+        name: "Downloader",
+        dependencies: [
+            "DI",
+            "DateProvider",
+            "PathLib",
+            .product(name: "Alamofire", package: "Alamofire"),
+        ],
+        path: "Sources/Downloader"
+    )
+)
 // MARK: Environment
 targets.append(
     .target(
@@ -833,6 +846,7 @@ let package = Package(
         .library(name: "DI", targets: ["DI"]),
         .library(name: "DateProvider", targets: ["DateProvider"]),
         .library(name: "DateProviderTestHelpers", targets: ["DateProviderTestHelpers"]),
+        .library(name: "Downloader", targets: ["Downloader"]),
         .library(name: "Environment", targets: ["Environment"]),
         .library(name: "FileSystem", targets: ["FileSystem"]),
         .library(name: "FileSystemTestHelpers", targets: ["FileSystemTestHelpers"]),
@@ -869,6 +883,7 @@ let package = Package(
         .library(name: "XcodeLocatorModels", targets: ["XcodeLocatorModels"]),
     ],
     dependencies: [
+        .package(name: "Alamofire", url: "https://github.com/Alamofire/Alamofire", .exact("5.5.0")),
         .package(name: "Glob", url: "https://github.com/Bouke/Glob", .exact("1.0.5")),
         .package(name: "Signals", url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.21")),
         .package(name: "Socket", url: "https://github.com/Kitura/BlueSocket.git", .exact("1.0.52")),
