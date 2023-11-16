@@ -53,6 +53,7 @@ public final class DownloaderImpl: Downloader {
     ) async -> Result<AbsolutePath, Error> {
         let downloadStartedAt = dateProvider.currentDate()
         let request = AF.download(url, method: .get)
+        request.validate()
         
         Task {
             for await progress in request.downloadProgress() {
