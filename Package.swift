@@ -107,16 +107,40 @@ targets.append(
         path: "Sources/CLTTypes"
     )
 )
+// MARK: Cloc
+targets.append(
+    .target(
+        name: "Cloc",
+        dependencies: [
+            "FileSystem",
+            "PathLib",
+            "ProcessController",
+        ],
+        path: "Sources/Cloc"
+    )
+)
 // MARK: CommandSupport
 targets.append(
     .target(
         name: "CommandSupport",
         dependencies: [
+            "CLTExtensions",
             "DI",
             "PathLib",
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
         ],
         path: "Sources/CommandSupport"
+    )
+)
+// MARK: CommandSupportTests
+targets.append(
+    .testTarget(
+        name: "CommandSupportTests",
+        dependencies: [
+            "CommandSupport",
+            .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        ],
+        path: "Tests/CommandSupportTests"
     )
 )
 // MARK: Concurrency
@@ -852,6 +876,7 @@ let package = Package(
         .library(name: "CLTLoggingModels", targets: ["CLTLoggingModels"]),
         .library(name: "CLTLoggingTestHelpers", targets: ["CLTLoggingTestHelpers"]),
         .library(name: "CLTTypes", targets: ["CLTTypes"]),
+        .library(name: "Cloc", targets: ["Cloc"]),
         .library(name: "CommandSupport", targets: ["CommandSupport"]),
         .library(name: "Concurrency", targets: ["Concurrency"]),
         .library(name: "Console", targets: ["Console"]),
