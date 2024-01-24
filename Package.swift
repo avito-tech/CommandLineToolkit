@@ -158,6 +158,7 @@ targets.append(
     .target(
         name: "Console",
         dependencies: [
+            "AtomicModels",
             "DI",
             "SignalHandling",
             .product(name: "Logging", package: "swift-log"),

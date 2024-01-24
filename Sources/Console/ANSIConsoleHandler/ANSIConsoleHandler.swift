@@ -1,5 +1,6 @@
 import Foundation
 import Logging
+import AtomicModels
 
 private final actor ANSIConsoleHandlerStateHolder {
     private var isInInteractiveMode: Bool = false
@@ -369,15 +370,17 @@ enum RenderCache {
             self.preferredSize = preferredSize
         }
     }
-    static var cache: LRUCache<Key, ConsoleRender> = .init(size: 500)
+    static var cache = AtomicValue(LRUCache<Key, ConsoleRender>(size: 500))
 }
 
 struct CachedRenderer<Upstream: Renderer>: Renderer where Upstream.State: Hashable {
     let upstream: Upstream
 
     func render(state: Upstream.State, preferredSize: Size?) -> ConsoleRender {
-        RenderCache.cache.refer(to: .init(state: state, preferredSize: preferredSize)) {
-            upstream.render(state: state, preferredSize: preferredSize)
+        RenderCache.cache.withExclusiveAccess { cache in
+            cache.refer(to: .init(state: state, preferredSize: preferredSize)) {
+                upstream.render(state: state, preferredSize: preferredSize)
+            }
         }
     }
 }
