@@ -35,6 +35,7 @@ default_action___open() {
 action___clean() { default_action___clean ${@+"$@"}; }
 default_action___clean() {
     perform_inside_project rm -rf .build/
+    perform_inside_project rm -rf .swiftpm/
 }
 
 # `make build` - builds with release configuration
