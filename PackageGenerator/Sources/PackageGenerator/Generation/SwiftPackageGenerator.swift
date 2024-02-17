@@ -26,7 +26,13 @@ public final class SwiftPackageGenerator {
     ) throws {
         for item in generatedContents {
             log("Checking if package contents at \(item.package.location.path) matches expected value")
+            
+            guard FileManager().isReadableFile(atPath: item.package.packageSwiftUrl.path) else {
+                throw PackageSwiftMissingError(packageSwiftFileUrl: item.package.packageSwiftUrl)
+            }
+            
             let currentContents = try String(contentsOf: item.package.packageSwiftUrl)
+            
             if currentContents != item.contents {
                 throw ContentMismatchError(
                     packageSwiftFileUrl: item.package.packageSwiftUrl,
@@ -43,7 +49,7 @@ public final class SwiftPackageGenerator {
         for item in generatedContents {
             log("Storing generated package contents at \(item.package.packageSwiftUrl.path)")
             do {
-                let currentContents = try String(contentsOf: item.package.packageSwiftUrl)
+                let currentContents = try? String(contentsOf: item.package.packageSwiftUrl)
                 guard currentContents != item.contents else { continue }
                 try item.contents
                     .data(using: .utf8)?

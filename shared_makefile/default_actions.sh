@@ -73,7 +73,14 @@ default_action___test() {
 action___run_ci_tests() { default_action___run_ci_tests ${@+"$@"}; }
 default_action___run_ci_tests() {
     export ON_CI=true
-    export SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED=true
+
+    if [ -z ${SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED+x} ]; then
+        # Variable is unset
+        if __should_verify_that_package_contents_are_unchanged; then
+            export SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED=true
+        fi
+    fi
+
     action___test --enable-code-coverage -Xswiftc -DTEST
 }
 
@@ -96,4 +103,18 @@ default_action___help() {
 
 __indent_lines_except_first() {
     perl -pe 's/\n/\n    /'
+}
+
+__should_verify_that_package_contents_are_unchanged() {
+    # SPM requires Package.swift to be committed to repo.
+    # However, it is not true for packages that are not in repo (SPM doesn't see them)
+    # So a user may choose to ignore Package.swift
+
+    body() {
+        which git 1>/dev/null 2>/dev/null || return 1 # can't say if it is ignored or not
+
+        ! git check-ignore "Package.swift"
+    }
+
+    perform_inside_project body
 }

@@ -19,10 +19,16 @@ __set_repo_root() {
 __perform_inside_folder() {
     local folder=$1
     shift
-    
+
+    local status=0
+
     pushd "$folder" > /dev/null
-    "$@"
+
+    "$@" || status=$?
+
     popd > /dev/null
+
+    return $status
 }
 
 __make_temporary_directory() {
