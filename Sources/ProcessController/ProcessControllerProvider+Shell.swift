@@ -113,12 +113,16 @@ public final class CapturedOutputStreams {
     private let stderrStorage = AtomicValue(Data())
     
     public var stdoutData: Data { stdoutStorage.currentValue() }
-    public var stdoutSting: String { String(data: stdoutData, encoding: .utf8) ?? "" }
-    public var stdoutLines: [Substring] { stdoutSting.split(separator: "\n") }
+    @available(*, deprecated, renamed: "stdoutString")
+    public var stdoutSting: String { stdoutString }
+    public var stdoutString: String { String(data: stdoutData, encoding: .utf8) ?? "" }
+    public var stdoutLines: [Substring] { stdoutString.split(separator: "\n") }
     
     public var stderrData: Data { stderrStorage.currentValue() }
-    public var stderrSting: String { String(data: stderrData, encoding: .utf8) ?? "" }
-    public var stderrLines: [Substring] { stderrSting.split(separator: "\n") }
+    @available(*, deprecated, renamed: "stderrString")
+    public var stderrSting: String { stderrString }
+    public var stderrString: String { String(data: stderrData, encoding: .utf8) ?? "" }
+    public var stderrLines: [Substring] { stderrString.split(separator: "\n") }
     
     public var outputStreaming: OutputStreaming {
         return OutputStreaming { data in

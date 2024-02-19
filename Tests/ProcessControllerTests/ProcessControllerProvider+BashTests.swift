@@ -25,7 +25,7 @@ final class ProcessControllerProviderBashTests: XCTestCase {
             outputStreaming: capturedOutput.outputStreaming
         )
         XCTAssertEqual(
-            capturedOutput.stdoutSting,
+            capturedOutput.stdoutString,
             "hello\n"
         )
     }
@@ -41,7 +41,7 @@ final class ProcessControllerProviderBashTests: XCTestCase {
             )
         }
         XCTAssertEqual(
-            capturedOutput.stderrSting,
+            capturedOutput.stderrString,
             "ls: \(uniqueString): No such file or directory\n"
         )
     }
