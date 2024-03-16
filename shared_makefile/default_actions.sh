@@ -70,8 +70,10 @@ default_action___test() {
 }
 
 # `make run_ci_tests` - runs tests (for usage on CI machine)
-action___run_ci_tests() { default_action___run_ci_tests ${@+"$@"}; }
+action___run_ci_tests() { default_action___run_ci_tests enable-code-coverage ${@+"$@"}; }
 default_action___run_ci_tests() {
+    CODE_COVERAGE=${1:-enable-code-coverage}
+
     export ON_CI=true
 
     if [ -z ${SHOULD_VERIFY_THAT_PACKAGE_CONTENTS_ARE_UNCHANGED+x} ]; then
@@ -81,7 +83,7 @@ default_action___run_ci_tests() {
         fi
     fi
 
-    action___test --enable-code-coverage -Xswiftc -DTEST
+    action___test --${CODE_COVERAGE} -Xswiftc -DTEST
 }
 
 # `make test` - prints help
