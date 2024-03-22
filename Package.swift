@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.9
 import PackageDescription
 
 var targets = [Target]()
@@ -297,7 +297,7 @@ targets.append(
         dependencies: [
             "MetricsUtils",
             "SocketModels",
-            .product(name: "Socket", package: "Socket"),
+            .product(name: "Socket", package: "BlueSocket"),
         ],
         path: "Sources/Graphite"
     )
@@ -321,7 +321,7 @@ targets.append(
             "Graphite",
             "SocketModels",
             "TestHelpers",
-            .product(name: "Socket", package: "Socket"),
+            .product(name: "Socket", package: "BlueSocket"),
         ],
         path: "Tests/GraphiteTests"
     )
@@ -606,7 +606,7 @@ targets.append(
         name: "SignalHandling",
         dependencies: [
             "Types",
-            .product(name: "Signals", package: "Signals"),
+            .product(name: "Signals", package: "BlueSignals"),
         ],
         path: "Sources/SignalHandling"
     )
@@ -617,7 +617,7 @@ targets.append(
         name: "SignalHandlingTests",
         dependencies: [
             "SignalHandling",
-            .product(name: "Signals", package: "Signals"),
+            .product(name: "Signals", package: "BlueSignals"),
         ],
         path: "Tests/SignalHandlingTests"
     )
@@ -640,7 +640,7 @@ targets.append(
             "AtomicModels",
             "MetricsUtils",
             "SocketModels",
-            .product(name: "Socket", package: "Socket"),
+            .product(name: "Socket", package: "BlueSocket"),
         ],
         path: "Sources/Statsd"
     )
@@ -654,7 +654,7 @@ targets.append(
             "SocketModels",
             "Statsd",
             "TestHelpers",
-            .product(name: "Socket", package: "Socket"),
+            .product(name: "Socket", package: "BlueSocket"),
         ],
         path: "Tests/StatsdTests"
     )
@@ -867,7 +867,7 @@ targets.append(
 let package = Package(
     name: "CommandLineToolkit",
     platforms: [
-        .macOS(.v11),
+        .macOS(.v13),
     ],
     products: [
         .library(name: "AtomicModels", targets: ["AtomicModels"]),
@@ -923,13 +923,13 @@ let package = Package(
         .library(name: "XcodeLocatorModels", targets: ["XcodeLocatorModels"]),
     ],
     dependencies: [
-        .package(name: "Alamofire", url: "https://github.com/Alamofire/Alamofire", .exact("5.5.0")),
-        .package(name: "Glob", url: "https://github.com/Bouke/Glob", .exact("1.0.5")),
-        .package(name: "Signals", url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.21")),
-        .package(name: "Socket", url: "https://github.com/Kitura/BlueSocket.git", .exact("1.0.52")),
-        .package(name: "Yams", url: "https://github.com/jpsim/Yams.git", from: "4.0.6"),
-        .package(name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser", from: "1.1.3"),
-        .package(name: "swift-log", url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
+        .package(url: "https://github.com/Alamofire/Alamofire", exact: "5.5.0"),
+        .package(url: "https://github.com/IBM-Swift/BlueSignals.git", exact: "1.0.21"),
+        .package(url: "https://github.com/Kitura/BlueSocket.git", exact: "1.0.52"),
+        .package(url: "https://github.com/Bouke/Glob", exact: "1.0.5"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.6"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.3"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     ],
     targets: targets
 )

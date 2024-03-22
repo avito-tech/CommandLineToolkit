@@ -1,7 +1,7 @@
 {
   "dependencies" : {
     "external" : {
-        "Signals": {
+        "BlueSignals": {
             "url": "https://github.com/IBM-Swift/BlueSignals.git",
             "version": {
                 "exact": "1.0.21"
@@ -37,7 +37,7 @@
                 "Logging"
             ]
         },
-        "Socket": {
+        "BlueSocket": {
             "url": "https://github.com/Kitura/BlueSocket.git",
             "version": {
                 "exact": "1.0.52"
@@ -79,10 +79,10 @@
   "platforms" : [
     {
       "name" : "macOS",
-      "version" : "11"
+      "version" : "13"
     }
   ],
   "products" : "productForEachTarget",
-  "swiftToolsVersion" : "5.5",
+  "swiftToolsVersion" : "5.9",
   "targets" : "discoverAutomatically"
 }

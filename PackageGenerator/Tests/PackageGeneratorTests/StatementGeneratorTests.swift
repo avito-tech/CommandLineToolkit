@@ -66,7 +66,7 @@ final class StatementGeneratorTests: XCTestCase {
                 .library(name: "TargetA", targets: ["TargetA"]),
             ],
             dependencies: [
-                .package(name: "SomeExternalPackage", url: "http://example.com/someexternalpackage", .exact("123")),
+                .package(url: "http://example.com/someexternalpackage", exact: "123"),
             ],
             targets: targets
         )
@@ -524,6 +524,79 @@ final class StatementGeneratorTests: XCTestCase {
             products: [
             ],
             dependencies: [
+            ],
+            targets: targets
+        )
+
+        """
+        
+        XCTAssertEqual(
+            contents.first!.contents,
+            expectedContents
+        )
+    }
+
+    func test___external_dependencies_requirements() throws {
+        let contents = try statementGenerator.generatePackageSwiftCode(
+            generatablePackage: GeneratablePackage(
+                location: URL(fileURLWithPath: NSTemporaryDirectory()),
+                packageJsonFile: PackageJsonFile(
+                    swiftToolsVersion: "1.2",
+                    name: "TestPackage",
+                    platforms: [],
+                    products: PackageProducts.explicit([]),
+                    dependencies: PackageDependencies(
+                        implicitSystemModules: [],
+                        external: [
+                            "A": ExternalPackageLocation.url(url: "http://g.com/foo", version: .exact("1.2.3"), importMappings: [:], targetNames: .generated),
+                            "B": ExternalPackageLocation.url(url: "http://g.com/bar", version: .branch("master"), importMappings: [:], targetNames: .generated),
+                            "C": ExternalPackageLocation.url(url: "http://g.com/baz", version: .revision("f123f"), importMappings: [:], targetNames: .generated),
+                            "D": ExternalPackageLocation.url(url: "http://g.com/bra", version: .from("4.5.6"), importMappings: [:], targetNames: .generated)
+                        ],
+                        mirrorsFilePath: nil
+                    ),
+                    targets: PackageTargets.single(
+                        PackageTarget(
+                            name: "TargetA",
+                            dependencies: [],
+                            path: "Sources/TargetA",
+                            isTest: false,
+                            settings: TargetSpecificSettings(
+                            ),
+                            conditionalCompilationTargetRequirement: nil
+                        )
+                    ),
+                    commonSwiftSettings: .empty
+                )
+            )
+        )
+        
+        let expectedContents = """
+        // swift-tools-version:1.2
+        import PackageDescription
+
+        var targets = [Target]()
+        // MARK: TargetA
+        targets.append(
+            .target(
+                name: "TargetA",
+                dependencies: [
+                ],
+                path: "Sources/TargetA"
+            )
+        )
+
+        let package = Package(
+            name: "TestPackage",
+            platforms: [
+            ],
+            products: [
+            ],
+            dependencies: [
+                .package(url: "http://g.com/foo", exact: "1.2.3"),
+                .package(url: "http://g.com/bar", branch: "master"),
+                .package(url: "http://g.com/baz", revision: "f123f"),
+                .package(url: "http://g.com/bra", from: "4.5.6"),
             ],
             targets: targets
         )

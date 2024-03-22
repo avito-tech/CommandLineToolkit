@@ -2,14 +2,12 @@ import Foundation
 
 /// Defines external package version
 public enum ExternalPackageVersion: Codable, Hashable {
-    case upToNextMajor(String)
     case exact(String)
     case from(String)
     case branch(String)
     case revision(String)
     
     private enum CodingKeys: CodingKey {
-        case upToNextMajor
         case exact
         case from
         case branch
@@ -19,8 +17,6 @@ public enum ExternalPackageVersion: Codable, Hashable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self = try FirstNonThrowingResultOf.perform({
-            .upToNextMajor(try container.decode(String.self, forKey: .upToNextMajor))
-        }, {
             .exact(try container.decode(String.self, forKey: .exact))
         }, {
             .from(try container.decode(String.self, forKey: .from))
@@ -36,8 +32,6 @@ public enum ExternalPackageVersion: Codable, Hashable {
         switch self {
         case let .exact(value):
             try container.encode(value, forKey: .exact)
-        case let .upToNextMajor(value):
-            try container.encode(value, forKey: .upToNextMajor)
         case let .from(value):
             try container.encode(value, forKey: .from)
         case let .branch(value):
