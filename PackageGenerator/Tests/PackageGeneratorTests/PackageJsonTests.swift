@@ -3,13 +3,6 @@ import PackageGenerator
 import XCTest
 
 final class PackageJsonTests: XCTestCase {
-    lazy var jsonEncoder: JSONEncoder = {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys, .prettyPrinted, .withoutEscapingSlashes]
-        return encoder
-    }()
-    lazy var jsonDecoder = JSONDecoder()
-    
     func test___basic() throws {
         let jsonFile = PackageJsonFile(
             swiftToolsVersion: "swift-version",
@@ -213,21 +206,5 @@ final class PackageJsonTests: XCTestCase {
             }
             """
         )
-    }
-    
-    private func assert(
-        jsonFile: PackageJsonFile,
-        equalsJsonRepresentation: String
-    ) throws {
-        let parsedFile = try jsonDecoder.decodeExplaining(
-            PackageJsonFile.self,
-            from: Data(equalsJsonRepresentation.utf8)
-        )
-        
-        if jsonFile != parsedFile {
-            print("Expected JSON representation:")
-            print(try jsonEncoder.encode(jsonFile))
-            XCTFail("Result mismatch, see logs")
-        }
     }
 }

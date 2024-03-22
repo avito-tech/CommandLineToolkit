@@ -11,7 +11,7 @@ public enum ExcludePaths: Hashable {
         case let .single(path):
             return [ path ]
         case let .multiple(paths):
-            return paths
+            return paths.sorted()
         }
     }
     
@@ -26,6 +26,10 @@ public enum ExcludePaths: Hashable {
         case let .multiple(exising):
             self = .multiple(exising + path)
         }
+    }
+    
+    public static func == (lhs: ExcludePaths, rhs: ExcludePaths) -> Bool {
+        lhs.paths == rhs.paths
     }
 }
 

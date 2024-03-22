@@ -21,12 +21,16 @@ public struct PackageJsonFile: Codable, Hashable {
     /// All package targets
     public let targets: PackageTargets
     
-    public init(swiftToolsVersion: String, name: String, platforms: [PackagePlatform], products: PackageProducts, dependencies: PackageDependencies, targets: PackageTargets) {
+    /// Swift settings shared between all targets.
+    public let commonSwiftSettings: SwiftSettings?
+    
+    public init(swiftToolsVersion: String, name: String, platforms: [PackagePlatform], products: PackageProducts, dependencies: PackageDependencies, targets: PackageTargets, commonSwiftSettings: SwiftSettings? = nil) {
         self.swiftToolsVersion = swiftToolsVersion
         self.name = name
         self.platforms = platforms
         self.products = products
         self.dependencies = dependencies
         self.targets = targets
+        self.commonSwiftSettings = commonSwiftSettings
     }
 }

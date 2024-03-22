@@ -42,6 +42,8 @@ public final class StatementGenerator {
             } else {
                 targetMethodName = ".target("
             }
+            
+            let swiftSettings = target.settings.swiftSettings.merging(other: generatablePackage.packageJsonFile.commonSwiftSettings)
 
             statements.append("// MARK: \(target.name)")
             statements.append("targets.append(")
@@ -117,13 +119,19 @@ public final class StatementGenerator {
                     .sorted()
             )
             statements.append("        ],")
-            statements.append("        path: \"\(target.path)\"" + (target.settings.isDefined ? "," : ""))
+            statements.append("        path: \"\(target.path)\"" + (target.settings.isDefined || swiftSettings.isDefined ? "," : ""))
             
             if target.settings.excludePaths.isDefined {
                 statements.append("        exclude: [")
                 let excludes = target.settings.excludePaths.paths
                     .map { IndentedStatement(level: 3, string: "\"\($0)\",").statement }
                 statements.append(contentsOf: excludes)
+                statements.append("        ]" + (swiftSettings.isDefined || target.settings.linkerSettings.isDefined ? "," : ""))
+            }
+            
+            if swiftSettings.isDefined {
+                statements.append("        swiftSettings: [")
+                statements.append(contentsOf: swiftSettings.statements.map { "            " + $0 + "," })
                 statements.append("        ]" + (target.settings.linkerSettings.isDefined ? "," : ""))
             }
             

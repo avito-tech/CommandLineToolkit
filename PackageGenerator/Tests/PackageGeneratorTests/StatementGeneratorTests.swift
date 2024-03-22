@@ -385,4 +385,155 @@ final class StatementGeneratorTests: XCTestCase {
             expectedContents
         )
     }
+    
+    func test___swift_settings() throws {
+        let contents = try statementGenerator.generatePackageSwiftCode(
+            generatablePackage: GeneratablePackage(
+                location: URL(fileURLWithPath: NSTemporaryDirectory()),
+                packageJsonFile: PackageJsonFile(
+                    swiftToolsVersion: "1.2",
+                    name: "TestPackage",
+                    platforms: [],
+                    products: PackageProducts.explicit([]),
+                    dependencies: PackageDependencies(
+                        implicitSystemModules: [],
+                        external: [:],
+                        mirrorsFilePath: nil
+                    ),
+                    targets: PackageTargets.single(
+                        PackageTarget(
+                            name: "TargetA",
+                            dependencies: [],
+                            path: "Sources/TargetA",
+                            isTest: false,
+                            settings: TargetSpecificSettings(
+                                swiftSettings: SwiftSettings(values: [
+                                    .define(name: "FOO"),
+                                    .enableExperimentalFeature(name: "StrictConcurrency=complete"),
+                                    .enableUpcomingFeature(name: "Hell"),
+                                    .interoperabilityMode(mode: .CXX),
+                                    .unsafeFlags(flags: ["Unsafe", "Flag"])
+                                ])
+                            ),
+                            conditionalCompilationTargetRequirement: nil
+                        )
+                    )
+                )
+            )
+        )
+        
+        let expectedContents = """
+        // swift-tools-version:1.2
+        import PackageDescription
+
+        var targets = [Target]()
+        // MARK: TargetA
+        targets.append(
+            .target(
+                name: "TargetA",
+                dependencies: [
+                ],
+                path: "Sources/TargetA",
+                swiftSettings: [
+                    .define("FOO"),
+                    .enableExperimentalFeature("StrictConcurrency=complete"),
+                    .enableUpcomingFeature("Hell"),
+                    .interoperabilityMode(.CXX),
+                    .unsafeFlags(["Unsafe", "Flag"]),
+                ]
+            )
+        )
+
+        let package = Package(
+            name: "TestPackage",
+            platforms: [
+            ],
+            products: [
+            ],
+            dependencies: [
+            ],
+            targets: targets
+        )
+
+        """
+        
+        XCTAssertEqual(
+            contents.first!.contents,
+            expectedContents
+        )
+    }
+        
+    func test___common_swift_settings() throws {
+        let contents = try statementGenerator.generatePackageSwiftCode(
+            generatablePackage: GeneratablePackage(
+                location: URL(fileURLWithPath: NSTemporaryDirectory()),
+                packageJsonFile: PackageJsonFile(
+                    swiftToolsVersion: "1.2",
+                    name: "TestPackage",
+                    platforms: [],
+                    products: PackageProducts.explicit([]),
+                    dependencies: PackageDependencies(
+                        implicitSystemModules: [],
+                        external: [:],
+                        mirrorsFilePath: nil
+                    ),
+                    targets: PackageTargets.single(
+                        PackageTarget(
+                            name: "TargetA",
+                            dependencies: [],
+                            path: "Sources/TargetA",
+                            isTest: false,
+                            settings: TargetSpecificSettings(
+                                swiftSettings: SwiftSettings(values: [
+                                    .define(name: "BAR")
+                                ])
+                            ),
+                            conditionalCompilationTargetRequirement: nil
+                        )
+                    ),
+                    commonSwiftSettings: SwiftSettings(values: [
+                        .define(name: "FOO")
+                    ])
+                )
+            )
+        )
+        
+        let expectedContents = """
+        // swift-tools-version:1.2
+        import PackageDescription
+
+        var targets = [Target]()
+        // MARK: TargetA
+        targets.append(
+            .target(
+                name: "TargetA",
+                dependencies: [
+                ],
+                path: "Sources/TargetA",
+                swiftSettings: [
+                    .define("FOO"),
+                    .define("BAR"),
+                ]
+            )
+        )
+
+        let package = Package(
+            name: "TestPackage",
+            platforms: [
+            ],
+            products: [
+            ],
+            dependencies: [
+            ],
+            targets: targets
+        )
+
+        """
+        
+        XCTAssertEqual(
+            contents.first!.contents,
+            expectedContents
+        )
+    }
+
 }

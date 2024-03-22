@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.9
 import PackageDescription
 let package = Package(
     name: "PackageGenerator",
@@ -9,7 +9,7 @@ let package = Package(
         .executable(name: "package-gen", targets: ["Bin"]),
     ],
     targets: [
-        .target(
+        .executableTarget(
             name: "Bin",
             dependencies: ["PackageGenerator"]
         ),
