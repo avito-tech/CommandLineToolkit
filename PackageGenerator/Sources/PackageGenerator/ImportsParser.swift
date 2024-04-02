@@ -6,7 +6,7 @@ public final class ImportsParser {
     public init() throws {
         // https://docs.swift.org/swift-book/ReferenceManual/Declarations.html#grammar_import-declaration
         let whitespace = #"\s+"#
-        let attributesRegex = "@testable"
+        let attributesRegex = "@(?:testable|preconcurrency)"
         let importKindRegex = "(?:typealias|struct|class|enum|protocol|let|var|func)"
         let importPathRegex = #"\S+(?:\.\S+)*"# // "ModuleName" or "ModuleName.ClassName" or with longer path
         

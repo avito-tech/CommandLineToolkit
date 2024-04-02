@@ -120,4 +120,18 @@ final class TargetJsonTests: XCTestCase {
             """
         )
     }
+    
+    func test___ignore_common_swift_settings() throws {
+        let jsonFile = TargetSpecificSettings(
+            ignoreCommonSwiftSettings: true
+        )
+        try assert(
+            jsonFile: jsonFile,
+            equalsJsonRepresentation: """
+            {
+              "ignoreCommonSwiftSettings" : true
+            }
+            """
+        )
+    }
 }

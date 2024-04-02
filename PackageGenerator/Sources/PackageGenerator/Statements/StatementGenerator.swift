@@ -43,7 +43,7 @@ public final class StatementGenerator {
                 targetMethodName = ".target("
             }
             
-            let swiftSettings = target.settings.swiftSettings.merging(other: generatablePackage.packageJsonFile.commonSwiftSettings)
+            let swiftSettings = obtainSwiftSettings(generatablePackage: generatablePackage, target: target)
 
             statements.append("// MARK: \(target.name)")
             statements.append("targets.append(")
@@ -301,6 +301,14 @@ public final class StatementGenerator {
             packageTargets: generatablePackage.packageJsonFile.targets,
             generatablePackageLocation: generatablePackage.location
         )
+    }
+    
+    private func obtainSwiftSettings(generatablePackage: GeneratablePackage, target: PackageTarget) -> SwiftSettings {
+        if let ignoreCommonSwiftSettings = target.settings.ignoreCommonSwiftSettings, ignoreCommonSwiftSettings {
+            target.settings.swiftSettings
+        } else {
+            target.settings.swiftSettings.merging(other: generatablePackage.packageJsonFile.commonSwiftSettings)
+        }
     }
     
     private func obtainPackageTargets(

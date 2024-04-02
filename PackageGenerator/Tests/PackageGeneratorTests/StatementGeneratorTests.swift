@@ -609,4 +609,76 @@ final class StatementGeneratorTests: XCTestCase {
         )
     }
 
+    func test___ignore_common_swift_settings() throws {
+        let contents = try statementGenerator.generatePackageSwiftCode(
+            generatablePackage: GeneratablePackage(
+                location: URL(fileURLWithPath: NSTemporaryDirectory()),
+                packageJsonFile: PackageJsonFile(
+                    swiftToolsVersion: "1.2",
+                    name: "TestPackage",
+                    platforms: [],
+                    products: PackageProducts.explicit([]),
+                    dependencies: PackageDependencies(
+                        implicitSystemModules: [],
+                        external: [:],
+                        mirrorsFilePath: nil
+                    ),
+                    targets: PackageTargets.single(
+                        PackageTarget(
+                            name: "TargetA",
+                            dependencies: [],
+                            path: "Sources/TargetA",
+                            isTest: false,
+                            settings: TargetSpecificSettings(
+                                swiftSettings: SwiftSettings(values: [
+                                    .define(name: "BAR")
+                                ]),
+                                ignoreCommonSwiftSettings: true
+                            ),
+                            conditionalCompilationTargetRequirement: nil
+                        )
+                    ),
+                    commonSwiftSettings: SwiftSettings(values: [
+                        .define(name: "FOO")
+                    ])
+                )
+            )
+        )
+        
+        let expectedContents = """
+        // swift-tools-version:1.2
+        import PackageDescription
+
+        var targets = [Target]()
+        // MARK: TargetA
+        targets.append(
+            .target(
+                name: "TargetA",
+                dependencies: [
+                ],
+                path: "Sources/TargetA",
+                swiftSettings: [
+                    .define("BAR"),
+                ]
+            )
+        )
+
+        let package = Package(
+            name: "TestPackage",
+            platforms: [
+            ],
+            products: [
+            ],
+            dependencies: [
+            ],
+            targets: targets
+        )
+
+        """
+        
+        XCTAssertEqual(
+            contents.first!.contents,
+            expectedContents
+        )
+    }
 }
