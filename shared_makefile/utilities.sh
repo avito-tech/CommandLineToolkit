@@ -22,7 +22,7 @@ __perform_inside_folder() {
 
     local status=0
 
-    pushd "$folder" > /dev/null
+    pushd "$folder" > /dev/null || return 1
 
     "$@" || status=$?
 
