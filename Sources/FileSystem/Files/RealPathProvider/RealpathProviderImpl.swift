@@ -37,7 +37,7 @@ public final class RealpathProviderImpl: RealpathProvider {
 
         return AbsolutePath(String(cString: result))
     }
-    
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private func systemRealpath(_ path: String) -> UnsafeMutablePointer<CChar>! {
 #if canImport(Darwin)
         return Darwin.realpath(path, nil)
