@@ -27,7 +27,7 @@ final actor TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
 
     var canBeCollapsed: Bool {
         get async {
-            guard case .finished = state.operationState else {
+            guard case .finished = state.operationState, !state.verbose else {
                 return false
             }
 

@@ -28,6 +28,7 @@ struct TraceComponentState<Value> {
     var level: Logger.Level
     var name: String
     var mode: TraceMode
+    var verbose: Bool
     var operationState: TraceOperationState<Value>?
     var startTime: CFAbsoluteTime?
     var endTime: CFAbsoluteTime?

@@ -20,4 +20,24 @@ public extension ProcessControllerProvider {
         processController.onStderr { _, data, _ in outputStreaming.stderr(data) }
         try processController.startAndWaitForSuccessfulTermination()
     }
+    
+    func subprocessAsync(
+        arguments: [String],
+        environment: Environment = .current,
+        currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
+        outputStreaming: OutputStreaming = .restream,
+        automaticManagement: AutomaticManagement = .noManagement
+    ) async throws {
+        let subprocess = Subprocess(
+            arguments: arguments,
+            environment: environment,
+            automaticManagement: automaticManagement,
+            workingDirectory: currentWorkingDirectory
+        )
+        
+        let processController = try createProcessController(subprocess: subprocess)
+        processController.onStdout { _, data, _ in outputStreaming.stdout(data) }
+        processController.onStderr { _, data, _ in outputStreaming.stderr(data) }
+        try await processController.startAndWaitForSuccessfulTerminationAsync()
+    }
 }
