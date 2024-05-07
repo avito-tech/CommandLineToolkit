@@ -78,16 +78,10 @@ public struct ANSIConsoleHandler: ConsoleHandler {
     }
 
     public var logLevel: Logger.Level
-    public var verbose: Bool
 
-    public init(
-        terminal: ANSITerminal = .shared,
-        logLevel: Logger.Level = .info,
-        verbose: Bool = false
-    ) {
+    public init(terminal: ANSITerminal = .shared, logLevel: Logger.Level = .info) {
         self.terminal = terminal
         self.logLevel = logLevel
-        self.verbose = verbose
     }
 
     enum ConsoleHandlerError: Error {

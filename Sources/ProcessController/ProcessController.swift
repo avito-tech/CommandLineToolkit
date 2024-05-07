@@ -7,7 +7,6 @@ public protocol ProcessController: AnyObject {
     
     func start() throws
     func waitForProcessToDie()
-    func waitForProcessToDieAsync() async
     func processStatus() -> ProcessStatus
     func send(signal: Int32)
     
@@ -46,11 +45,6 @@ public extension ProcessController {
         waitForProcessToDie()
     }
     
-    func startAndListenUntilProcessDies() async throws {
-        try start()
-        await waitForProcessToDieAsync()
-    }
-    
     var isProcessRunning: Bool {
         return processStatus() == .stillRunning
     }
@@ -61,19 +55,6 @@ public extension ProcessController {
     
     func startAndWaitForSuccessfulTermination() throws {
         try startAndListenUntilProcessDies()
-        let status = processStatus()
-        guard status == .terminated(exitCode: 0) else {
-            throw ProcessTerminationError.unexpectedProcessStatus(
-                name: processName,
-                arguments: subprocess.arguments,
-                pid: processId,
-                processStatus: status
-            )
-        }
-    }
-    
-    func startAndWaitForSuccessfulTerminationAsync() async throws {
-        try await startAndListenUntilProcessDies()
         let status = processStatus()
         guard status == .terminated(exitCode: 0) else {
             throw ProcessTerminationError.unexpectedProcessStatus(

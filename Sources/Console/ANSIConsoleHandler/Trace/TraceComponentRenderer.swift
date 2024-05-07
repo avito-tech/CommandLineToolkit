@@ -62,8 +62,8 @@ struct TraceComponentRenderer<Value>: Renderer {
         let end = state.endTime ?? CFAbsoluteTimeGetCurrent()
 
         let duration = end - start
-        let interval = String(format: "%0.3f sec", duration)
-        return " \(interval, style: style)"
+        let interval = String(format: "%9.5f sec", duration)
+        return "\(interval, style: style)"
     }
 
     private func renderHeader(
@@ -88,8 +88,7 @@ struct TraceComponentRenderer<Value>: Renderer {
             progress = String(format: " %.2f%%", value).consoleText(.help)
         case let .progress(.discrete(current, full)):
             titleStyle = .headerTitle
-            let frame = state.frames[Int((Double(state.frame) / Double(ANSIConsoleHandler.targetFps)) * Double(state.frames.count)) % state.frames.count]
-            progress = " \(frame) [\(current)/\(full)]".consoleText(.help)
+            progress = " [\(current)/\(full)]".consoleText(.help)
         case .finished(.success):
             titleStyle = .success
             progress = " \(.successSymbol, style: .success)"
@@ -101,9 +100,15 @@ struct TraceComponentRenderer<Value>: Renderer {
             let frame = state.frames[Int((Double(state.frame) / Double(ANSIConsoleHandler.targetFps)) * Double(state.frames.count)) % state.frames.count]
             progress = " \(frame, style: .help)"
         }
-        let time: ConsoleText = executionTime(state: state, style: .plain)
+        let time: ConsoleText = executionTime(state: state, style: titleStyle)
 
-        return "\(inBlock ? .blockStartSymbol : .noBlockSymbol, style: blockStyle) \(state.name, style: titleStyle)\(progress)\(time)"
+        let lhsPart: ConsoleText = "\(inBlock ? .blockStartSymbol : .noBlockSymbol, style: blockStyle) \(state.name, style: titleStyle)\(progress) "
+        let rhsPart: ConsoleText = time
+
+        let expectedWidth = preferredSize?.cols ?? 80
+        let spacer = String(repeating: .dashSpacerSymbol, count: expectedWidth - lhsPart.description.count - rhsPart.description.count)
+
+        return "\(lhsPart)\(spacer, style: titleStyle)\(rhsPart)"
     }
 }
 

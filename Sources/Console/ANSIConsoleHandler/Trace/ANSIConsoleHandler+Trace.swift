@@ -29,7 +29,7 @@ extension ANSIConsoleHandler {
     ) async throws -> Value {
         let component = TraceComponent<Value>(
             parent: ConsoleContext.current.activeContainer,
-            state: .init(level: level, name: name, mode: mode, verbose: verbose)
+            state: .init(level: level, name: name, mode: mode)
         )
 
         guard isInteractive else {
