@@ -34,6 +34,29 @@ public final class TeamcityMessagingImpl: TeamcityMessaging {
         return result
     }
     
+    public func block<T>(
+        name: String,
+        flowId: String?,
+        body: () async throws -> T
+    ) async rethrows -> T {
+        try await wrap(
+            messageBefore: teamcityMessageGenerator.blockOpenend(name: name, flowId: flowId),
+            messageAfter: teamcityMessageGenerator.blockClosed(name: name, flowId: flowId),
+            body: body
+        )
+    }
+    
+    private func wrap<T>(
+        messageBefore: ControlMessage,
+        messageAfter: ControlMessage,
+        body: () async throws -> T
+    ) async rethrows -> T {
+        output(controlMessage: messageBefore)
+        let result = try await body()
+        output(controlMessage: messageAfter)
+        return result
+    }
+    
     private func output(controlMessage: ControlMessage) {
         do {
             try teamcityMessagingOutput.output(controlMessage: controlMessage)

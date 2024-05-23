@@ -138,6 +138,23 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
         }
     }
     
+    public func waitForProcessToDieAsync() async {
+        await processTerminationHandlerGroup.waitAsync()
+        if canInfinitelyWaitForOpenPipeFileHandleGroup {
+            await openPipeFileHandleGroup.waitAsync()
+        } else {
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    await self.openPipeFileHandleGroup.waitAsync()
+                }
+                group.addTask {
+                    try? await Task.sleep(for: .milliseconds(500))
+                }
+                await group.next()
+            }
+        }
+    }
+    
     public func processStatus() -> ProcessStatus {
         if !didStartProcess {
             return .notStarted
@@ -376,6 +393,16 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
     private func didProcessDataFromProcess() {
         for controller in automaticManagementItemControllers {
             controller.processReportedActivity()
+        }
+    }
+}
+
+private extension DispatchGroup {
+    func waitAsync() async {
+        await withCheckedContinuation { continuation in
+            notify(queue: .global()) {
+                continuation.resume()
+            }
         }
     }
 }

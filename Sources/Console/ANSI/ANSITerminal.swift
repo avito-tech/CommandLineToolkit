@@ -28,7 +28,7 @@ public final class ANSITerminal {
     private init() {
         size = self.getSize()
 
-        SignalHandling.addSignalHandler(signal: .user(Int(SIGWINCH))) { _ in
+        SignalHandling.addSignalHandler(signal: .user(SIGWINCH)) { _ in
             self.lock.withWriterLockVoid {
                 self.size = self.getSize()
             }

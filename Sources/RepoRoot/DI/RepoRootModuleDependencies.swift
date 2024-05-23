@@ -25,9 +25,9 @@ public final class RepoRootModuleDependencies: ModuleDependencies {
             )
         }
         di.register(type: RepoRootProvider.self) { di in
-            try CurrentExecutableRepoRootProvider(
+            try WorkdirRepoRootProvider(
                 repoRootProviderFactory: di.resolve(),
-                currentExecutableProvider: di.resolve()
+                fileSystem: di.resolve()
             )
         }
     }

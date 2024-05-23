@@ -17,7 +17,7 @@ struct LogComponentRenderer: Renderer {
         if state.metadata.isEmpty {
             metadataLines = []
         } else {
-            let renderedMetadata = render(metadata: state.metadata)
+            let renderedMetadata = render(metadata: state.metadata, width: preferredSize?.cols ?? 0)
                 .components(separatedBy: "\n")
                 .filter { $0.isEmpty == false }
             let longestLine = ([title] + originalLines + renderedMetadata).lazy.map(\.description.count).max() ?? 0
@@ -43,9 +43,10 @@ struct LogComponentRenderer: Renderer {
         body.map { "\(.blockBorderSymbol, style: style) \($0, style: style)" }
     }
 
-    private func render(metadata: Logger.Metadata) -> String {
+    private func render(metadata: Logger.Metadata, width: Int) -> String {
         let yaml = try? dump(
             object: metadata.mapValues(\.foundationObject),
+            width: -1,
             allowUnicode: true,
             sortKeys: true
         )

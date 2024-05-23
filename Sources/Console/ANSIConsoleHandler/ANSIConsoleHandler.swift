@@ -55,7 +55,9 @@ extension ConsoleContext {
 }
 
 /// Default ``ConsoleHandler`` used in console library
-public struct ANSIConsoleHandler: ConsoleHandler {
+public final class ANSIConsoleHandler: ConsoleHandler {
+    public static let shared: ANSIConsoleHandler = .init()
+
     /// Frames per second which interactive console will try to perform
     static let targetFps: UInt64 = 30
     /// Tick delay in milliseconds
@@ -78,10 +80,16 @@ public struct ANSIConsoleHandler: ConsoleHandler {
     }
 
     public var logLevel: Logger.Level
+    public var verbose: Bool
 
-    public init(terminal: ANSITerminal = .shared, logLevel: Logger.Level = .info) {
+    public init(
+        terminal: ANSITerminal = .shared,
+        logLevel: Logger.Level = .info,
+        verbose: Bool = false
+    ) {
         self.terminal = terminal
         self.logLevel = logLevel
+        self.verbose = verbose
     }
 
     enum ConsoleHandlerError: Error {
@@ -128,6 +136,7 @@ public struct ANSIConsoleHandler: ConsoleHandler {
             )
 
             if isInteractive {
+                terminal.enableNonBlockingTerminal()
                 defer { terminal.disableNonBlockingTerminal() }
 
                 do {

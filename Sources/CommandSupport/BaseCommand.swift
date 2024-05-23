@@ -60,12 +60,11 @@
 
 import DI
 
-open class BaseCommand<T> where
-    T: ModuleDependencies,
-    T: InitializableWithNoArguments
-{
-    public let di: DependencyInjection = DiMaker<T>.makeDi()
-    
+open class BaseCommand {
+    public var di: DependencyResolver {
+        DiContext.current
+    }
+
     public init() {
     }
 }

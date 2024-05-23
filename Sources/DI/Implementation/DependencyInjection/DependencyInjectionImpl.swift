@@ -6,7 +6,11 @@ public final class DependencyInjectionImpl: DependencyInjection {
     
     public init() {
     }
-    
+
+    init(container: DependencyInjectionImpl) {
+        self.dependencies = container.dependencies
+    }
+
     // This function is optimized for the case when most resolves are occuring in a same thread.
     // For example, if something is resolved slowly the lock will be locked.
     // Alternative is to release lock before calling `factory()`, but this will be very

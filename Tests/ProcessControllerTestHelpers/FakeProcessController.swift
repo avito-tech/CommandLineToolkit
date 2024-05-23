@@ -31,7 +31,14 @@ public final class FakeProcessController: ProcessController {
     public func waitForProcessToDie() {
         try? SynchronousWaiter().waitWhile { isProcessRunning }
     }
-    
+
+    public func waitForProcessToDieAsync() async {
+        await withCheckedContinuation { continuation in
+            try? SynchronousWaiter().waitWhile { isProcessRunning }
+            continuation.resume()
+        }
+    }
+
     public var overridedProcessStatus: ProcessStatus = .notStarted
     
     public func processStatus() -> ProcessStatus {

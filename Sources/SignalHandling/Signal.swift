@@ -2,7 +2,7 @@ import Foundation
 import Signals
 
 // swiftlint:disable sync
-public enum Signal: Hashable, CustomStringConvertible {
+public enum Signal: Hashable, CustomStringConvertible, RawRepresentable {
     case hup
     case int
     case quit
@@ -11,8 +11,31 @@ public enum Signal: Hashable, CustomStringConvertible {
     case alrm
     case term
     case pipe
-    case user(Int)
-    
+    case user(Int32)
+
+    public init(rawValue: Int32) {
+        self = switch rawValue {
+        case SIGHUP:
+            .hup
+        case SIGINT:
+            .int
+        case SIGQUIT:
+            .quit
+        case SIGABRT:
+            .abrt
+        case SIGKILL:
+            .kill
+        case SIGALRM:
+            .alrm
+        case SIGTERM:
+            .term
+        case SIGPIPE:
+            .pipe
+        default:
+            .user(rawValue)
+        }
+    }
+
     public var description: String {
         switch self {
         case .hup:
@@ -58,7 +81,11 @@ public enum Signal: Hashable, CustomStringConvertible {
             return Int32(value)
         }
     }
-    
+
+    public var rawValue: Int32 {
+        intValue
+    }
+
     var blueSignal: Signals.Signal {
         switch self {
         case .hup:
@@ -78,7 +105,7 @@ public enum Signal: Hashable, CustomStringConvertible {
         case .pipe:
             return .pipe
         case .user(let value):
-            return .user(value)
+            return .user(Int(value))
         }
     }
 }

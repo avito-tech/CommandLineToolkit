@@ -10,17 +10,33 @@ public protocol TeamcityMessaging {
         flowId: String?,
         body: () throws -> T
     ) rethrows -> T
+    
+    func block<T>(
+        name: String,
+        flowId: String?,
+        body: () async throws -> T
+    ) async rethrows -> T
 }
 
 extension TeamcityMessaging {
     public func block<T>(
         name: String,
-        flowId: String? = nil,
         body: () throws -> T
     ) rethrows -> T {
         try block(
             name: name,
-            flowId: flowId,
+            flowId: nil,
+            body: body
+        )
+    }
+    
+    public func block<T>(
+        name: String,
+        body: () async throws -> T
+    ) async rethrows -> T {
+        try await block(
+            name: name,
+            flowId: nil,
             body: body
         )
     }
