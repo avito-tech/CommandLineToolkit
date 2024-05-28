@@ -31,7 +31,22 @@ public extension FileSystemEnumerator {
         }
         return paths
     }
-    
+
+    func contains(_ predicate: (AbsolutePath) throws -> Bool) throws -> Bool {
+        do {
+            try each { path in
+                if try predicate(path) {
+                    throw EarlyExitError()
+                }
+            }
+        } catch is EarlyExitError {
+            return true
+        } catch {
+            throw error
+        }
+        return false
+    }
+
     func reduce<T>(_ initialResult: T, _ nextPartialResult: (T, AbsolutePath) throws -> T) throws -> T {
         var result = initialResult
         try each { path in
@@ -40,3 +55,5 @@ public extension FileSystemEnumerator {
         return result
     }
 }
+
+private struct EarlyExitError: Error {}
