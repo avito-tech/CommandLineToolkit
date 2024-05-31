@@ -43,7 +43,7 @@ action___build() { default_action___build ${@+"$@"}; }
 default_action___build() {
     action___generate
     local arch_options; arch_options=$(__make_swift_build_arch_options "$@")
-    perform_inside_project swift build $arch_options -c release -Xswiftc -Osize
+    perform_inside_project swift build $arch_options -c release -Xswiftc -Osize -Xswiftc -Xfrontend -Xswiftc -internalize-at-link -Xlinker -dead_strip
 }
 
 # `make build_debug` - builds with debug configuration

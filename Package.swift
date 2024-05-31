@@ -125,9 +125,11 @@ targets.append(
         name: "CommandSupport",
         dependencies: [
             "CLTExtensions",
+            "Console",
             "DI",
             "PathLib",
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            .product(name: "Logging", package: "swift-log"),
         ],
         path: "Sources/CommandSupport"
     )
