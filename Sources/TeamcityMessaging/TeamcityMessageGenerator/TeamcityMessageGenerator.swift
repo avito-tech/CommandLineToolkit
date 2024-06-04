@@ -24,7 +24,7 @@ public final class TeamcityMessageGenerator {
             .withFlowId(flowId: flowId)
             .toControlMessage()
     }
-    
+
     /// Note that when you close a block, all its inner blocks are closed automatically.
     public func blockClosed(
         name: String,
@@ -38,4 +38,54 @@ public final class TeamcityMessageGenerator {
             .withFlowId(flowId: flowId)
             .toControlMessage()
     }
+
+    /// Note that when you close a block, all its inner blocks are closed automatically.
+    public func flowStarted(
+        name: String,
+        timestamp: Date? = nil,
+        flowId: String,
+        parentFlowId: String?
+    ) -> ControlMessage {
+        controlMessageBuilder
+            .build(type: "flowStarted")
+            .withParameter(name: "name", value: name)
+            .withParameter(name: "parent", value: parentFlowId)
+            .withTimestamp(timestamp: timestamp)
+            .withFlowId(flowId: flowId)
+            .toControlMessage()
+    }
+
+    /// Note that when you close a block, all its inner blocks are closed automatically.
+    public func flowFinished(
+        timestamp: Date? = nil,
+        flowId: String
+    ) -> ControlMessage {
+        controlMessageBuilder
+            .build(type: "flowFinished")
+            .withTimestamp(timestamp: timestamp)
+            .withFlowId(flowId: flowId)
+            .toControlMessage()
+    }
+
+    /// Note that when you close a block, all its inner blocks are closed automatically.
+    public func message(
+        text: String,
+        status: MessageStatus? = nil,
+        timestamp: Date? = nil,
+        flowId: String? = nil
+    ) -> ControlMessage {
+        controlMessageBuilder
+            .build(type: "message")
+            .withTimestamp(timestamp: timestamp)
+            .withFlowId(flowId: flowId)
+            .withParameter(name: "text", value: text)
+            .withParameter(name: "status", value: status?.rawValue)
+            .toControlMessage()
+    }
+}
+
+public enum MessageStatus: String {
+    case normal = "NORMAL"
+    case warning = "WARNING"
+    case failure = "FAILURE"
 }

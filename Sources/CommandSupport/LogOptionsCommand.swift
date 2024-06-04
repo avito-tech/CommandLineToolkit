@@ -1,9 +1,12 @@
 import ArgumentParser
 import Logging
 import Console
+import DI
+import TeamcityMessaging
 
 public enum LogFormat: String, Codable, ExpressibleByArgument {
     case interactive
+    case teamcity
 }
 
 public struct LogOptions: ParsableArguments {
@@ -48,6 +51,22 @@ extension ParsableCommand {
         case .interactive:
             ConsoleSystem.bootstrap {
                 ANSIConsoleHandler(logLevel: logLevel, verbose: options.verbose)
+            }
+        case .teamcity:
+            do {
+                let messageGenerator = try DiContext.current.resolve() as TeamcityMessageGenerator
+                let messageRenderer = try DiContext.current.resolve() as TeamcityMessageRenderer
+
+                ConsoleSystem.bootstrap {
+                    TeamcityConsoleHandler(
+                        logLevel: logLevel,
+                        verbose: options.verbose,
+                        messageGenerator: messageGenerator,
+                        messageRenderer: messageRenderer
+                    )
+                }
+            } catch {
+                fatalError("Failed to resolve dependencies with error: \(error)")
             }
         }
 

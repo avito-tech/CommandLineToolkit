@@ -1,4 +1,5 @@
 import Foundation
+import CLTExtensions
 
 public final class TeamcityMessageRendererImpl: TeamcityMessageRenderer {
     private let timestampDateFormatter = DateFormatter()

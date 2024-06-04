@@ -56,6 +56,7 @@ targets.append(
             "PathLib",
             "ProcessController",
             "Tmp",
+            .product(name: "Logging", package: "swift-log"),
         ],
         path: "Sources/CLTLogging"
     )
@@ -128,6 +129,7 @@ targets.append(
             "Console",
             "DI",
             "PathLib",
+            "TeamcityMessaging",
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
             .product(name: "Logging", package: "swift-log"),
         ],
@@ -163,6 +165,7 @@ targets.append(
             "AtomicModels",
             "DI",
             "SignalHandling",
+            "TeamcityMessaging",
             .product(name: "Logging", package: "swift-log"),
             .product(name: "Yams", package: "Yams"),
         ],

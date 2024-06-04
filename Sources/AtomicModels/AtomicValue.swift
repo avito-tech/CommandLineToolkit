@@ -1,21 +1,38 @@
 import Dispatch
 import Foundation
 
-public class AtomicValue<T> {
-    var value: T
-    private let lock = NSLock()
+@propertyWrapper
+public final class AtomicValue<T> {
+    private var value: T
+    private let lock = NSRecursiveLock()
 
     public init(_ value: T) {
         self.value = value
     }
     
+    public init(wrappedValue: T) {
+        self.value = wrappedValue
+    }
+    
+    public var wrappedValue: T {
+        get { currentValue() }
+        set { set(newValue) }
+        _modify {
+            lock.lock()
+            defer { lock.unlock() }
+            yield &value
+        }
+    }
+
+    public var projectedValue: AtomicValue {
+        return self
+    }
+
     @discardableResult
-    public func withExclusiveAccess<R>(work: (inout T) throws -> (R)) rethrows -> R {
+    public func withExclusiveAccess<R>(work: (inout T) throws -> R) rethrows -> R {
         lock.lock()
         defer { lock.unlock() }
-        let result = try work(&value)
-        didUpdateValue()
-        return result
+        return try work(&value)
     }
     
     public func currentValue() -> T {
@@ -28,8 +45,5 @@ public class AtomicValue<T> {
         lock.lock()
         defer { lock.unlock() }
         value = newValue
-        didUpdateValue()
     }
-    
-    func didUpdateValue() {}
 }
