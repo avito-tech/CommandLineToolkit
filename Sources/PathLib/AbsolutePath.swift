@@ -12,7 +12,8 @@ public final class AbsolutePath:
     
     public static let root = AbsolutePath(components: [String]())
     public static let home = AbsolutePath(NSHomeDirectory())
-    
+    public static let temp = AbsolutePath(NSTemporaryDirectory())
+
     /// Returns an `AbsolutePath` only if `string` has a value that looks like an absolute path - begins with `/`.
     /// - Parameter string: String representation of absolute path.
     /// - Throws: Error when `string` doesn't seem to be an absolute path.
