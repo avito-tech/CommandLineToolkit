@@ -33,7 +33,8 @@ public final class ClocTool: Cloc {
     ]
     
     public func countLinesOfCode(
-        sourceFiles: [AbsolutePath]
+        sourceFiles: [AbsolutePath],
+        includeLangOptions: Set<IncludeLangOption>
     ) throws -> Int {
         for clocBinaryPath in clocBinaryPaths {
             if !filePropertiesProvider.exists(path: clocBinaryPath) {
@@ -43,7 +44,8 @@ public final class ClocTool: Cloc {
             if try filePropertiesProvider.properties(path: clocBinaryPath).isExecutable {
                 return try run(
                     clocBinaryPath: clocBinaryPath,
-                    sourceFiles: sourceFiles
+                    sourceFiles: sourceFiles,
+                    includeLangOptions: includeLangOptions
                 )
             }
         }
@@ -53,22 +55,37 @@ public final class ClocTool: Cloc {
     
     private func run(
         clocBinaryPath: AbsolutePath,
-        sourceFiles: [AbsolutePath]
+        sourceFiles: [AbsolutePath],
+        includeLangOptions: Set<IncludeLangOption>
     ) throws -> Int {
-        let processController = try processControllerProvider.createProcessController(
-            subprocess: Subprocess(
-                arguments: [
-                    clocBinaryPath,
-                    "--json",
-                    "--include-lang=swift",
-                ] + sourceFiles
+        do {
+            let processController = try processControllerProvider.createProcessController(
+                subprocess: Subprocess(
+                    arguments: [
+                        clocBinaryPath,
+                        "--json",
+                        "--include-lang=\(includeLangOptions.map(\.rawValue).joined(separator: ","))"
+                    ] + sourceFiles
+                )
             )
-        )
-        var clocOutput = Data()
-        processController.onStdout { _, data, _ in clocOutput.append(contentsOf: data) }
-        try processController.startAndWaitForSuccessfulTermination()
-        
-        let parsedOutput = try JSONDecoder().decode(ClocOutput.self, from: clocOutput)
-        return parsedOutput.SUM.code
+            var clocOutput = Data()
+            processController.onStdout { _, data, _ in clocOutput.append(contentsOf: data) }
+
+            try processController.startAndWaitForSuccessfulTermination()
+
+            if let parsedOutput = try? JSONDecoder().decode(ClocOutput.self, from: clocOutput) {
+                return parsedOutput.SUM.code
+            } else {
+                return 0
+            }
+        } catch {
+            throw """
+            Failed to get cloc
+            from \(sourceFiles)
+            using \(clocBinaryPath)
+            for \(includeLangOptions)
+            becasue of \(error)
+            """
+        }
     }
 }
