@@ -97,3 +97,9 @@ public extension EnvironmentKey where Value == Int {
         .int("SCRIPT_INPUT_FILE_COUNT")
     }
 }
+
+public extension EnvironmentKey where Value == Bool {
+    static var isRunningOnCI: Self {
+        .bool("IS_ON_BUILD_MACHINE")
+    }
+}
