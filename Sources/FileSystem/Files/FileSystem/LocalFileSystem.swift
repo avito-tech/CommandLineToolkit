@@ -13,6 +13,7 @@ public final class LocalFileSystem: FileSystem {
     private let commonlyUsedPathsProviderFactory: CommonlyUsedPathsProviderFactory
     private let fileToucher: FileToucher
     private let pathLinker: PathLinker
+    private let fileAppender: FileAppender
     
     public init(
         fileSystemEnumeratorFactory: FileSystemEnumeratorFactory,
@@ -25,7 +26,8 @@ public final class LocalFileSystem: FileSystem {
         fileSystemPropertiesProvider: FileSystemPropertiesProvider,
         commonlyUsedPathsProviderFactory: CommonlyUsedPathsProviderFactory,
         fileToucher: FileToucher,
-        pathLinker: PathLinker
+        pathLinker: PathLinker,
+        fileAppender: FileAppender
     ) {
         self.fileSystemEnumeratorFactory = fileSystemEnumeratorFactory
         self.directoryCreator = directoryCreator
@@ -38,6 +40,7 @@ public final class LocalFileSystem: FileSystem {
         self.commonlyUsedPathsProviderFactory = commonlyUsedPathsProviderFactory
         self.fileToucher = fileToucher
         self.pathLinker = pathLinker
+        self.fileAppender = fileAppender
     }
     
     public func symLink(
@@ -134,5 +137,9 @@ public final class LocalFileSystem: FileSystem {
     
     public func fileSystemProperties(forFileAtPath: AbsolutePath) -> FileSystemPropertiesContainer {
         fileSystemPropertiesProvider.fileSystemProperties(forFileAtPath: forFileAtPath)
+    }
+    
+    public func appendToFile(path: AbsolutePath, data: Data) throws {
+        try fileAppender.appendToFile(path: path, data: data)
     }
 }

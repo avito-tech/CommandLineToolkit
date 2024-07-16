@@ -81,4 +81,9 @@ open class FakeFileSystem: FileSystem {
     public func touch(path: AbsolutePath) throws {
         try onTouch(path)
     }
+    
+    public var onAppendToFile: (AbsolutePath, Data) throws -> () = { _, _ in }
+    public func appendToFile(path: PathLib.AbsolutePath, data: Data) throws {
+        try onAppendToFile(path, data)
+    }
 }

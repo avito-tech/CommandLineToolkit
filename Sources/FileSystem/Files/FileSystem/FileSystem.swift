@@ -12,7 +12,8 @@ public protocol FileSystem:
     FileSystemPropertiesProvider,
     CommonlyUsedPathsProviderFactory,
     FileToucher,
-    PathLinker
+    PathLinker,
+    FileAppender
 {
 }
 

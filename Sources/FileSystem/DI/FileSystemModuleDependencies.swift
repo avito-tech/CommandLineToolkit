@@ -41,7 +41,8 @@ public final class FileSystemModuleDependencies: ModuleDependencies {
                 fileSystemPropertiesProvider: di.resolve(),
                 commonlyUsedPathsProviderFactory: di.resolve(),
                 fileToucher: di.resolve(),
-                pathLinker: di.resolve()
+                pathLinker: di.resolve(),
+                fileAppender: di.resolve()
             )
         }
         di.register(type: FileSystemEnumeratorFactory.self) { di in
@@ -56,6 +57,9 @@ public final class FileSystemModuleDependencies: ModuleDependencies {
         }
         di.register(type: FileCreator.self) { _ in
             FileCreatorImpl()
+        }
+        di.register(type: FileAppender.self) { _ in
+            FileAppenderImpl()
         }
         di.register(type: PathCopier.self) { di in
             try PathCopierImpl(
