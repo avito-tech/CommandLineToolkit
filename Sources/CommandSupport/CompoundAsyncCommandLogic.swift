@@ -9,6 +9,7 @@ public final class CompoundAsyncCommandLogic: AsyncCommandLogic {
     public func run() async throws {
         for logic in commandLogics {
             try await logic.run()
+            try Task.checkCancellation()
         }
     }
 }
