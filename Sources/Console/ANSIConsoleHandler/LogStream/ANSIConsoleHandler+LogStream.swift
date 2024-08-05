@@ -8,7 +8,7 @@ extension ANSIConsoleHandler {
         line: UInt
     ) async throws -> LogSink {
         guard level >= self.logLevel else {
-            return NoOpLogSink()
+            return backing.map(LogHandlerSink.init(logHandler:)) ?? NoOpLogSink()
         }
 
         let component = LogStreamComponent(state: .init(name: name, level: level))

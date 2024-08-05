@@ -73,3 +73,26 @@ struct NoOpLogSink: LogSink {
     func finish() {
     }
 }
+
+struct LogHandlerSink: LogSink {
+    let logHandler: LogHandler
+    
+    func append(line: String) {
+        logHandler.log(
+            level: .debug,
+            message: "\(line)",
+            metadata: nil,
+            source: "ANSIConsoleHandler",
+            file: #fileID,
+            function: #function,
+            line: #line
+        )
+    }
+    
+    func append(lines: [String]) {
+        lines.forEach(self.append(line:))
+    }
+    
+    func finish() {
+    }
+}

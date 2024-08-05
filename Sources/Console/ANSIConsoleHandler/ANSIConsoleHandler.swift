@@ -65,6 +65,9 @@ public final class ANSIConsoleHandler: ConsoleHandler {
     /// Tick delay in nanoseconds
     static let tickDelayNs: UInt64 = tickDelayMs * 1_000_000
 
+    /// Backing log handler for all messages.
+    let backing: LogHandler?
+    
     let terminal: ANSITerminal
 
     public var isAtTTY: Bool {
@@ -85,11 +88,13 @@ public final class ANSIConsoleHandler: ConsoleHandler {
     public init(
         terminal: ANSITerminal = .shared,
         logLevel: Logger.Level = .info,
-        verbose: Bool = false
+        verbose: Bool = false,
+        backing: LogHandler? = nil
     ) {
         self.terminal = terminal
         self.logLevel = logLevel
         self.verbose = verbose
+        self.backing = backing
     }
 
     enum ConsoleHandlerError: Error {
@@ -274,6 +279,7 @@ public final class ANSIConsoleHandler: ConsoleHandler {
             } else {
                 terminal.writeln(line.description)
             }
+            backing?.log(level: logLevel, message: "\(line.description)", metadata: nil, source: "component", file: #fileID, function: #function, line: #line)
         }
         if isInteractive {
             terminal.cursorOn()

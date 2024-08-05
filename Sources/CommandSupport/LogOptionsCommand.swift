@@ -41,16 +41,37 @@ extension LogOptionsCommand {
     }
 }
 
+public struct ParsableCommandLogConfiguration {
+    public init(consoleBacking: LogHandler?, additionalSystem: [LogHandler]) {
+        self.consoleBacking = consoleBacking
+        self.additionalSystem = additionalSystem
+    }
+    
+    let consoleBacking: LogHandler?
+    let additionalSystem: [LogHandler]
+    
+    public static let `default` = ParsableCommandLogConfiguration(consoleBacking: nil, additionalSystem: [])
+}
+
 extension ParsableCommand {
-    public func bootstrapLogger() {
-        let options = (self as? LogOptionsCommand)?.logOptions ?? .default
-
-        let logLevel = options.verbose ? .trace : options.logLevel
-
-        switch options.logFormat {
+    
+    public var logOptions: LogOptions {
+        (self as? LogOptionsCommand)?.logOptions ?? .default
+    }
+    
+    public var logLevel: Logger.Level {
+        logOptions.verbose ? .trace : logOptions.logLevel
+    }
+    
+    public func bootstrapLogger(with config: ParsableCommandLogConfiguration = .default) {
+        let systemLogHandlerFactory: (String) -> [any LogHandler]
+        switch logOptions.logFormat {
         case .interactive:
             ConsoleSystem.bootstrap {
-                ANSIConsoleHandler(logLevel: logLevel, verbose: options.verbose)
+                ANSIConsoleHandler(logLevel: logLevel, verbose: logOptions.verbose, backing: config.consoleBacking)
+            }
+            systemLogHandlerFactory = { label in
+                [ConsoleLogHandler(label: label)] + config.additionalSystem
             }
         case .teamcity:
             do {
@@ -60,10 +81,13 @@ extension ParsableCommand {
                 ConsoleSystem.bootstrap {
                     TeamcityConsoleHandler(
                         logLevel: logLevel,
-                        verbose: options.verbose,
+                        verbose: logOptions.verbose,
                         messageGenerator: messageGenerator,
                         messageRenderer: messageRenderer
                     )
+                }
+                systemLogHandlerFactory = { label in
+                    [ConsoleLogHandler(label: label)]
                 }
             } catch {
                 fatalError("Failed to resolve dependencies with error: \(error)")
@@ -71,7 +95,7 @@ extension ParsableCommand {
         }
 
         LoggingSystem.bootstrap { label in
-            ConsoleLogHandler(label: label)
+            MultiplexLogHandler(systemLogHandlerFactory(label))
         }
 
         validateLogOptions()
