@@ -25,6 +25,27 @@ extension ProcessControllerProvider {
         )
     }
     
+    public func bash(
+        isLoginShell: Bool = false, // suggestion: avoid "true" as much as possible if you want to achieve more predictable behavior
+        environment: Environment = .current,
+        currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
+        automaticManagement: AutomaticManagement = .noManagement,
+        command: () -> String
+    ) throws -> String {
+        let streams = CapturedOutputStreams()
+        
+        try bash(
+            command(),
+            isLoginShell: isLoginShell,
+            environment: environment,
+            currentWorkingDirectory: currentWorkingDirectory,
+            outputStreaming: streams.outputStreaming,
+            automaticManagement: automaticManagement
+        )
+        
+        return streams.stdoutString
+    }
+    
     public func zsh(
         _ command: String,
         isLoginShell: Bool, // suggestion: avoid "true" as much as possible if you want to achieve more predictable behavior
@@ -42,6 +63,27 @@ extension ProcessControllerProvider {
             outputStreaming: outputStreaming,
             automaticManagement: automaticManagement
         )
+    }
+    
+    public func zsh(
+        isLoginShell: Bool = false, // suggestion: avoid "true" as much as possible if you want to achieve more predictable behavior
+        environment: Environment = .current,
+        currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
+        automaticManagement: AutomaticManagement = .noManagement,
+        command: () -> String
+    ) throws -> String {
+        let streams = CapturedOutputStreams()
+        
+        try zsh(
+            command(),
+            isLoginShell: isLoginShell,
+            environment: environment,
+            currentWorkingDirectory: currentWorkingDirectory,
+            outputStreaming: streams.outputStreaming,
+            automaticManagement: automaticManagement
+        )
+        
+        return streams.stdoutString
     }
     
     // bash and zsh share "-l" option (note that it may be not true for different interpreters or options)
