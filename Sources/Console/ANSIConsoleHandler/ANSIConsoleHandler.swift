@@ -439,7 +439,7 @@ protocol ContainerConsoleComponent: AnyObject {
     var parent: ContainerConsoleComponent? { get }
     var children: [any ConsoleComponent] { get async }
 
-    func add(child: any ConsoleComponent) async
+    func add(child: any ConsoleComponent)
 }
 
 struct ConsoleRender {

@@ -114,9 +114,10 @@ public final class MockCLIHandler: ConsoleHandler {
     public func logStream(
         level: Logger.Level,
         name: String,
+        renderTail: Int,
         file: StaticString,
         line: UInt
-    ) async throws -> LogSink {
+    ) -> any LogSink {
         MockLogSink()
     }
 }

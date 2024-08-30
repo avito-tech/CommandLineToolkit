@@ -143,6 +143,7 @@ public final class TeamcityConsoleHandler: ConsoleHandler {
     public func logStream(
         level: Logging.Logger.Level,
         name: String,
+        renderTail: Int,
         file: StaticString,
         line: UInt
     ) -> any LogSink {

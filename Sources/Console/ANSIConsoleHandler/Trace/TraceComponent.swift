@@ -1,8 +1,10 @@
 import Foundation
 import Logging
+import AtomicModels
 
-final actor TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
+final class TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
     let parent: ContainerConsoleComponent?
+    @AtomicValue
     var state: TraceComponentState<Value>
 
     var children: [any ConsoleComponent] {
@@ -69,9 +71,18 @@ final actor TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
 
     private func childrenRenderers(state: TraceComponentState<Value>) async -> [AnyRenderer<Void>] {
         var result: [AnyRenderer<Void>] = []
-        for child in children where await child.shouldRender(mode: state.mode) {
-            await result.append(child.typeErasedRenderer())
+        
+        // Unfold failed operation trees
+        if case .finished(.failure) = state.operationState {
+            for child in children {
+                await result.append(child.typeErasedRenderer())
+            }
+        } else {
+            for child in children where await child.shouldRender(mode: state.mode) {
+                await result.append(child.typeErasedRenderer())
+            }
         }
+        
         return result
     }
 

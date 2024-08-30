@@ -117,13 +117,16 @@ extension ProcessControllerProvider {
 public struct OutputStreaming: ExpressibleByArrayLiteral {
     public let stdout: (Data) -> ()
     public let stderr: (Data) -> ()
+    public let finish: () -> ()
     
     public init(
         stdout: @escaping (Data) -> (),
-        stderr: @escaping (Data) -> ()
+        stderr: @escaping (Data) -> (),
+        finish: @escaping () -> () = {}
     ) {
         self.stdout = stdout
         self.stderr = stderr
+        self.finish = finish
     }
     
     public typealias ArrayLiteralElement = OutputStreaming

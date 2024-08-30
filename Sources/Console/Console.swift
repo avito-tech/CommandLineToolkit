@@ -44,29 +44,11 @@ extension Console {
     public func logStream(
         level: Logger.Level = .trace,
         name: String,
+        renderTail: Int = 1,
         file: StaticString = #file,
         line: UInt = #line
-    ) throws -> LogSink {
-        try runBlocking {
-            try await handler.logStream(level: level, name: name, file: file, line: line)
-        }
-    }
-
-    /// Creates a log sink and allows to stream logs from underlying command line instrument
-    ///
-    /// Should always run in a trace
-    ///
-    /// - Parameters:
-    ///   - level: Log level
-    ///   - name: Name of stream
-    /// - Returns: ``LogSink`` — an object which receives new log lines and appends those to the stream
-    public func logStream(
-        level: Logger.Level = .trace,
-        name: String,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) async throws -> LogSink {
-        try await handler.logStream(level: level, name: name, file: file, line: line)
+    ) -> LogSink {
+        handler.logStream(level: level, name: name, renderTail: renderTail, file: file, line: line)
     }
 }
 
@@ -312,7 +294,7 @@ extension Console {
     /// 
     /// - Parameter operation: Operation to be ran with captured `ConsoleContext`
     /// - Returns: Value returned by operation
-    public func withEscapingContext<Value>(_ operation: (ContextContinuation) throws -> Value) rethrows -> Value {
+    public static func withEscapingContext<Value>(_ operation: (ContextContinuation) throws -> Value) rethrows -> Value {
         try operation(ContextContinuation(context: .current))
     }
 
@@ -332,7 +314,7 @@ extension Console {
     ///
     /// - Parameter operation: Operation to be ran with captured `ConsoleContext`
     /// - Returns: Value returned by operation
-    public func withEscapingContext<Value>(_ operation: (ContextContinuation) async throws -> Value) async rethrows -> Value {
+    public static func withEscapingContext<Value>(_ operation: (ContextContinuation) async throws -> Value) async rethrows -> Value {
         try await operation(ContextContinuation(context: .current))
     }
 }

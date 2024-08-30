@@ -86,7 +86,8 @@ public protocol ConsoleHandler {
     func logStream(
         level: Logger.Level,
         name: String,
+        renderTail: Int,
         file: StaticString,
         line: UInt
-    ) async throws -> LogSink
+    ) -> LogSink
 }

@@ -1,6 +1,8 @@
 import Logging
+import AtomicModels
 
-final actor LogStreamComponent: ConsoleComponent {
+final class LogStreamComponent: ConsoleComponent {
+    @AtomicValue
     var state: LogStreamComponentState
 
     init(state: LogStreamComponentState) {
@@ -38,28 +40,32 @@ final actor LogStreamComponent: ConsoleComponent {
 }
 
 public protocol LogSink {
-    func append(line: String) async
-    func append(lines: [String]) async
-    func finish() async
+    func append(line: String)
+    func append(lines: [String])
+    func finish()
 }
 
-struct ComponentLogSink: LogSink {
+final class ComponentLogSink: LogSink {
     let component: LogStreamComponent
 
     init(component: LogStreamComponent) {
         self.component = component
     }
-
-    func append(line: String) async {
-        await component.append(lines: [line])
+    
+    deinit {
+        finish()
     }
 
-    func append(lines: [String]) async {
-        await component.append(lines: lines)
+    func append(line: String) {
+        component.append(lines: [line])
     }
 
-    func finish() async {
-        await component.finish()
+    func append(lines: [String]) {
+        component.append(lines: lines)
+    }
+
+    func finish() {
+        component.finish()
     }
 }
 
