@@ -10,23 +10,30 @@ final class LogStreamComponent: ConsoleComponent {
     }
 
     var result: Result<Void, Error>? {
-        if state.isFinished {
-            return .success(())
-        } else {
-            return nil
-        }
+        state.result?.mapError { $0 }
     }
 
-    var canBeCollapsed: Bool {
-        return state.isFinished
+    var isVisible: Bool {
+        let verbositySettings = ConsoleContext.current.verbositySettings
+        return verbositySettings.verbose || state.level >= verbositySettings.logLevel || state.isFailure
+    }
+    
+    func canBeCollapsed(at level: Logger.Level) -> Bool {
+        let verbositySettings = ConsoleContext.current.verbositySettings
+        return !verbositySettings.verbose && state.level <= level && state.isSuccess
     }
 
     func handle(event: ConsoleControlEvent) {
+        switch event {
+        case .tick:
+            state.frame = (state.frame + 1) % 60
+        default:
+            break
+        }
     }
 
     func renderer() -> some Renderer<Void> {
         LogStreamComponentRenderer()
-            .withCache()
             .withState(state: state)
     }
 
@@ -34,15 +41,16 @@ final class LogStreamComponent: ConsoleComponent {
         state.lines.append(contentsOf: lines)
     }
 
-    func finish() {
-        state.isFinished = true
+    func finish(result: Result<Void, LogStreamError>, cancelled: Bool) {
+        state.result = result
+        state.isCancelled = cancelled
     }
 }
 
 public protocol LogSink {
     func append(line: String)
     func append(lines: [String])
-    func finish()
+    func finish(result: Result<Void, LogStreamError>, cancelled: Bool)
 }
 
 final class ComponentLogSink: LogSink {
@@ -53,7 +61,9 @@ final class ComponentLogSink: LogSink {
     }
     
     deinit {
-        finish()
+        if component.isUnfinished {
+            component.finish(result: .success(()), cancelled: Task.isCancelled)
+        }
     }
 
     func append(line: String) {
@@ -64,8 +74,8 @@ final class ComponentLogSink: LogSink {
         component.append(lines: lines)
     }
 
-    func finish() {
-        component.finish()
+    func finish(result: Result<Void, LogStreamError>, cancelled: Bool) {
+        component.finish(result: result, cancelled: cancelled)
     }
 }
 
@@ -76,16 +86,17 @@ struct NoOpLogSink: LogSink {
     func append(lines: [String]) {
     }
 
-    func finish() {
+    func finish(result: Result<Void, LogStreamError>, cancelled: Bool) {
     }
 }
 
 struct LogHandlerSink: LogSink {
-    let logHandler: LogHandler
+    var level: Logger.Level = .debug
+    var logHandler: LogHandler
     
     func append(line: String) {
         logHandler.log(
-            level: .debug,
+            level: level,
             message: "\(line)",
             metadata: nil,
             source: "ANSIConsoleHandler",
@@ -99,6 +110,6 @@ struct LogHandlerSink: LogSink {
         lines.forEach(self.append(line:))
     }
     
-    func finish() {
+    func finish(result: Result<Void, LogStreamError>, cancelled: Bool) {
     }
 }

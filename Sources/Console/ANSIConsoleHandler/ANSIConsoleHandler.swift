@@ -54,6 +54,45 @@ extension ConsoleContext {
     }
 }
 
+public struct ConsoleVerbositySettings {
+    public var logLevel: Logger.Level
+    public var verbose: Bool
+    
+    public init(logLevel: Logger.Level, verbose: Bool) {
+        self.logLevel = logLevel
+        self.verbose = verbose
+    }
+    
+    public static let `default` = Self(
+        logLevel: .info,
+        verbose: false
+    )
+    
+    public static let trace = Self(
+        logLevel: .trace,
+        verbose: false
+    )
+    
+    public static let verbose = Self(
+        logLevel: .trace,
+        verbose: true
+    )
+}
+
+extension ConsoleContext {
+    private enum ConsoleVerbositySettingsKey: ConsoleContextKey {
+        static let defaultValue: ConsoleVerbositySettings = .init(
+            logLevel: .info,
+            verbose: false
+        )
+    }
+
+    public var verbositySettings: ConsoleVerbositySettings {
+        get { self[ConsoleVerbositySettingsKey.self] }
+        set { self[ConsoleVerbositySettingsKey.self] = newValue }
+    }
+}
+
 /// Default ``ConsoleHandler`` used in console library
 public final class ANSIConsoleHandler: ConsoleHandler {
     public static let shared: ANSIConsoleHandler = .init()
@@ -82,18 +121,15 @@ public final class ANSIConsoleHandler: ConsoleHandler {
         #endif
     }
 
-    public var logLevel: Logger.Level
-    public var verbose: Bool
-
+    public var verbositySettings: ConsoleVerbositySettings
+    
     public init(
         terminal: ANSITerminal = .shared,
-        logLevel: Logger.Level = .info,
-        verbose: Bool = false,
+        verbositySettings: ConsoleVerbositySettings = .default,
         backing: LogHandler? = nil
     ) {
         self.terminal = terminal
-        self.logLevel = logLevel
-        self.verbose = verbose
+        self.verbositySettings = verbositySettings
         self.backing = backing
     }
 
@@ -121,69 +157,71 @@ public final class ANSIConsoleHandler: ConsoleHandler {
         file: StaticString,
         line: UInt
     ) async throws -> Value {
-        if let activeContainer = ConsoleContext.current.activeContainer {
-            await activeContainer.add(child: component)
-            while await component.isUnfinished {
-                try await Task.sleep(nanoseconds: ANSIConsoleHandler.tickDelayNs)
-            }
-            guard let result = await component.result else {
-                throw ConsoleHandlerError.componentFinishedWithoutResult
-            }
-            return try result.get()
-        }
-
-        return try await ConsoleContext.current.stateHolder.performInInteractiveMode(file: file, line: line) {
-            var state: RenderingState = .init(
-                lastRender: .empty,
-                lastRenderedLines: 0,
-                terminalSize: terminal.size,
-                lastRenderCursorPos: terminal.readCursorPos()
-            )
-
-            if isInteractive {
-                terminal.enableNonBlockingTerminal()
-                defer { terminal.disableNonBlockingTerminal() }
-
-                do {
-                    repeat {
-                        guard let event = getControlEvent(state: &state) else {
-                            continue
-                        }
-
-                        await component.handle(event: event)
-
-                        let renderer = await component.renderer()
-
-                        state.terminalSize = terminal.size
-                        render(component: renderer.render(preferredSize: state.terminalSize), state: &state)
-
-                        if case .tick = event {
-                            try await Task.sleep(nanoseconds: ANSIConsoleHandler.tickDelayNs)
-                        }
-                    } while await component.isUnfinished
-
-                    cleanLastRender(state: state)
-                } catch let error as CancellationError {
-                    await finalize(component: component, state: state)
-                    throw error
+        try await ConsoleContext.$current.withUpdated(key: \.verbositySettings, value: verbositySettings) {
+            if let activeContainer = ConsoleContext.current.activeContainer {
+                activeContainer.add(child: component)
+                while component.isUnfinished {
+                    try await Task.sleep(nanoseconds: ANSIConsoleHandler.tickDelayNs)
                 }
+                guard let result = component.result else {
+                    throw ConsoleHandlerError.componentFinishedWithoutResult
+                }
+                return try result.get()
             }
 
-            await finalize(component: component, state: state)
+            return try await ConsoleContext.current.stateHolder.performInInteractiveMode(file: file, line: line) {
+                var state: RenderingState = .init(
+                    lastRender: .empty,
+                    lastRenderedLines: 0,
+                    terminalSize: terminal.size,
+                    lastRenderCursorPos: terminal.readCursorPos()
+                )
 
-            guard let result = await component.result else {
-                throw ConsoleHandlerError.componentFinishedWithoutResult
+                if isInteractive {
+                    terminal.enableNonBlockingTerminal()
+                    defer { terminal.disableNonBlockingTerminal() }
+
+                    do {
+                        repeat {
+                            guard let event = getControlEvent(state: &state) else {
+                                continue
+                            }
+
+                            component.handle(event: event)
+
+                            let renderer = component.renderer()
+                            
+                            state.terminalSize = terminal.size
+                            render(component: renderer.render(preferredSize: state.terminalSize), state: &state)
+                            
+                            if case .tick = event {
+                                try await Task.sleep(nanoseconds: ANSIConsoleHandler.tickDelayNs)
+                            }
+                        } while component.isUnfinished
+
+                        cleanLastRender(state: state)
+                    } catch let error as CancellationError {
+                        finalize(component: component, state: state)
+                        throw error
+                    }
+                }
+
+                finalize(component: component, state: state)
+
+                guard let result = component.result else {
+                    throw ConsoleHandlerError.componentFinishedWithoutResult
+                }
+
+                return try result.get()
             }
-
-            return try result.get()
         }
     }
 
     private func finalize<Value, Component: ConsoleComponent<Value>>(
         component: Component,
         state: RenderingState
-    ) async {
-        let renderer = await component.renderer()
+    ) {
+        let renderer = component.renderer()
         renderNonInteractive(component: renderer.render(preferredSize: state.terminalSize))
     }
 
@@ -279,7 +317,15 @@ public final class ANSIConsoleHandler: ConsoleHandler {
             } else {
                 terminal.writeln(line.description)
             }
-            backing?.log(level: logLevel, message: "\(line.description)", metadata: nil, source: "component", file: #fileID, function: #function, line: #line)
+            backing?.log(
+                level: verbositySettings.logLevel,
+                message: "\(line.description)", 
+                metadata: nil,
+                source: "component",
+                file: #fileID,
+                function: #function,
+                line: #line
+            )
         }
         if isInteractive {
             terminal.cursorOn()
@@ -296,17 +342,28 @@ enum ConsoleControlEvent {
 protocol ConsoleComponent<Value> {
     associatedtype Value = Void
     associatedtype ComponentRenderer: Renderer<Void>
-
-    var result: Result<Value, Error>? { get async }
-    var canBeCollapsed: Bool { get async }
-
-    func handle(event: ConsoleControlEvent) async
-    func renderer() async -> ComponentRenderer
+    
+    /// Result of component execution
+    var result: Result<Value, Error>? { get }
+    
+    /// Is component visible at current global logging verbosity settings
+    var isVisible: Bool { get }
+    
+    /// If component can be collapsed (hidden) in current trace
+    /// - Parameter level: Level of current trace
+    func canBeCollapsed(at level: Logger.Level) -> Bool
+    
+    /// Handle input or lifecycle event
+    /// - Parameter event: event to handle
+    func handle(event: ConsoleControlEvent)
+    
+    /// Produce rendeder with baked current state
+    func renderer() -> ComponentRenderer
 }
 
 extension ConsoleComponent {
-    func typeErasedRenderer() async -> AnyRenderer<Void> {
-        await renderer().asAnyRenderer
+    func typeErasedRenderer() -> AnyRenderer<Void> {
+        renderer().asAnyRenderer
     }
 }
 
@@ -423,21 +480,25 @@ extension Renderer {
 
 extension ConsoleComponent {
     var isFinished: Bool {
-        get async {
-            return await result != nil
-        }
+        result != nil
     }
 
     var isUnfinished: Bool {
-        get async {
-            return await result == nil
-        }
+        result == nil
+    }
+    
+    var isFailure: Bool {
+        if case .failure = result { true } else { false }
+    }
+    
+    var isSuccess: Bool {
+        if case .success = result { true } else { false }
     }
 }
 
 protocol ContainerConsoleComponent: AnyObject {
-    var parent: ContainerConsoleComponent? { get }
-    var children: [any ConsoleComponent] { get async }
+    var parent: ContainerConsoleComponent? { get set }
+    var children: [any ConsoleComponent] { get }
 
     func add(child: any ConsoleComponent)
 }

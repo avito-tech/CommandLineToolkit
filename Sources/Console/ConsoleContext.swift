@@ -16,10 +16,28 @@ struct ConsoleContext {
         get { storage[ObjectIdentifier(key)] as? Key.Value ?? key.defaultValue }
         set { storage[ObjectIdentifier(key)] = newValue }
     }
-
-    static func current<Value>(with key: WritableKeyPath<ConsoleContext, Value>, value: Value) -> ConsoleContext {
-        var newContext = current
+    
+    func withUpdated<Value>(key: WritableKeyPath<ConsoleContext, Value>, value: Value) -> ConsoleContext {
+        var newContext = self
         newContext[keyPath: key] = value
         return newContext
+    }
+}
+
+extension TaskLocal where Value == ConsoleContext {
+    func withUpdated<R, ContextValue>(
+        key: WritableKeyPath<ConsoleContext, ContextValue>,
+        value: ContextValue,
+        operation: () throws -> R
+    ) rethrows -> R {
+        try self.withValue(wrappedValue.withUpdated(key: key, value: value), operation: operation)
+    }
+    
+    func withUpdated<R, ContextValue>(
+        key: WritableKeyPath<ConsoleContext, ContextValue>,
+        value: ContextValue,
+        operation: () async throws -> R
+    ) async rethrows -> R {
+        try await self.withValue(wrappedValue.withUpdated(key: key, value: value), operation: operation)
     }
 }

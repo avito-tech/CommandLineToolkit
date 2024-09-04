@@ -1,6 +1,9 @@
 import Foundation
+import Logging
+import AtomicModels
 
-final actor SelectComponent<Value>: ConsoleComponent {
+final class SelectComponent<Value>: ConsoleComponent {
+    @AtomicValue
     var state: SelectComponentState<Value>
 
     init(state: SelectComponentState<Value>) {
@@ -17,8 +20,12 @@ final actor SelectComponent<Value>: ConsoleComponent {
         return .success(values)
     }
 
-    var canBeCollapsed: Bool { false }
+    var isVisible: Bool { true }
 
+    func canBeCollapsed(at level: Logger.Level) -> Bool {
+        false
+    }
+    
     func handle(event: ConsoleControlEvent) {
         switch event {
         case .inputChar(.enter):

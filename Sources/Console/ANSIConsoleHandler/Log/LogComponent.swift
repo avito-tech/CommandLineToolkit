@@ -4,8 +4,14 @@ struct LogComponent: ConsoleComponent {
     let state: LogComponentState
     var result: Result<Void, Error>? { .success(()) }
 
-    var canBeCollapsed: Bool {
-        return state.level < .notice
+    var isVisible: Bool {
+        let verbositySettings = ConsoleContext.current.verbositySettings
+        return verbositySettings.verbose || state.level >= verbositySettings.logLevel
+    }
+    
+    func canBeCollapsed(at level: Logger.Level) -> Bool {
+        let verbositySettings = ConsoleContext.current.verbositySettings
+        return !verbositySettings.verbose && state.level <= level
     }
 
     func handle(event: ConsoleControlEvent) {

@@ -8,7 +8,7 @@ public struct ConsoleLogHandler: LogHandler {
 
     public init(handler: ConsoleHandler, label: String) {
         self.handler = handler
-        self.logLevel = handler.logLevel
+        self.logLevel = handler.verbositySettings.logLevel
     }
 
     public init(console: Console = .init(), label: String) {

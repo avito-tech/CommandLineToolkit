@@ -1,6 +1,9 @@
 import Foundation
+import AtomicModels
+import Logging
 
-final actor InputComponent: ConsoleComponent {
+final class InputComponent: ConsoleComponent {
+    @AtomicValue
     var state: InputComponentState
 
     init(state: InputComponentState) {
@@ -11,8 +14,12 @@ final actor InputComponent: ConsoleComponent {
         return state.isFinished ? .success(state.input) : nil
     }
 
-    var canBeCollapsed: Bool { false }
+    var isVisible: Bool { true }
 
+    func canBeCollapsed(at level: Logger.Level) -> Bool {
+        false
+    }
+    
     func handle(event: ConsoleControlEvent) {
         let index = state.input.index(state.input.startIndex, offsetBy: state.cursorIndex)
 

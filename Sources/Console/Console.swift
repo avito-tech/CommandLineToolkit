@@ -211,7 +211,7 @@ extension Console {
     public func trace<Value: Sendable>(
         level: Logger.Level = .info,
         name: String,
-        mode: TraceMode = .verbose,
+        options: TraceOptions = [],
         file: StaticString = #file,
         line: UInt = #line,
         work: (TraceProgressUpdator) async throws -> Value
@@ -219,7 +219,7 @@ extension Console {
         try await handler.trace(
             level: level,
             name: name,
-            mode: mode,
+            options: options,
             file: file,
             line: line,
             work: work
@@ -237,7 +237,7 @@ extension Console {
     public func trace<Value: Sendable>(
         level: Logger.Level = .info,
         name: String,
-        mode: TraceMode = .verbose,
+        options: TraceOptions = [],
         file: StaticString = #file,
         line: UInt = #line,
         work: () async throws -> Value
@@ -245,7 +245,7 @@ extension Console {
         try await handler.trace(
             level: level,
             name: name,
-            mode: mode,
+            options: options,
             file: file,
             line: line
         ) { _ in

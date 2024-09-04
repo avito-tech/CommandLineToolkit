@@ -19,9 +19,7 @@ extension ANSIConsoleHandler {
 
         let component = LogComponent(state: state)
         if let activeContainer = ConsoleContext.current.activeContainer {
-            runBlocking {
-                await activeContainer.add(child: component)
-            }
+            activeContainer.add(child: component)
         } else {
             renderNonInteractive(component: component.renderer().render(preferredSize: nil))
         }

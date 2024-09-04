@@ -27,22 +27,19 @@ public final class TeamcityConsoleHandler: ConsoleHandler {
         #endif
     }
 
-    public var logLevel: Logger.Level
-    public var verbose: Bool
-
+    public var verbositySettings: ConsoleVerbositySettings
+    
     private let messageGenerator: TeamcityMessageGenerator
     private let messageRenderer: TeamcityMessageRenderer
 
     public init(
         terminal: ANSITerminal = .shared,
-        logLevel: Logger.Level = .info,
-        verbose: Bool = false,
+        verbositySettings: ConsoleVerbositySettings = .default,
         messageGenerator: TeamcityMessageGenerator,
         messageRenderer: TeamcityMessageRenderer
     ) {
         self.terminal = terminal
-        self.logLevel = logLevel
-        self.verbose = verbose
+        self.verbositySettings = verbositySettings
         self.messageGenerator = messageGenerator
         self.messageRenderer = messageRenderer
     }
@@ -79,7 +76,7 @@ public final class TeamcityConsoleHandler: ConsoleHandler {
     public func trace<Value: Sendable>(
         level: Logging.Logger.Level,
         name: String,
-        mode: TraceMode,
+        options: TraceOptions,
         file: StaticString,
         line: UInt,
         work: (any TraceProgressUpdator) async throws -> Value
@@ -111,7 +108,7 @@ public final class TeamcityConsoleHandler: ConsoleHandler {
             ))
         }
 
-        return try await ConsoleContext.$current.withValue(ConsoleContext.current(with: \.activeFlow, value: flowId)) {
+        return try await ConsoleContext.$current.withUpdated(key: \.activeFlow, value: flowId) {
             return try await work(NoOpTraceProgressUpdator())
         }
     }
@@ -125,7 +122,7 @@ public final class TeamcityConsoleHandler: ConsoleHandler {
         function: String,
         line: UInt
     ) {
-        guard level >= self.logLevel else { return }
+        guard level >= self.verbositySettings.logLevel else { return }
         log(controlMessage: messageGenerator.message(
             text: "\(level.teamcityLevelPrefix): \(message.description)" + (prettify(metadata).map { "\n\($0)" } ?? ""),
             status: MessageStatus(level: level),
@@ -214,7 +211,7 @@ private struct TeamcityLogSink: LogSink {
         }
     }
 
-    func finish() {
+    func finish(result: Result<Void, LogStreamError>, cancelled: Bool) {
         end()
     }
 }

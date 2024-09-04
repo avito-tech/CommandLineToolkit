@@ -1,4 +1,8 @@
-final actor QuestionComponent: ConsoleComponent {
+import Logging
+import AtomicModels
+
+final class QuestionComponent: ConsoleComponent {
+    @AtomicValue
     var state: QuestionComponentState
 
     init(state: QuestionComponentState) {
@@ -9,7 +13,11 @@ final actor QuestionComponent: ConsoleComponent {
         return state.answer.map(Result.success)
     }
 
-    var canBeCollapsed: Bool { false }
+    var isVisible: Bool { true }
+
+    func canBeCollapsed(at level: Logger.Level) -> Bool {
+        false
+    }
 
     func handle(event: ConsoleControlEvent) {
         switch event {
@@ -28,7 +36,7 @@ final actor QuestionComponent: ConsoleComponent {
         }
     }
 
-    func renderer() async -> some Renderer<Void> {
+    func renderer() -> some Renderer<Void> {
         QuestionComponentRenderer()
             .withCache()
             .withState(state: state)

@@ -8,12 +8,13 @@ extension ANSIConsoleHandler {
         file: StaticString,
         line: UInt
     ) -> LogSink {
-        let component = LogStreamComponent(state: .init(name: name, level: level, renderTail: renderTail))
-        let sink = ComponentLogSink(component: component)
-
         guard let activeContainer = ConsoleContext.current.activeContainer else {
-            preconditionFailure("No active trace for log stream", file: file, line: line)
+            return LogHandlerSink(level: level, logHandler: ConsoleLogHandler(handler: self, label: name))
         }
+
+        let component = LogStreamComponent(state: .init(level: level, name: name, renderTail: renderTail))
+
+        let sink = ComponentLogSink(component: component)
 
         activeContainer.add(child: component)
 

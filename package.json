@@ -10,6 +10,16 @@
                 "Signals"
             ]
         },
+        "swift-snapshot-testing": {
+            "url": "https://github.com/pointfreeco/swift-snapshot-testing.git",
+            "version": {
+                "from": "1.17.4"
+            },
+            "targetNames": [
+                "SnapshotTesting",
+                "InlineSnapshotTesting"
+            ]
+        },
         "Glob": {
             "url": "https://github.com/Bouke/Glob",
             "version": {

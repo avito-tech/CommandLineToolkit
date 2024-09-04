@@ -16,19 +16,43 @@ public enum TraceOperationState<Value: Sendable>: Sendable {
     }
 }
 
-public enum TraceMode: Sendable {
-    case verbose
-    case collapseFinished
-    case countSubtraces
+public struct TraceOptions: RawRepresentable, OptionSet, Hashable {
+    public var rawValue: UInt
+    
+    public init(rawValue: UInt) {
+        self.rawValue = rawValue
+    }
+    
+    public static let collapseFinished: Self = .init(rawValue: 1 << 0)
+    public static let countSubtraces: Self = .init(rawValue: 1 << 1)
+}
+
+extension TraceOptions: CustomStringConvertible {
+    public var description: String {
+        let optionNames = [
+            TraceOptions.collapseFinished: "collapseFinished",
+            TraceOptions.countSubtraces: "countSubtraces",
+        ]
+        
+        let optionsString = optionNames
+            .sorted(using: KeyPathComparator(\.value))
+            .compactMap { option, name in
+                if self.contains(option) {
+                    return name
+                } else {
+                    return nil
+                }
+            }
+            .joined(separator: ", ")
+        
+        return "[\(optionsString)]"
+    }
 }
 
 struct TraceComponentState<Value> {
-    var children: [any ConsoleComponent] = []
-
     var level: Logger.Level
     var name: String
-    var mode: TraceMode
-    var verbose: Bool
+    var options: TraceOptions
     var operationState: TraceOperationState<Value>?
     var startTime: CFAbsoluteTime?
     var endTime: CFAbsoluteTime?

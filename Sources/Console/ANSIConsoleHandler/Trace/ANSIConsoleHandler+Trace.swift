@@ -22,14 +22,14 @@ extension ANSIConsoleHandler {
     public func trace<Value: Sendable>(
         level: Logger.Level,
         name: String,
-        mode: TraceMode,
+        options: TraceOptions,
         file: StaticString,
         line: UInt,
         work: (TraceProgressUpdator) async throws -> Value
     ) async throws -> Value {
         let component = TraceComponent<Value>(
             parent: ConsoleContext.current.activeContainer,
-            state: .init(level: level, name: name, mode: mode, verbose: verbose)
+            state: .init(level: level, name: name, options: options)
         )
 
         guard isInteractive else {
@@ -52,17 +52,17 @@ extension ANSIConsoleHandler {
         work: (TraceProgressUpdator) async throws -> Value,
         in component: TraceComponent<Value>
     ) async throws -> Value {
-        try await ConsoleContext.$current.withValue(.current(with: \.activeContainer, value: component)) {
+        try await ConsoleContext.$current.withUpdated(key: \.activeContainer, value: component) {
             do {
-                await component.updateOperationState(state: .started)
+                component.updateOperationState(state: .started)
 
                 let result = try await work(ComponentTraceProgressUpdator(component: component))
 
-                await component.updateOperationState(state: .finished(.success(result)))
+                component.updateOperationState(state: .finished(.success(result)))
 
                 return result
             } catch {
-                await component.updateOperationState(state: .finished(.failure(error)))
+                component.updateOperationState(state: .finished(.failure(error)))
                 throw error
             }
         }
@@ -108,14 +108,14 @@ extension ANSIConsoleHandler {
 }
 
 public protocol TraceProgressUpdator {
-    func update(progress: Progress) async
+    func update(progress: Progress)
 }
 
 public struct ComponentTraceProgressUpdator<Value>: TraceProgressUpdator {
     let component: TraceComponent<Value>
 
-    public func update(progress: Progress) async {
-        await component.updateOperationState(state: .progress(progress))
+    public func update(progress: Progress) {
+        component.updateOperationState(state: .progress(progress))
     }
 }
 

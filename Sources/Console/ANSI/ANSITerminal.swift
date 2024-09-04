@@ -17,6 +17,7 @@ public final class ANSITerminal {
 
     private var terminal: termios = termios()
     private(set) var isNonBlockingMode = false
+    private(set) var isNonBlockingExitSetUp = false
     var isCursorVisible = true
 
     private let stdoutStream: StdioOutputStream = .stdout
@@ -127,27 +128,33 @@ public final class ANSITerminal {
 extension ANSITerminal {
     func disableNonBlockingTerminal() {
         // restore default terminal mode
-        tcsetattr(STDIN_FILENO, TCSANOW, &ANSITerminal.shared.terminal)
+        var blockTerm = terminal
+        
+        // enable CANONical mode and ECHO-ing input
+        blockTerm.c_lflag |= tcflag_t(ICANON | ECHO | ECHOCTL)
+        // acknowledge CRNL line ending and UTF8 input
+        blockTerm.c_iflag |= tcflag_t(ICRNL | IUTF8)
+        
+        tcsetattr(STDIN_FILENO, TCSANOW, &blockTerm)
         isNonBlockingMode = false
     }
 
-    func enableNonBlockingTerminal(rawMode: Bool = false) {
+    func enableNonBlockingTerminal() {
         // store current terminal mode
         tcgetattr(STDIN_FILENO, &terminal)
-        atexit(exitDisableNonBlockingTerminal)
+        if !isNonBlockingExitSetUp {
+            atexit(exitDisableNonBlockingTerminal)
+            isNonBlockingExitSetUp = true
+        }
         isNonBlockingMode = true
 
         // configure non-blocking and non-echoing terminal mode
         var nonBlockTerm = terminal
-        if rawMode {
-            //! full raw mode without any input processing at all
-            cfmakeraw(&nonBlockTerm)
-        } else {
-            // disable CANONical mode and ECHO-ing input
-            nonBlockTerm.c_lflag &= ~tcflag_t(ICANON | ECHO)
-            // acknowledge CRNL line ending and UTF8 input
-            nonBlockTerm.c_iflag &= ~tcflag_t(ICRNL | IUTF8)
-        }
+        
+        // disable CANONical mode and ECHO-ing input
+        nonBlockTerm.c_lflag &= ~tcflag_t(ICANON | ECHO | ECHOCTL)
+        // acknowledge CRNL line ending and UTF8 input
+        nonBlockTerm.c_iflag &= ~tcflag_t(ICRNL | IUTF8)
 
         // enable new terminal mode
         tcsetattr(STDIN_FILENO, TCSANOW, &nonBlockTerm)

@@ -9,7 +9,7 @@ struct MockTraceProgressUpdator: TraceProgressUpdator {
     let handler: MockCLIHandler
     let name: String
 
-    func update(progress: Progress) async {
+    func update(progress: Progress) {
         handler.traceProgressUpdates[name, default: []].append(progress)
     }
 }
@@ -23,8 +23,7 @@ struct MockLogSink: LogSink {
 
     }
 
-    func finish() {
-
+    func finish(result: Result<Void, LogStreamError>, cancelled: Bool) {
     }
 }
 
@@ -33,7 +32,7 @@ public final class MockCLIHandler: ConsoleHandler {
 
     public var isInteractive: Bool = false
 
-    public var logLevel: Logging.Logger.Level = .trace
+    public var verbositySettings: ConsoleVerbositySettings = .init(logLevel: .trace, verbose: true)
 
     public init() {}
 
@@ -41,7 +40,7 @@ public final class MockCLIHandler: ConsoleHandler {
     public func trace<Value>(
         level: Logger.Level,
         name: String,
-        mode: TraceMode,
+        options: TraceOptions,
         file: StaticString,
         line: UInt,
         work: (TraceProgressUpdator) async throws -> Value

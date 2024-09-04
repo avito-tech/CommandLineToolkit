@@ -193,6 +193,9 @@ targets.append(
         name: "ConsoleTests",
         dependencies: [
             "Console",
+            .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
+            .product(name: "Logging", package: "swift-log"),
+            .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
         ],
         path: "Tests/ConsoleTests"
     )
@@ -536,6 +539,7 @@ targets.append(
         name: "ProcessController",
         dependencies: [
             "AtomicModels",
+            "Console",
             "DI",
             "DateProvider",
             "Environment",
@@ -543,6 +547,7 @@ targets.append(
             "PathLib",
             "SignalHandling",
             "Timer",
+            .product(name: "Logging", package: "swift-log"),
         ],
         path: "Sources/ProcessController"
     )
@@ -935,6 +940,7 @@ let package = Package(
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.6"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.3"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing.git", from: "1.17.4"),
     ],
     targets: targets
 )

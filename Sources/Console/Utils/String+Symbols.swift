@@ -9,6 +9,7 @@ extension String {
     static let spaceSpacerSymbol: Self = " "
     static let successSymbol: Self = "✔"
     static let failureSymbol: Self = "✘"
+    static let cancelSymbol: Self = "⛔︎"
     static let activeSymbol: Self = "▶"
     static let inputSymbol: Self = "❯"
     static let selectedSymbol: Self = "●"

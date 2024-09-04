@@ -1,6 +1,8 @@
 import AtomicModels
 import Foundation
 import PathLib
+import Logging
+import Console
 
 // swiftlint:disable multiple_closures_with_trailing_closure
 
@@ -117,12 +119,12 @@ extension ProcessControllerProvider {
 public struct OutputStreaming: ExpressibleByArrayLiteral {
     public let stdout: (Data) -> ()
     public let stderr: (Data) -> ()
-    public let finish: () -> ()
+    public let finish: (_ status: Int32, _ isCancelled: Bool) -> ()
     
     public init(
         stdout: @escaping (Data) -> (),
         stderr: @escaping (Data) -> (),
-        finish: @escaping () -> () = {}
+        finish: @escaping (Int32, Bool) -> () = { _, _ in }
     ) {
         self.stdout = stdout
         self.stderr = stderr
@@ -134,11 +136,7 @@ public struct OutputStreaming: ExpressibleByArrayLiteral {
         self = OutputStreaming.multiple(elements)
     }
     
-    public static let restream = OutputStreaming { data in
-        FileHandle.standardOutput.write(data)
-    } stderr: { data in
-        FileHandle.standardError.write(data)
-    }
+    public static var restream: Self { .restream(name: "process") }
     
     public static let silent = OutputStreaming { _ in } stderr: { _ in }
     
@@ -147,6 +145,108 @@ public struct OutputStreaming: ExpressibleByArrayLiteral {
             streams.forEach { $0.stdout(data) }
         } stderr: { data in
             streams.forEach { $0.stderr(data) }
+        }
+    }
+    
+    public static func restream(
+        level: Logger.Level = .debug,
+        name: String,
+        renderTail: Int = 3,
+        ignoreNonZeroStatusCode: Bool = false,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> OutputStreaming {
+        let console = Console()
+        let sink = console.logStream(level: level, name: name, renderTail: renderTail, file: file, line: line)
+        
+        let stdoutStream = MessageStream { message in
+            sink.append(line: message)
+        }
+        let stderrStream = MessageStream { message in
+            sink.append(line: message)
+        }
+        
+        return OutputStreaming { data in
+            stdoutStream.append(data: data)
+        } stderr: { data in
+            stderrStream.append(data: data)
+        } finish: { status, cancelled in
+            stdoutStream.flushMessageIfMessageIsNotEmpty()
+            stderrStream.flushMessageIfMessageIsNotEmpty()
+            let isSuccess = status == 0 || ignoreNonZeroStatusCode
+            sink.finish(result: isSuccess ? .success(()) : .failure(.init(statusCode: status)), cancelled: cancelled)
+        }
+    }
+}
+
+private struct MessageStream {
+    @AtomicValue
+    private var stringStream = ""
+    private let flushMessage: (String) -> ()
+    
+    init(
+        flushMessage: @escaping (String) -> ()
+    ) {
+        self.flushMessage = flushMessage
+    }
+    
+    func append(data: Data) {
+        let stringComponents = Array(
+            string(data: data).split(
+                omittingEmptySubsequences: false,
+                whereSeparator: { $0 == "\n" }
+            ).map { String($0) } // Unfortunately, `Logger` doesn't work with substrings, and it is easier anyway to just use strings
+        )
+        
+        if stringComponents.isEmpty {
+            // Impossible case for result of split, not worth properly handling like throwing and error
+            flushMessage("String components count of the result of split is: \(stringComponents.count). This case has to be impossible, or something is horribly wrong.")
+        } else if stringComponents.count == 1 {
+            // String is not split into components by new line => Data has no new line, can't log it,
+            // because we don't want to have extra newlines when there aren't newlines in `data`
+            let singleComponent = stringComponents[0]
+            stringStream += singleComponent
+        } else {
+            // stringComponents.count >= 1
+            
+            // Flush buffer with new component, as it has corresponding newline character
+            let firstComponent = stringComponents[0]
+            stringStream.append(firstComponent)
+            flushMessageAndClearStringStream()
+            
+            // For every component with new line, flush it and don't use buffer
+            if stringComponents.count > 2 {
+                for index in 1..<(stringComponents.count - 1) {
+                    let intermediateComponent = stringComponents[index]
+                    flushMessage(intermediateComponent)
+                }
+            }
+            
+            // Last component has no corresponding newline character and needs to be added to buffer
+            if stringComponents.count > 1 {
+                let lastComponent = stringComponents[stringComponents.count - 1]
+                
+                stringStream.append(lastComponent)
+            }
+        }
+    }
+    
+    func flushMessageIfMessageIsNotEmpty() {
+        if !stringStream.isEmpty {
+            flushMessageAndClearStringStream()
+        }
+    }
+    
+    private func flushMessageAndClearStringStream() {
+        flushMessage(stringStream)
+        stringStream = ""
+    }
+    
+    private func string(data: Data) -> String {
+        do {
+            return try String(utf8Data: data)
+        } catch {
+            return error.localizedDescription
         }
     }
 }

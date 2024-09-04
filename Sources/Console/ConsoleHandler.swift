@@ -4,7 +4,7 @@ import Logging
 public protocol ConsoleHandler {
     var isAtTTY: Bool { get }
     var isInteractive: Bool { get }
-    var logLevel: Logger.Level { get set }
+    var verbositySettings: ConsoleVerbositySettings { get }
 
     /// Ask user to input some string
     /// - Parameters:
@@ -58,7 +58,7 @@ public protocol ConsoleHandler {
     func trace<Value: Sendable>(
         level: Logger.Level,
         name: String,
-        mode: TraceMode,
+        options: TraceOptions,
         file: StaticString,
         line: UInt,
         work: (TraceProgressUpdator) async throws -> Value

@@ -47,8 +47,13 @@ public extension ProcessController {
     }
     
     func startAndListenUntilProcessDies() async throws {
+        try Task.checkCancellation()
         try start()
-        await waitForProcessToDieAsync()
+        try await withTaskCancellationHandler {
+            await waitForProcessToDieAsync()
+        } onCancel: {
+            send(signal: SIGINT)
+        }
     }
     
     var isProcessRunning: Bool {
@@ -87,23 +92,6 @@ public extension ProcessController {
     
     func forceKillProcess() {
         send(signal: SIGKILL)
-    }
-    
-    func restreamStdout() {
-        onStdout { _, data, _ in
-            FileHandle.standardOutput.write(data)
-        }
-    }
-    
-    func restreamStderr() {
-        onStderr { _, data, _ in
-            FileHandle.standardError.write(data)
-        }
-    }
-    
-    func restreamOutput() {
-        restreamStdout()
-        restreamStderr()
     }
     
     func terminateAndForceKillIfNeeded(

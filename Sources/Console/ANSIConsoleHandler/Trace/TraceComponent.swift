@@ -3,43 +3,64 @@ import Logging
 import AtomicModels
 
 final class TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
-    let parent: ContainerConsoleComponent?
+    @AtomicValue
+    var parent: ContainerConsoleComponent?
+
+    @AtomicValue
+    var children: [any ConsoleComponent]
+    
     @AtomicValue
     var state: TraceComponentState<Value>
 
-    var children: [any ConsoleComponent] {
-        state.children
-    }
-
     func add(child: any ConsoleComponent) {
-        state.children.append(child)
+        children.append(child)
+        
+        if let child = child as? ContainerConsoleComponent {
+            child.parent = self
+        }
     }
 
     init(
         parent: ContainerConsoleComponent?,
-        state: TraceComponentState<Value>
+        state: TraceComponentState<Value>,
+        children: [any ConsoleComponent] = []
     ) {
         self.parent = parent
         self.state = state
+        self.children = children
     }
 
     var result: Result<Value, Error>? {
         state.operationState?.finished
     }
-
-    var canBeCollapsed: Bool {
-        get async {
-            guard case .finished = state.operationState, !state.verbose else {
-                return false
+    
+    var isVisible: Bool {
+        let verbosity = ConsoleContext.current.verbositySettings
+        
+        if state.level >= verbosity.logLevel || isFailure || verbosity.verbose {
+            return true
+        }
+        
+        if state.options.contains(.collapseFinished) {
+            return children.contains { child in
+                child.isVisible && !child.canBeCollapsed(at: state.level)
             }
-
-            var result = true
-            for child in children {
-                let canBeCollapsed = await child.canBeCollapsed
-                result = result && canBeCollapsed
+        } else {
+            return children.contains { child in
+                child.isVisible
             }
-
-            return result
+        }
+    }
+    
+    func canBeCollapsed(at level: Logger.Level) -> Bool {
+        let verbosity = ConsoleContext.current.verbositySettings
+        
+        if !isSuccess || verbosity.verbose || state.level > level {
+            return false
+        }
+        
+        return children.allSatisfy { child in
+            child.canBeCollapsed(at: state.level)
         }
     }
 
@@ -56,9 +77,9 @@ final class TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
         }
     }
 
-    func handle(event: ConsoleControlEvent) async {
-        for child in children where await child.isUnfinished {
-            await child.handle(event: event)
+    func handle(event: ConsoleControlEvent) {
+        for child in children where child.isUnfinished {
+            child.handle(event: event)
         }
 
         switch event {
@@ -69,42 +90,33 @@ final class TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
         }
     }
 
-    private func childrenRenderers(state: TraceComponentState<Value>) async -> [AnyRenderer<Void>] {
-        var result: [AnyRenderer<Void>] = []
+    private func childrenRenderers(state: TraceComponentState<Value>) -> [AnyRenderer<Void>] {
+        let result: [AnyRenderer<Void>]
         
-        // Unfold failed operation trees
-        if case .finished(.failure) = state.operationState {
-            for child in children {
-                await result.append(child.typeErasedRenderer())
-            }
+        if state.options.contains(.collapseFinished) {
+            result = children
+                .filter { $0.isVisible && !$0.canBeCollapsed(at: state.level) || isFailure }
+                .map { $0.typeErasedRenderer() }
         } else {
-            for child in children where await child.shouldRender(mode: state.mode) {
-                await result.append(child.typeErasedRenderer())
-            }
+            result = children
+                .filter { $0.isVisible || isFailure }
+                .map { $0.typeErasedRenderer() }
         }
         
         return result
     }
 
-    func renderer() async -> some Renderer<Void> {
-        let childrenRenderers = await childrenRenderers(state: state)
+    func renderer() -> some Renderer<Void> {
+        let childrenRenderers = childrenRenderers(state: state)
 
         let progressOverride: Progress?
-        switch state.mode {
-        case .verbose, .collapseFinished:
+        if state.options.contains(.countSubtraces), isUnfinished {
+            progressOverride = .discrete(
+                current: children.lazy.filter(\.isFinished).count,
+                total: children.count
+            )
+        } else {
             progressOverride = nil
-        case .countSubtraces where state.operationState?.finished != nil:
-            progressOverride = nil
-        case .countSubtraces:
-            var finishedChildren: Int = 0
-
-            for child in children {
-                if await child.isFinished {
-                    finishedChildren += 1
-                }
-            }
-
-            progressOverride = .discrete(current: finishedChildren, total: children.count)
         }
 
         return TraceComponentRenderer().withState(state: .init(
@@ -112,38 +124,5 @@ final class TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
             progressOverride: progressOverride,
             traceState: state
         ))
-    }
-
-    func getContainerDepth() -> Int {
-        var depth: Int = 0
-        var activeContainer: ContainerConsoleComponent? = self
-        while activeContainer != nil {
-            activeContainer = activeContainer?.parent
-            depth += 1
-        }
-        return depth
-    }
-}
-
-private extension ConsoleComponent {
-    func shouldRender(mode: TraceMode) async -> Bool {
-        switch mode {
-        case .verbose:
-            return true
-        case .collapseFinished:
-            let isFinished = await isFinished
-            let canBeCollapsed = await canBeCollapsed
-
-            return !(isFinished && canBeCollapsed)
-        case .countSubtraces:
-            switch await result {
-            case .failure:
-                return true
-            case .success:
-                return !(await canBeCollapsed)
-            case .none:
-                return false
-            }
-        }
     }
 }
