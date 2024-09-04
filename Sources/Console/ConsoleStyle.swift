@@ -47,7 +47,15 @@ struct ConsoleStyle: Equatable {
 extension ConsoleStyle {
     /// Plain text with no color or background.
     static let plain: ConsoleStyle = .init()
-
+    
+    static let progressBarProgress: ConsoleStyle = .init(
+        color: .palette(28)
+    )
+    
+    static let progressBarUnfinished: ConsoleStyle = .init(
+        color: .palette(8)
+    )
+    
     /// Green text with no background.
     static let success: ConsoleStyle = .init(
         color: .palette(28),

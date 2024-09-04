@@ -6,6 +6,8 @@ struct TraceComponentRenderer<Value>: Renderer {
         var progressOverride: Progress?
         var traceState: TraceComponentState<Value>
     }
+    
+    let progressBarWidth = 16
 
     func render(state: State, preferredSize: Size?) -> ConsoleRender {
         let borderStyle = ConsoleStyle.from(state: state.traceState.operationState)
@@ -84,12 +86,15 @@ struct TraceComponentRenderer<Value>: Renderer {
         let progress: ConsoleText
         switch operationState {
         case let .progress(.fraction(value)):
+            let counter = String(format: " %.2f%%", value * 100).consoleText(.help)
+            let progressBar = renderProgressBar(progress: value, width: progressBarWidth)
             titleStyle = .headerTitle
-            progress = String(format: " %.2f%%", value).consoleText(.help)
+            progress = " \(counter) \(progressBar)"
         case let .progress(.discrete(current, full)):
+            let counter = "[\(current)/\(full)]".consoleText(.help)
+            let progressBar = renderProgressBar(progress: Double(current) / Double(full), width: progressBarWidth)
             titleStyle = .headerTitle
-            let frame = state.frames[Int((Double(state.frame) / Double(ANSIConsoleHandler.targetFps)) * Double(state.frames.count)) % state.frames.count]
-            progress = " \(frame) [\(current)/\(full)]".consoleText(.help)
+            progress = " \(counter) \(progressBar)"
         case .finished(.success):
             titleStyle = .success
             progress = " \(.successSymbol, style: .success)"
@@ -104,6 +109,27 @@ struct TraceComponentRenderer<Value>: Renderer {
         let time: ConsoleText = executionTime(state: state, style: .plain)
 
         return "\(inBlock ? .blockStartSymbol : .noBlockSymbol, style: blockStyle) \(state.name, style: titleStyle)\(progress)\(time)"
+    }
+    
+    private func renderProgressBar(progress: Double, width: Int) -> ConsoleText {
+        let block = "━"
+        let partBlocks = [" ", "╸"]
+        let dwidth = Double(width)
+        let progress = min(1, max(0, progress))
+        let wholeWidth = Int(floor(progress * dwidth))
+        let remainderWidth = (progress * dwidth).truncatingRemainder(dividingBy: 1)
+        let partWidth = Int(floor(remainderWidth * Double(partBlocks.count)))
+        let isFull = (width - wholeWidth - 1) < 0
+        
+        let wholeBlocks = String(repeating: block, count: wholeWidth).consoleText(.progressBarProgress)
+        let partChar: ConsoleText = isFull
+            ? ""
+            : partBlocks[partWidth].consoleText(.progressBarProgress)
+        let fillerBlocks: ConsoleText = isFull
+            ? ""
+            : String(repeating: block, count: max(0, width - wholeWidth - 1)).consoleText(.progressBarUnfinished)
+        let line = wholeBlocks + partChar + fillerBlocks
+        return line
     }
 }
 
