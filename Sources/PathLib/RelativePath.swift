@@ -6,7 +6,8 @@ public final class RelativePath:
     Hashable,
     Comparable,
     ExpressibleByStringLiteral,
-    ExpressibleByArrayLiteral
+    ExpressibleByArrayLiteral,
+    ExpressibleByStringInterpolation
 {
     public let components: [String] // source value
     public let pathString: String // precomputed value
@@ -41,7 +42,11 @@ public final class RelativePath:
         
         return components.joined(separator: "/")
     }
-    
+
+    public static func +(lhs: RelativePath, rhs: RelativePath) -> RelativePath {
+        return lhs.appending(relativePath: rhs)
+    }
+
     private struct ValidationError<S: StringProtocol>: Error, CustomStringConvertible {
         let string: S
         var description: String { "String '\(string)' does not appear to be a relative path" }

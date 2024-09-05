@@ -96,7 +96,11 @@ public final class AbsolutePath:
         
         return RelativePath(components: relativeComponents)
     }
-    
+
+    public static func +(lhs: AbsolutePath, rhs: RelativePath) -> AbsolutePath {
+        return AbsolutePath(components: lhs.components + rhs.components)
+    }
+
     // MARK: - Conformance to `ExpressibleByStringLiteral`
     
     public typealias StringLiteralType = String
