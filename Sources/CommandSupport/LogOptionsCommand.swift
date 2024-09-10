@@ -106,7 +106,7 @@ extension ParsableCommand {
             return
         }
 
-        // They should be GlobalArgumentsCommands, otherwise it will be impossible to set log level, and only defailt will be used
+        // They should be GlobalArgumentsCommands, otherwise it will be impossible to set log level, and only default will be used
         if self is LogOptionsCommand {
             return
         }
