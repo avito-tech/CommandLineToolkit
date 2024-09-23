@@ -76,12 +76,14 @@ extension Console {
     public func question(
         title: String,
         defaultAnswer: Bool = true,
+        help: String? = nil,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws -> Bool {
         return try await handler.question(
             title: title,
             defaultAnswer: defaultAnswer,
+            help: help,
             file: file,
             line: line
         )

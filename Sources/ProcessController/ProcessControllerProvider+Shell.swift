@@ -145,6 +145,8 @@ public struct OutputStreaming: ExpressibleByArrayLiteral {
             streams.forEach { $0.stdout(data) }
         } stderr: { data in
             streams.forEach { $0.stderr(data) }
+        } finish: { status, cancelled in
+            streams.forEach { $0.finish(status, cancelled) }
         }
     }
     

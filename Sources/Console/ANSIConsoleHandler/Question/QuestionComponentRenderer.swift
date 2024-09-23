@@ -10,15 +10,26 @@ struct QuestionComponentRenderer: Renderer {
     }
 
     private func renderInProgress(state: State) -> ConsoleRender {
-        let help = state.answer != nil ? "" : (state.defaultAnswer ? "[Y]/n" : "y/[N]")
+        let answerHint = state.answer != nil ? "" : (state.defaultAnswer ? "[Y]/n" : "y/[N]")
+        
+        let help: [ConsoleText]
+        if let helpMessage = state.help {
+            help = helpMessage.split(separator: "\n").map {
+                "\(.blockBorderSymbol) \($0, style: .help)"
+            }
+        } else {
+            help = []
+        }
+        
         let prompt: ConsoleText = "\(.blockBorderSymbol) \(.inputSymbol) "
         return .init(
             lines: [
-                "\(.blockStartSymbol) \(state.title, style: .headerTitle) \(help, style: .help)",
+                "\(.blockStartSymbol) \(state.title, style: .headerTitle) \(answerHint, style: .help)",
+            ] + help + [
                 prompt,
                 "\(.blockEndSymbol)"
             ],
-            cursorPosition: .init(row: 1, col: 1 + prompt.description.count)
+            cursorPosition: .init(row: 1 + help.count, col: 1 + prompt.description.count)
         )
     }
 

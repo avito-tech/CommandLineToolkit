@@ -147,6 +147,13 @@ extension ConsoleText: ExpressibleByStringInterpolation {
         }
         
         mutating func appendInterpolation(
+            _ value: Substring,
+            style: ConsoleStyle = .plain
+        ) {
+            appendInterpolation(String(value), style: style)
+        }
+        
+        mutating func appendInterpolation(
             _ value: String,
             color: ConsoleColor?,
             background: ConsoleColor? = nil,

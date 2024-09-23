@@ -7,6 +7,7 @@ extension ANSIConsoleHandler {
     public func question(
         title: String,
         defaultAnswer: Bool,
+        help: String?,
         file: StaticString,
         line: UInt
     ) async throws -> Bool {
@@ -17,7 +18,7 @@ extension ANSIConsoleHandler {
             return nonInteractiveQuestion(title: title, defaultAnswer: defaultAnswer)
         }
 
-        let component = QuestionComponent(state: .init(title: title, defaultAnswer: defaultAnswer))
+        let component = QuestionComponent(state: .init(title: title, defaultAnswer: defaultAnswer, help: help))
 
         return try await run(component, file: file, line: line)
     }

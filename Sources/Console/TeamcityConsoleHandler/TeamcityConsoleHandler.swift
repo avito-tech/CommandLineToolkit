@@ -56,6 +56,7 @@ public final class TeamcityConsoleHandler: ConsoleHandler {
     public func question(
         title: String,
         defaultAnswer: Bool,
+        help: String?,
         file: StaticString,
         line: UInt
     ) async throws -> Bool {

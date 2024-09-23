@@ -26,6 +26,7 @@ public protocol ConsoleHandler {
     func question(
         title: String,
         defaultAnswer: Bool,
+        help: String?,
         file: StaticString,
         line: UInt
     ) async throws -> Bool
