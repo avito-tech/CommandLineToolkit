@@ -198,8 +198,6 @@ public final class ANSIConsoleHandler: ConsoleHandler {
                                 try await Task.sleep(nanoseconds: ANSIConsoleHandler.tickDelayNs)
                             }
                         } while component.isUnfinished
-
-                        cleanLastRender(state: state)
                     } catch let error as CancellationError {
                         finalize(component: component, state: state)
                         throw error
@@ -221,6 +219,7 @@ public final class ANSIConsoleHandler: ConsoleHandler {
         component: Component,
         state: RenderingState
     ) {
+        cleanLastRender(state: state)
         let renderer = component.renderer()
         renderNonInteractive(component: renderer.render(preferredSize: state.terminalSize))
     }

@@ -7,7 +7,7 @@ public protocol DependencyResolver: AnyObject {
 
 extension DependencyResolver {
     // Use this function for most cases.
-    public func resolve<T>() throws -> T {
+    public func resolve<T>(type: T.Type = T.self) throws -> T {
         return try resolve(nestedDependencyResolver: self)
     }
 }

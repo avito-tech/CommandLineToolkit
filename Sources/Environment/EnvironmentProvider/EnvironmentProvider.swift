@@ -12,4 +12,8 @@ extension EnvironmentProvider {
         
         return try key.conversion.apply(value)
     }
+    
+    public func get<Value>(_ key: EnvironmentKey<Value>, default value: @autoclosure () -> Value) throws -> Value {
+        return try get(key) ?? value()
+    }
 }
