@@ -1,8 +1,10 @@
 import PathLib
 import Foundation
 
-final class FileAppenderImpl: FileAppender {
-    func appendToFile(path: AbsolutePath, data: Data) throws {
+public final class FileAppenderImpl: FileAppender {
+    public init() {}
+
+    public func appendToFile(path: AbsolutePath, data: Data) throws {
         if let fileHandle = FileHandle(forWritingAtPath: path.pathString) {
             defer { fileHandle.closeFile() }
             try fileHandle.seekToEnd()

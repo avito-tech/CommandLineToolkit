@@ -1,4 +1,10 @@
+#if canImport(Darwin)
 import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#else
+#error("unsupported runtime")
+#endif
 import SignalHandling
 
 extension String {

@@ -1,4 +1,10 @@
+#if canImport(Darwin)
 import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#else
+#error("unsupported runtime")
+#endif
 
 /// A wrapper to facilitate `print`-ing to stderr and stdio that
 /// ensures access to the underlying `FILE` is locked to prevent

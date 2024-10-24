@@ -1,6 +1,12 @@
 // Grabbed implementation from swift-log
 // swiftlint:disable all
+#if canImport(Darwin)
 import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#else
+#error("unsupported runtime")
+#endif
 
 /// A reader/writer threading lock based on `libpthread` instead of `libdispatch`.
 ///
