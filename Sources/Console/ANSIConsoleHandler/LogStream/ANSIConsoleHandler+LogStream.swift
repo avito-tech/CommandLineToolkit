@@ -8,8 +8,11 @@ extension ANSIConsoleHandler {
         file: StaticString,
         line: UInt
     ) -> LogSink {
-        guard let activeContainer = ConsoleContext.current.activeContainer else {
-            return LogHandlerSink(level: level, logHandler: ConsoleLogHandler(handler: self, label: name))
+        guard isInteractive, let activeContainer = ConsoleContext.current.activeContainer else {
+            return LogHandlerSink(
+                level: level,
+                logHandler: ConsoleLogHandler(handler: self, label: name)
+            )
         }
 
         let component = LogStreamComponent(state: .init(level: level, name: name, renderTail: renderTail))

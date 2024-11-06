@@ -168,15 +168,23 @@ public struct OutputStreaming: ExpressibleByArrayLiteral {
             sink.append(line: message)
         }
         
-        return OutputStreaming { data in
-            stdoutStream.append(data: data)
-        } stderr: { data in
-            stderrStream.append(data: data)
-        } finish: { status, cancelled in
-            stdoutStream.flushMessageIfMessageIsNotEmpty()
-            stderrStream.flushMessageIfMessageIsNotEmpty()
-            let isSuccess = status == 0 || ignoreNonZeroStatusCode
-            sink.finish(result: isSuccess ? .success(()) : .failure(.init(statusCode: status)), cancelled: cancelled)
+        return Console.withEscapingContext { continuation in
+            return OutputStreaming { data in
+                continuation.yield {
+                    stdoutStream.append(data: data)
+                }
+            } stderr: { data in
+                continuation.yield {
+                    stderrStream.append(data: data)
+                }
+            } finish: { status, cancelled in
+                continuation.yield {
+                    stdoutStream.flushMessageIfMessageIsNotEmpty()
+                    stderrStream.flushMessageIfMessageIsNotEmpty()
+                    let isSuccess = status == 0 || ignoreNonZeroStatusCode
+                    sink.finish(result: isSuccess ? .success(()) : .failure(.init(statusCode: status)), cancelled: cancelled)
+                }
+            }
         }
     }
 }

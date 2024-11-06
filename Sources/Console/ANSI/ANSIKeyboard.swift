@@ -222,7 +222,9 @@ extension ANSITerminal {
         }
 
         // make sure there is data in stdin
-        if !keyPressed() { return .unknown(raw: cmd) }
+        guard keyPressed() else {
+            return .unknown(raw: cmd)
+        }
 
         while true {                                // read key sequence
             cmd.append(readChar())                  // check for ESC combination

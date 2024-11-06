@@ -150,6 +150,8 @@ public final class ANSIConsoleHandler: ConsoleHandler {
             }
         }
         var lastRenderCursorPos: Position
+        var frame: Int = 0
+        let frames: [String] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
     }
 
     func run<Value, Component: ConsoleComponent<Value>>(
@@ -189,22 +191,27 @@ public final class ANSIConsoleHandler: ConsoleHandler {
 
                             component.handle(event: event)
 
-                            let renderer = component.renderer()
-                            
-                            state.terminalSize = terminal.size
-                            render(component: renderer.render(preferredSize: state.terminalSize), state: &state)
+                            if component.isVisible {
+                                let renderer = component.renderer()
+                                state.terminalSize = terminal.size
+                                render(component: renderer.render(preferredSize: state.terminalSize), state: &state)
+                            }
                             
                             if case .tick = event {
-                                try await Task.sleep(nanoseconds: ANSIConsoleHandler.tickDelayNs)
+                                await Task.nonThrowingSleep(nanoseconds: ANSIConsoleHandler.tickDelayNs)
                             }
                         } while component.isUnfinished
                     } catch let error as CancellationError {
-                        finalize(component: component, state: state)
+                        if component.isVisible {
+                            finalize(component: component, state: state)
+                        }
                         throw error
                     }
                 }
 
-                finalize(component: component, state: state)
+                if component.isVisible {
+                    finalize(component: component, state: state)
+                }
 
                 guard let result = component.result else {
                     throw ConsoleHandlerError.componentFinishedWithoutResult
@@ -261,6 +268,8 @@ public final class ANSIConsoleHandler: ConsoleHandler {
                         state.fullRender = true
                     }
                     return nil
+                case .unknown(raw: .ESC):
+                    event = .inputChar(.escape)
                 case let .unknown(raw):
                     fatalError("Unknown command \(raw.replacingOccurrences(of: String.ESC, with: "^"))")
                 }
@@ -293,7 +302,8 @@ public final class ANSIConsoleHandler: ConsoleHandler {
                 terminal.writeln()
             }
         }
-        terminal.write("AI")
+        let frame = state.frames[Int((Double(state.frame) / Double(ANSIConsoleHandler.targetFps)) * Double(state.frames.count)) % state.frames.count]
+        terminal.write(Task.isCancelled ? "Завершаем задачу \(frame)" : frame)
         terminal.clearBelow()
 
         state.lastRenderCursorPos.row += -state.lastRenderedLines + linesToRender
@@ -301,6 +311,7 @@ public final class ANSIConsoleHandler: ConsoleHandler {
         state.lastRender = component
         state.lastRenderedLines = linesToRender
         state.fullRender = false
+        state.frame = (state.frame + 1) % Int(ANSIConsoleHandler.targetFps)
 
         if let position = component.cursorPosition {
             terminal.moveUp(linesToRender - position.row + (newActualLines - linesToRender))
@@ -328,6 +339,17 @@ public final class ANSIConsoleHandler: ConsoleHandler {
         }
         if isInteractive {
             terminal.cursorOn()
+        }
+    }
+}
+
+private extension Task where Success == Never, Failure == Never {
+    static func nonThrowingSleep(nanoseconds: UInt64) async {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global().asyncAfter(
+                deadline: .now() + .nanoseconds(Int(nanoseconds)),
+                execute: continuation.resume
+            )
         }
     }
 }
