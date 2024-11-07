@@ -2,9 +2,9 @@ import Foundation
 
 public struct Selectable<Value>: Hashable {
     let id: UUID = .init()
-    let title: String
-    let help: String?
-    let value: Value
+    public let title: String
+    public let help: String?
+    public let value: Value
 
     public init(title: String, help: String? = nil, value: Value) {
         self.title = title
