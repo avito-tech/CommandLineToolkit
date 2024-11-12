@@ -1,3 +1,5 @@
+import PathLib
+
 /// Typed env var key, allows to do correct type conversion
 public struct EnvironmentKey<Value> {
     public let key: String
@@ -74,6 +76,18 @@ extension EnvironmentKey where Value == Bool {
                 String(bool)
             }
         ))
+    }
+}
+
+extension EnvironmentKey where Value == AbsolutePath {
+    public static func path(_ key: String) -> Self {
+        .init(
+            key: key,
+            conversion: .init(
+                applyTransform: AbsolutePath.init,
+                unapplyTransform: \.pathString
+            )
+        )
     }
 }
 

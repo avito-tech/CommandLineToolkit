@@ -109,12 +109,10 @@ private extension AbsolutePath {
 
 private extension EnvironmentKey {
     static var personalPrivateKeyPath: EnvironmentKey<AbsolutePath> {
-        return EnvironmentKey<String>.string("IOS_BUILD_MACHINE_TLS_CLIENT_KEY")
-            .map(.init(applyTransform: AbsolutePath.init, unapplyTransform: \.pathString))
+        .path("IOS_BUILD_MACHINE_TLS_CLIENT_KEY")
     }
 
     static var personalCertificatePath: EnvironmentKey<AbsolutePath> {
-        return EnvironmentKey<String>.string("IOS_BUILD_MACHINE_TLS_CLIENT_CERT")
-            .map(.init(applyTransform: AbsolutePath.init, unapplyTransform: \.pathString))
+        .path("IOS_BUILD_MACHINE_TLS_CLIENT_CERT")
     }
 }
