@@ -2,7 +2,7 @@ import FileSystem
 import Foundation
 import PathLib
 
-open class FakeFileSystem: FileSystem {
+open class FakeFileSystem: FileSystem, FileReader, DataWriter {
     public init(rootPath: AbsolutePath) {
         self.fakeCommonlyUsedPathsProvider = FakeCommonlyUsedPathsProvider(
             applicationsProvider: { _ in rootPath.appending("Applications") },
@@ -85,5 +85,15 @@ open class FakeFileSystem: FileSystem {
     public var onAppendToFile: (AbsolutePath, Data) throws -> () = { _, _ in }
     public func appendToFile(path: PathLib.AbsolutePath, data: Data) throws {
         try onAppendToFile(path, data)
+    }
+    
+    public var onContents: (AbsolutePath) throws -> Data = { _ in throw "Not implemented" }
+    public func contents(filePath: AbsolutePath) throws -> Data {
+        try onContents(filePath)
+    }
+
+    public var onWrite: (AbsolutePath, Data) throws -> () = { _, _ in }
+    public func write(data: Data, filePath: AbsolutePath, ensureDirectoryExists: Bool) throws {
+        try onWrite(filePath, data)
     }
 }
