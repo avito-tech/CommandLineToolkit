@@ -93,20 +93,6 @@ final actor MutualTLSCredentialProviderImpl: MutualTLSCredentialProvider {
     }
 }
 
-private extension AbsolutePath {
-    static var certsPath: AbsolutePath {
-        return .home.appending(relativePath: ".avito/certs/")
-    }
-
-    static var personalPrivateKeyPath: AbsolutePath {
-        return .certsPath.appending(relativePath: "personal.key")
-    }
-
-    static var personalCertificatePath: AbsolutePath {
-        return .certsPath.appending(relativePath: "personal.crt")
-    }
-}
-
 private extension EnvironmentKey {
     static var personalPrivateKeyPath: EnvironmentKey<AbsolutePath> {
         .path("IOS_BUILD_MACHINE_TLS_CLIENT_KEY")
