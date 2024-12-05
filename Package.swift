@@ -334,6 +334,27 @@ targets.append(
         path: "Tests/GraphiteTests"
     )
 )
+// MARK: ImagesInterfaces
+targets.append(
+    .target(
+        name: "ImagesInterfaces",
+        dependencies: [
+            "PathLib",
+        ],
+        path: "Sources/ImagesInterfaces"
+    )
+)
+// MARK: ImagesTestHelpers
+targets.append(
+    .target(
+        name: "ImagesTestHelpers",
+        dependencies: [
+            "ImagesInterfaces",
+            "PathLib",
+        ],
+        path: "Tests/ImagesTestHelpers"
+    )
+)
 // MARK: JSONStream
 targets.append(
     .target(
@@ -901,6 +922,8 @@ let package = Package(
         .library(name: "FileSystemTestHelpers", targets: ["FileSystemTestHelpers"]),
         .library(name: "Graphite", targets: ["Graphite"]),
         .library(name: "GraphiteTestHelpers", targets: ["GraphiteTestHelpers"]),
+        .library(name: "ImagesInterfaces", targets: ["ImagesInterfaces"]),
+        .library(name: "ImagesTestHelpers", targets: ["ImagesTestHelpers"]),
         .library(name: "JSONStream", targets: ["JSONStream"]),
         .library(name: "Kibana", targets: ["Kibana"]),
         .library(name: "KibanaModels", targets: ["KibanaModels"]),
