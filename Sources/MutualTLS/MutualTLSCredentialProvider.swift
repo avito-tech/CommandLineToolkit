@@ -88,7 +88,7 @@ final actor MutualTLSCredentialProviderImpl: MutualTLSCredentialProvider {
         )
 
         if streams.stderrString.contains("No such file or directory") {
-            throw "\(file) not found, authorize with `avito login` first"
+            throw "\(file) not found, authorize with `ai login` first"
         }
     }
 }
