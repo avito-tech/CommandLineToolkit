@@ -12,11 +12,10 @@ extension FileReader {
     }
     
     public func decodable<T: Decodable>(
-        jsonFilePath: AbsolutePath
+        type: T.Type = T.self,
+        jsonFilePath: AbsolutePath,
+        decoder: JSONDecoder = JSONDecoder()
     ) throws -> T {
-        return try JSONDecoder().decode(
-            T.self,
-            from: contents(filePath: jsonFilePath)
-        )
+        try decoder.decode(type, from: contents(filePath: jsonFilePath))
     }
 }

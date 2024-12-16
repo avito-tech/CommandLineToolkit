@@ -36,10 +36,11 @@ extension DataWriter {
     public func writeJson<T: Encodable>(
         encodable: T,
         filePath: AbsolutePath,
-        ensureDirectoryExists: Bool = true
+        ensureDirectoryExists: Bool = true,
+        encoder: JSONEncoder = JSONEncoder()
     ) throws {
         try write(
-            data: JSONEncoder().encode(encodable),
+            data: encoder.encode(encodable),
             filePath: filePath,
             ensureDirectoryExists: ensureDirectoryExists
         )

@@ -103,12 +103,12 @@ extension Console {
     ///   - values: list of possible values
     ///   - options: possible selection options
     /// - Returns: array of selected values
-    func select<Value>(
+    public func select<Value>(
         title: String,
         values: [Selectable<Value>],
         minSelections: Int = 1,
         maxSelections: Int = .max,
-        options: SelectionOptions,
+        options: SelectionOptions = .init(),
         file: StaticString = #file,
         line: UInt = #line
     ) async throws -> [Value] {
@@ -210,6 +210,7 @@ extension Console {
     ///   - mode: Mode in which to run trace, specific modes allow to cleanup nested finished traces
     ///   - work: Work to be performed inside of a trace
     /// - Returns: Value returned form `work` closure
+    @discardableResult
     public func trace<Value: Sendable>(
         level: Logger.Level = .info,
         name: String,
@@ -236,6 +237,7 @@ extension Console {
     ///   - mode: Mode in which to run trace, specific modes allow to cleanup nested finished traces
     ///   - work: Work to be performed inside of a trace
     /// - Returns: Value returned form `work` closure
+    @discardableResult
     public func trace<Value: Sendable>(
         level: Logger.Level = .info,
         name: String,
