@@ -4,19 +4,19 @@ import Console
 import DI
 import TeamcityMessaging
 
-public enum LogFormat: String, Codable, ExpressibleByArgument {
+public enum LogFormat: String, Codable, ExpressibleByArgument, CaseIterable {
     case interactive
     case teamcity
 }
 
 public struct LogOptions: ParsableArguments {
-    @Flag(name: .shortAndLong)
+    @Flag(name: .shortAndLong, help: "Verbose logging")
     public var verbose: Bool = false
 
-    @Option
+    @Option(help: "\(Logger.Level.allValueStrings.formatted(.list(type: .or)))")
     public var logLevel: Logger.Level = .info
 
-    @Option
+    @Option(help: "\(LogFormat.allValueStrings.formatted(.list(type: .or)))")
     public var logFormat: LogFormat = .interactive
 
     public init() {}
