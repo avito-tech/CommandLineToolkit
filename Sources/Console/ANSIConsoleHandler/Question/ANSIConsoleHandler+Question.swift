@@ -11,6 +11,8 @@ extension ANSIConsoleHandler {
         file: StaticString,
         line: UInt
     ) async throws -> Bool {
+        try Task.checkCancellation()
+
         guard isAtTTY else {
             fatalError("Using question is only allowed at TTY", file: file, line: line)
         }

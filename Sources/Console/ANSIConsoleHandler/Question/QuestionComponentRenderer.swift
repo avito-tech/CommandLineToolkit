@@ -2,15 +2,22 @@ import Foundation
 
 struct QuestionComponentRenderer: Renderer {
     func render(state: QuestionComponentState, preferredSize: Size?) -> ConsoleRender {
-        if let answer = state.answer {
-            return renderFinished(state: state, answer: answer)
-        } else {
+        switch state.result {
+        case nil:
             return renderInProgress(state: state)
+        case .cancelled:
+            return renderCancelled(state: state)
+        case let .selected(answer):
+            return renderFinished(state: state, answer: answer)
         }
     }
 
-    private func renderInProgress(state: State) -> ConsoleRender {
-        let answerHint = state.answer != nil ? "" : (state.defaultAnswer ? "[Y]/n" : "y/[N]")
+    private func renderCancelled(state: QuestionComponentState) -> ConsoleRender {
+        return .init(lines: ["\(.noBlockSymbol, style: .error) \(state.title, style: .error) \(.cancelSymbol, style: .error)"])
+    }
+
+    private func renderInProgress(state: QuestionComponentState) -> ConsoleRender {
+        let answerHint = state.defaultAnswer ? "[Y]/n" : "y/[N]"
         
         let help: [ConsoleText]
         if let helpMessage = state.help {

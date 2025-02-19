@@ -1,9 +1,12 @@
 struct InputComponentRenderer: Renderer {
     func render(state: InputComponentState, preferredSize: Size?) -> ConsoleRender {
-        if state.isFinished {
-            return renderFinished(state: state)
-        } else {
+        switch state.result {
+        case nil:
             return renderInProgress(state: state)
+        case .cancelled:
+            return renderCancelled(state: state)
+        case let .success(input):
+            return renderFinished(state: state, input: input)
         }
     }
 
@@ -24,11 +27,17 @@ struct InputComponentRenderer: Renderer {
         )
     }
 
-    private func renderFinished(state: InputComponentState) -> ConsoleRender {
+    private func renderCancelled(state: InputComponentState) -> ConsoleRender {
+        return .init(
+            lines: ["\(.noBlockSymbol, style: .error) \(state.title, style: .error) \(.cancelSymbol, style: .error)"]
+        )
+    }
+
+    private func renderFinished(state: InputComponentState, input: String) -> ConsoleRender {
         return .init(
             lines: [
                 "\(.blockStartSymbol, style: .success) \(state.title, style: .success)",
-                "\(.blockBorderSymbol, style: .success) \(state.input)",
+                "\(.blockBorderSymbol, style: .success) \(input)",
                 "\(.blockEndSymbol, style: .success)"
             ]
         )

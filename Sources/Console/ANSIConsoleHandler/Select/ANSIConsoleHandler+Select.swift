@@ -15,6 +15,8 @@ extension ANSIConsoleHandler {
         file: StaticString,
         line: UInt
     ) async throws -> [Value] {
+        try Task.checkCancellation()
+
         guard isAtTTY else {
             fatalError("Using select is only allowed at TTY", file: file, line: line)
         }

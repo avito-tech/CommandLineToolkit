@@ -10,7 +10,14 @@ final class QuestionComponent: ConsoleComponent {
     }
 
     var result: Result<Bool, Error>? {
-        return state.answer.map(Result.success)
+        switch state.result {
+        case nil:
+            return nil
+        case .cancelled:
+            return .failure(CancellationError())
+        case let .selected(answer):
+            return .success(answer)
+        }
     }
 
     var isVisible: Bool { true }
@@ -22,17 +29,20 @@ final class QuestionComponent: ConsoleComponent {
     func handle(event: ConsoleControlEvent) {
         switch event {
         case .inputChar("Y"), .inputChar("y"):
-            state.answer = true
+            state.confirm(answer: true)
         case .inputChar("N"), .inputChar("n"):
-            state.answer = false
+            state.confirm(answer: false)
         case .inputChar("\r"):
-            state.answer = state.defaultAnswer
+            state.confirm(answer: state.defaultAnswer)
         case let .inputEscapeSequence(code, _):
             if [.up, .down, .left, .right].contains(code) {
                 state.defaultAnswer.toggle()
             }
         case .inputChar, .tick:
             break
+        }
+        if Task.isCancelled {
+            state.cancel()
         }
     }
 

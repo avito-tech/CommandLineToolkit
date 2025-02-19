@@ -11,7 +11,14 @@ final class InputComponent: ConsoleComponent {
     }
 
     var result: Result<String, Error>? {
-        return state.isFinished ? .success(state.input) : nil
+        switch state.result {
+        case nil:
+            return nil
+        case .cancelled:
+            return .failure(CancellationError())
+        case let .success(input):
+            return .success(input)
+        }
     }
 
     var isVisible: Bool { true }
@@ -29,7 +36,7 @@ final class InputComponent: ConsoleComponent {
                 state.input = value
                 state.cursorIndex = state.input.count
             }
-            state.isFinished = true
+            state.confirm()
         case .inputChar(.del):
             guard !state.input.isEmpty, index > state.input.startIndex else {
                 break
@@ -54,6 +61,9 @@ final class InputComponent: ConsoleComponent {
             state.cursorIndex += 1
         case .inputEscapeSequence, .tick:
             break
+        }
+        if Task.isCancelled {
+            state.cancel()
         }
     }
 

@@ -27,6 +27,8 @@ extension ANSIConsoleHandler {
         line: UInt,
         work: (TraceProgressUpdator) async throws -> Value
     ) async throws -> Value {
+        try Task.checkCancellation()
+
         let component = TraceComponent<Value>(
             parent: ConsoleContext.current.activeContainer,
             state: .init(level: level, name: name, options: options)

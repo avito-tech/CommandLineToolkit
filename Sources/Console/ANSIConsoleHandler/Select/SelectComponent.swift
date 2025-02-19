@@ -11,13 +11,14 @@ final class SelectComponent<Value>: ConsoleComponent {
     }
 
     var result: Result<[Value], Error>? {
-        guard state.isFinished else {
+        switch state.result {
+        case nil:
             return nil
+        case .cancelled:
+            return .failure(CancellationError())
+        case let .selected(values):
+            return .success(values.map(\.value))
         }
-        let values = state.selectedIds.compactMap { id in
-            state.valuesIndex[id]?.value
-        }
-        return .success(values)
     }
 
     var isVisible: Bool { true }
@@ -33,7 +34,7 @@ final class SelectComponent<Value>: ConsoleComponent {
             case .single where state.selectedIds.isEmpty:
                 state.errorMessage = "Нужно что нибудь выбрать"
             case .single:
-                state.isFinished = true
+                state.confirm()
             case let .multiple(min, max):
                 guard min <= state.selectedIds.count else {
                     state.errorMessage = "Выбери как минимум \(min)"
@@ -43,7 +44,7 @@ final class SelectComponent<Value>: ConsoleComponent {
                     state.errorMessage = "Можно выбрать максимум \(max)"
                     break
                 }
-                state.isFinished = true
+                state.confirm()
             }
         case .inputChar(.del):
             if !state.search.isEmpty {
@@ -79,6 +80,9 @@ final class SelectComponent<Value>: ConsoleComponent {
             state.moveDown()
         case .inputEscapeSequence, .tick:
             break
+        }
+        if Task.isCancelled {
+            state.cancel()
         }
     }
 

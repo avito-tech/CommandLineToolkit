@@ -183,30 +183,23 @@ public final class ANSIConsoleHandler: ConsoleHandler {
                     terminal.enableNonBlockingTerminal()
                     defer { terminal.disableNonBlockingTerminal() }
 
-                    do {
-                        repeat {
-                            guard let event = getControlEvent(state: &state) else {
-                                continue
-                            }
-
-                            component.handle(event: event)
-
-                            if component.isVisible {
-                                let renderer = component.renderer()
-                                state.terminalSize = terminal.size
-                                render(component: renderer.render(preferredSize: state.terminalSize), state: &state)
-                            }
-                            
-                            if case .tick = event {
-                                await Task.nonThrowingSleep(nanoseconds: ANSIConsoleHandler.tickDelayNs)
-                            }
-                        } while component.isUnfinished
-                    } catch let error as CancellationError {
-                        if component.isVisible {
-                            finalize(component: component, state: state)
+                    repeat {
+                        guard let event = getControlEvent(state: &state) else {
+                            continue
                         }
-                        throw error
-                    }
+
+                        component.handle(event: event)
+
+                        if component.isVisible {
+                            let renderer = component.renderer()
+                            state.terminalSize = terminal.size
+                            render(component: renderer.render(preferredSize: state.terminalSize), state: &state)
+                        }
+                        
+                        if case .tick = event {
+                            await Task.nonThrowingSleep(nanoseconds: ANSIConsoleHandler.tickDelayNs)
+                        }
+                    } while component.isUnfinished
                 }
 
                 if component.isVisible {

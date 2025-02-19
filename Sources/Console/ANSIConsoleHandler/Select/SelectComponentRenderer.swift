@@ -1,10 +1,19 @@
 struct SelectComponentRenderer<Value>: Renderer {
     func render(state: SelectComponentState<Value>, preferredSize: Size?) -> ConsoleRender {
-        if state.isFinished {
-            return renderFinished(state: state)
-        } else {
+        switch state.result {
+        case nil:
             return renderInProgress(state: state, preferredSize: preferredSize)
+        case .cancelled:
+            return renderCancelled(state: state)
+        case let .selected(values):
+            return renderFinished(state: state, values: values)
         }
+    }
+
+    private func renderCancelled(state: SelectComponentState<Value>) -> ConsoleRender {
+        return .init(
+            lines: ["\(.noBlockSymbol, style: .error) \(state.title, style: .error) \(.cancelSymbol, style: .error)"]
+        )
     }
 
     private func renderInProgress(state: SelectComponentState<Value>, preferredSize: Size?) -> ConsoleRender {
@@ -61,16 +70,12 @@ struct SelectComponentRenderer<Value>: Renderer {
         )
     }
 
-    private func renderFinished(state: SelectComponentState<Value>) -> ConsoleRender {
+    private func renderFinished(state: SelectComponentState<Value>, values: [Selectable<Value>]) -> ConsoleRender {
         let header: ConsoleText = "\(.blockStartSymbol, style: .success) \(state.title, style: .success)"
         let footer: ConsoleText = "\(.blockEndSymbol, style: .success)"
-        let rows: [ConsoleText] = state.selectedIds
-            .compactMap { id in
-                state.valuesIndex[id]
-            }
-            .map { selectable in
-                "\(.blockBorderSymbol, style: .success) \(selectable.title)"
-            }
+        let rows: [ConsoleText] = values.map { selectable in
+            "\(.blockBorderSymbol, style: .success) \(selectable.title)"
+        }
 
         return .init(
             lines: [header] + rows + [footer]

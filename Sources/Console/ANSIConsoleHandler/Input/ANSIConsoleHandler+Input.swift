@@ -5,6 +5,8 @@ extension ANSIConsoleHandler {
         file: StaticString,
         line: UInt
     ) async throws -> String {
+        try Task.checkCancellation()
+
         guard isAtTTY else {
             fatalError("Using input is only allowed at TTY", file: file, line: line)
         }

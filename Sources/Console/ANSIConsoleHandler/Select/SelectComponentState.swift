@@ -45,6 +45,11 @@ struct SelectWindow: Hashable {
 }
 
 struct SelectComponentState<Value>: Hashable {
+    enum SelectionResult: Hashable {
+        case cancelled
+        case selected(values: [Selectable<Value>])
+    }
+
     let title: String
     let values: [Selectable<Value>]
     let valuesIndex: [UUID: Selectable<Value>]
@@ -73,7 +78,11 @@ struct SelectComponentState<Value>: Hashable {
         !search.isEmpty
     }
 
-    var isFinished: Bool = false
+    private(set) var result: SelectionResult?
+    
+    var isFinished: Bool {
+        result != nil
+    }
 
     private(set) var activeIndex: Int = 0 {
         didSet {
@@ -114,6 +123,14 @@ struct SelectComponentState<Value>: Hashable {
             minimum: max(0, min(expectedMinimum, expectedMaximum - (halfWindowSize + halfWindowSize))),
             maximum: min(filteredValues.count - 1, max(expectedMaximum, expectedMinimum + (halfWindowSize + halfWindowSize)))
         )
+    }
+
+    mutating func cancel() {
+        result = .cancelled
+    }
+
+    mutating func confirm() {
+        result = .selected(values: selectedIds.compactMap { valuesIndex[$0] })
     }
 
     mutating func moveUp(count: Int = 1) {
