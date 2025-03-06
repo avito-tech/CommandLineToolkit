@@ -149,7 +149,24 @@ public struct OutputStreaming: ExpressibleByArrayLiteral {
             streams.forEach { $0.finish(status, cancelled) }
         }
     }
-    
+
+    public static var rawOutput: OutputStreaming {
+        let stdoutStream = MessageStream { message in
+            print(message)
+        }
+        let stderrStream = MessageStream { message in
+            print(message)
+        }
+        return OutputStreaming { data in
+            stdoutStream.append(data: data)
+        } stderr: { data in
+            stderrStream.append(data: data)
+        } finish: { _, _ in
+            stdoutStream.flushMessageIfMessageIsNotEmpty()
+            stderrStream.flushMessageIfMessageIsNotEmpty()
+        }
+    }
+
     public static func restream(
         level: Logger.Level = .debug,
         name: String,
