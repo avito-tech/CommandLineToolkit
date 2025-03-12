@@ -1,6 +1,6 @@
 import Foundation
 
-public final class RelativePath:
+public struct RelativePath:
     Path,
     Codable,
     Hashable,

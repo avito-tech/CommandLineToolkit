@@ -1,6 +1,6 @@
 import Foundation
 
-public final class AbsolutePath:
+public struct AbsolutePath:
     Path,
     Codable,
     Hashable,
@@ -109,5 +109,11 @@ public final class AbsolutePath:
     
     private static func pathString<S: StringProtocol>(components: [S]) -> String {
         "/" + components.joined(separator: "/")
+    }
+}
+
+extension AbsolutePath: ExpressibleByStringInterpolation {
+    public init(stringInterpolation: StringInterpolation) {
+        self.init(stringLiteral: stringInterpolation.description)
     }
 }
