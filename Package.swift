@@ -568,6 +568,7 @@ targets.append(
             "PathLib",
             "SignalHandling",
             "Timer",
+            "Tmp",
             .product(name: "Logging", package: "swift-log"),
         ],
         path: "Sources/ProcessController"

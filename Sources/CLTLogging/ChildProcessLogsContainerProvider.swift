@@ -8,7 +8,7 @@ import PathLib
 import Tmp
 
 public protocol ChildProcessLogsContainerProvider {
-    func paths(subprocessName: String) throws -> (stdout: AbsolutePath, stderr: AbsolutePath)
+    func files(subprocessName: String) throws -> (stdout: TemporaryFile, stderr: TemporaryFile)
 }
 
 public final class ChildProcessLogsContainerProviderImpl: ChildProcessLogsContainerProvider {
@@ -23,23 +23,24 @@ public final class ChildProcessLogsContainerProviderImpl: ChildProcessLogsContai
         self.mainContainerPath = mainContainerPath
     }
     
-    public func paths(subprocessName: String) throws -> (stdout: AbsolutePath, stderr: AbsolutePath) {
+    public func files(subprocessName: String) throws -> (stdout: TemporaryFile, stderr: TemporaryFile) {
         let subprocessSpecificContainer = mainContainerPath.appending(
             components: ["subprocesses", subprocessName]
         )
-        let processContainer = try TemporaryFolder(
-            containerPath: subprocessSpecificContainer,
-            prefix: subprocessName,
-            deleteOnDealloc: false
-        ).absolutePath
+        try fileSystem.createDirectory(path: subprocessSpecificContainer, withIntermediateDirectories: true)
+
+        func createLogTemporaryFile(name: String) throws -> TemporaryFile {
+            try TemporaryFile(
+                containerPath: subprocessSpecificContainer,
+                prefix: subprocessName,
+                suffix: ".\(name).log",
+                deleteOnDealloc: false
+            )
+        }
         
-        let stdoutPath = processContainer.appending("stdout.log")
-        let stderrPath = processContainer.appending("stderr.log")
-        
-        try fileSystem.createDirectory(path: processContainer, withIntermediateDirectories: true)
-        try fileSystem.createFile(path: stdoutPath, data: nil)
-        try fileSystem.createFile(path: stderrPath, data: nil)
-        
-        return (stdout: stdoutPath, stderr: stderrPath)
+        return try (
+            stdout: createLogTemporaryFile(name: "stdout"),
+            stderr: createLogTemporaryFile(name: "stderr")
+        )
     }
 }

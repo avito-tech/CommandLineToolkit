@@ -8,15 +8,14 @@ import XCTest
 
 final class LoggableProcessControllerProviderTests: XCTestCase {
     lazy var processControllerProvider = FakeProcessControllerProvider()
-    lazy var tempFolder = assertDoesNotThrow { try TemporaryFolder() }
     
     func test() throws {
-        let stdoutFilePath = try tempFolder.createFile(filename: "stdout")
-        let stderrFilePath = try tempFolder.createFile(filename: "stderr")
+        let stdoutFile = try TemporaryFile()
+        let stderrFile = try TemporaryFile()
         
         let loggableProvider = LoggableProcessControllerProvider(
-            pathProvider: { _ -> (stdout: AbsolutePath, stderr: AbsolutePath) in
-                (stdout: stdoutFilePath, stderr: stderrFilePath)
+            filesProvider: { _ -> (stdout: TemporaryFile, stderr: TemporaryFile) in
+                (stdout: stdoutFile, stderr: stderrFile)
             },
             provider: processControllerProvider
         )
@@ -30,12 +29,12 @@ final class LoggableProcessControllerProviderTests: XCTestCase {
         fakeProcessController.broadcastStderr(data: Data("stderr".utf8))
         
         XCTAssertEqual(
-            try String(contentsOfFile: stdoutFilePath.pathString),
+            try String(contentsOfFile: stdoutFile.absolutePath.pathString),
             "stdout"
         )
         
         XCTAssertEqual(
-            try String(contentsOfFile: stderrFilePath.pathString),
+            try String(contentsOfFile: stderrFile.absolutePath.pathString),
             "stderr"
         )
     }
