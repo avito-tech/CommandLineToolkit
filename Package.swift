@@ -961,7 +961,7 @@ let package = Package(
         .package(url: "https://github.com/IBM-Swift/BlueSignals.git", exact: "1.0.21"),
         .package(url: "https://github.com/Kitura/BlueSocket.git", exact: "1.0.52"),
         .package(url: "https://github.com/Bouke/Glob", exact: "1.0.5"),
-        .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.6"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.6"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.3"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing.git", from: "1.17.4"),
