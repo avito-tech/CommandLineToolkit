@@ -114,11 +114,7 @@ public final class ANSIConsoleHandler: ConsoleHandler {
     }
 
     public var isInteractive: Bool {
-        #if Xcode
-        return false
-        #else
-        return isAtTTY
-        #endif
+        isAtTTY && !ProcessInfo.processInfo.isRunningInXcode
     }
 
     public var verbositySettings: ConsoleVerbositySettings
@@ -531,4 +527,11 @@ struct ConsoleRender {
     }
 
     static let empty: Self = .init(lines: [])
+}
+
+extension ProcessInfo {
+    fileprivate var isRunningInXcode: Bool {
+        // Xcode doesn't set these vars
+        environment["TERM"] == nil && environment["TERM_PROGRAM"] == nil
+    }
 }
