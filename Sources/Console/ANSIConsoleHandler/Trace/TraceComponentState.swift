@@ -30,12 +30,11 @@ public struct TraceOptions: RawRepresentable, OptionSet, Hashable {
 extension TraceOptions: CustomStringConvertible {
     public var description: String {
         let optionNames = [
-            TraceOptions.collapseFinished: "collapseFinished",
-            TraceOptions.countSubtraces: "countSubtraces",
+            (TraceOptions.collapseFinished, "collapseFinished"),
+            (TraceOptions.countSubtraces, "countSubtraces"),
         ]
         
         let optionsString = optionNames
-            .sorted(using: KeyPathComparator(\.value))
             .compactMap { option, name in
                 if self.contains(option) {
                     return name

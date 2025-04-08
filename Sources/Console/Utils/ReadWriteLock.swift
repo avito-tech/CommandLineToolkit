@@ -1,6 +1,10 @@
 // Grabbed implementation from swift-log
 // swiftlint:disable all
+#if os(macOS)
 import Darwin
+#else
+import Glibc
+#endif
 
 /// A reader/writer threading lock based on `libpthread` instead of `libdispatch`.
 ///

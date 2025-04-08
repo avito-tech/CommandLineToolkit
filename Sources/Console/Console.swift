@@ -1,4 +1,3 @@
-import Darwin
 import Logging
 
 /// Console entrypoint, should be used in a manner similar to `Logging.Logger`.

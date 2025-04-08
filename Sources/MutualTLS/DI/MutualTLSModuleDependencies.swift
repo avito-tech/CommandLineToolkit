@@ -1,3 +1,4 @@
+#if os(macOS)
 import DI
 import ProcessController
 import Environment
@@ -22,3 +23,4 @@ public final class MutualTLSModuleDependencies: ModuleDependencies {
         }
     }
 }
+#endif

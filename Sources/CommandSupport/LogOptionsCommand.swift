@@ -13,10 +13,10 @@ public struct LogOptions: ParsableArguments {
     @Flag(name: .shortAndLong, help: "Verbose logging")
     public var verbose: Bool = false
 
-    @Option(help: "\(Logger.Level.allValueStrings.formatted(.list(type: .or)))")
+    @Option(help: "\(Logger.Level.allValueStrings.joined(separator: ", "))")
     public var logLevel: Logger.Level = .info
 
-    @Option(help: "\(LogFormat.allValueStrings.formatted(.list(type: .or)))")
+    @Option(help: "\(LogFormat.allValueStrings.joined(separator: ", "))")
     public var logFormat: LogFormat = .interactive
 
     public init() {}

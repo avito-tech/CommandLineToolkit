@@ -6,6 +6,7 @@ public struct AbsolutePath:
     Hashable,
     Comparable,
     ExpressibleByStringLiteral,
+    ExpressibleByStringInterpolation,
     ExpressibleByArrayLiteral
 {
     // MARK: - Static interface
@@ -109,11 +110,5 @@ public struct AbsolutePath:
     
     private static func pathString<S: StringProtocol>(components: [S]) -> String {
         "/" + components.joined(separator: "/")
-    }
-}
-
-extension AbsolutePath: ExpressibleByStringInterpolation {
-    public init(stringInterpolation: StringInterpolation) {
-        self.init(stringLiteral: stringInterpolation.description)
     }
 }

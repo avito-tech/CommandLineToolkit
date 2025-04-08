@@ -2,6 +2,12 @@ import Foundation
 import PathLib
 
 struct PEM {
+    struct DecodingError: Error {
+        var description: String {
+            "Failed to decode pem"
+        }
+    }
+
     let contents: String
 
     init(contents: String) {
@@ -20,7 +26,7 @@ struct PEM {
             .replacingOccurrences(of: "\n", with: "")
 
         guard let derData = Data(base64Encoded: derString) else {
-            throw "Failed to decode pem"
+            throw DecodingError()
         }
 
         return .init(data: derData)

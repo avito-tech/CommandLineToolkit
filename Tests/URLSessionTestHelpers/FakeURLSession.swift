@@ -11,6 +11,12 @@ public final class FakeURLSession: URLSession {
     let session = URLSession.shared
     
     public var providedDownloadTasks = [FakeDownloadTask]()
+
+#if os(Linux)
+    public convenience init() {
+        self.init(configuration: .default)
+    }
+#endif
     
     override public func downloadTask(with request: URLRequest, completionHandler: @escaping (URL?, URLResponse?, Error?) -> ()) -> URLSessionDownloadTask {
         let task = FakeDownloadTask(

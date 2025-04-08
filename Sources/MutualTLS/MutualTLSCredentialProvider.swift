@@ -1,3 +1,4 @@
+#if os(macOS)
 import ProcessController
 import Foundation
 import PathLib
@@ -102,3 +103,4 @@ private extension EnvironmentKey {
         .path("IOS_BUILD_MACHINE_TLS_CLIENT_CERT")
     }
 }
+#endif

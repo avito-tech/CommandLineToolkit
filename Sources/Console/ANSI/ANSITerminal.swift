@@ -1,4 +1,8 @@
+#if os(macOS)
 import Darwin
+#else
+import Glibc
+#endif
 import SignalHandling
 
 extension String {
@@ -118,7 +122,7 @@ public final class ANSITerminal {
 
     private func getSize() -> Size {
         var winsz = winsize()
-        _ = ioctl(0, TIOCGWINSZ, &winsz)
+        _ = ioctl(0, UInt(TIOCGWINSZ), &winsz)
         return Size(rows: Int(winsz.ws_row), cols: Int(winsz.ws_col))
     }
 }

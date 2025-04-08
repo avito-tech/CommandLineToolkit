@@ -1,4 +1,8 @@
+#if os(macOS)
 import Darwin
+#else
+import Glibc
+#endif
 
 /// A wrapper to facilitate `print`-ing to stderr and stdio that
 /// ensures access to the underlying `FILE` is locked to prevent
@@ -26,8 +30,13 @@ struct StdioOutputStream: TextOutputStream {
         _ = fflush(self.file)
     }
 
+#if os(macOS)
     static let stderr = StdioOutputStream(file: Darwin.stderr, flushMode: .always)
     static let stdout = StdioOutputStream(file: Darwin.stdout, flushMode: .always)
+#else
+    static let stderr = StdioOutputStream(file: Glibc.stderr, flushMode: .always)
+    static let stdout = StdioOutputStream(file: Glibc.stdout, flushMode: .always)
+#endif
 
     /// Defines the flushing strategy for the underlying stream.
     enum FlushMode {
