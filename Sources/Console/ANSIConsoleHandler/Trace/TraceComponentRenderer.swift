@@ -1,13 +1,17 @@
 import Foundation
 
 struct TraceComponentRenderer<Value>: Renderer {
+    typealias TraceState = TraceComponentState<Value>
+
     struct State {
         var childrenRenderers: [AnyRenderer<Void>]
         var progressOverride: Progress?
-        var traceState: TraceComponentState<Value>
+        var traceState: TraceState
     }
     
     let progressBarWidth = 16
+
+    let clock: TraceClock
 
     func render(state: State, preferredSize: Size?) -> ConsoleRender {
         let borderStyle = ConsoleStyle.from(state: state.traceState.operationState)
@@ -59,17 +63,16 @@ struct TraceComponentRenderer<Value>: Renderer {
         )
     }
 
-    private func executionTime(state: TraceComponentState<Value>, style: ConsoleStyle) -> ConsoleText {
+    private func executionTime(state: TraceState, style: ConsoleStyle) -> ConsoleText {
         guard let start = state.startTime else { return "" }
-        let end = state.endTime ?? CFAbsoluteTimeGetCurrent()
+        let end = state.endTime ?? clock.now
 
-        let duration = end - start
-        let interval = String(format: "%0.3f sec", duration)
+        let interval = start.duration(to: end).render()
         return " \(interval, style: style)"
     }
 
     private func renderHeader(
-        state: TraceComponentState<Value>,
+        state: TraceState,
         inBlock: Bool,
         preferredSize: Size?,
         progressOverride: Progress?
@@ -144,4 +147,16 @@ private extension ConsoleStyle {
             return .plain
         }
     }
+}
+
+extension Duration {
+#if os(macOS)
+    fileprivate func render() -> String {
+        formatted(.time(pattern: .minuteSecond(padMinuteToLength: 0)))
+    }
+#else
+    fileprivate func render() -> String {
+        "\(self)"
+    }
+#endif
 }

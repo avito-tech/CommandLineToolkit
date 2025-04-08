@@ -19,12 +19,16 @@ extension TraceComponent where Value == Void {
     }
     
     private convenience init(level: Logger.Level, options: TraceOptions, result: Result<Void, Error>? = nil, @TraceTreeBuilder children: () -> [any ConsoleComponent] = { [] }) {
-        self.init(parent: nil, state: .init(
-            level: level,
-            name: "Test \(level) trace, options: \(options)",
-            options: options,
-            operationState: result.map(TraceOperationState.finished) ?? .started
-        ))
+        self.init(
+            parent: nil,
+            state: .init(
+                level: level,
+                name: "Test \(level) trace, options: \(options)",
+                options: options,
+                operationState: result.map(TraceOperationState.finished) ?? .started
+            ),
+            clock: .init()
+        )
         
         children().forEach { child in
             self.add(child: child)

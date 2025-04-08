@@ -31,7 +31,8 @@ extension ANSIConsoleHandler {
 
         let component = TraceComponent<Value>(
             parent: ConsoleContext.current.activeContainer,
-            state: .init(level: level, name: name, options: options)
+            state: .init(level: level, name: name, options: options),
+            clock: .init()
         )
 
         guard isInteractive else {

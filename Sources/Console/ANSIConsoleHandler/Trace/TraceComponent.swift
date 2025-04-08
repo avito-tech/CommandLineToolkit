@@ -3,6 +3,8 @@ import Logging
 import AtomicModels
 
 final class TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
+    typealias ComponentState = TraceComponentState<Value>
+
     @AtomicValue
     var parent: ContainerConsoleComponent?
 
@@ -10,7 +12,9 @@ final class TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
     var children: [any ConsoleComponent]
     
     @AtomicValue
-    var state: TraceComponentState<Value>
+    var state: ComponentState
+
+    private let clock: TraceClock
 
     func add(child: any ConsoleComponent) {
         children.append(child)
@@ -22,12 +26,14 @@ final class TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
 
     init(
         parent: ContainerConsoleComponent?,
-        state: TraceComponentState<Value>,
-        children: [any ConsoleComponent] = []
+        state: ComponentState,
+        children: [any ConsoleComponent] = [],
+        clock: TraceClock
     ) {
         self.parent = parent
         self.state = state
         self.children = children
+        self.clock = clock
     }
 
     var result: Result<Value, Error>? {
@@ -69,9 +75,9 @@ final class TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
 
         switch operationState {
         case .started:
-            state.startTime = CFAbsoluteTimeGetCurrent()
+            state.startTime = clock.now
         case .finished:
-            state.endTime = CFAbsoluteTimeGetCurrent()
+            state.endTime = clock.now
         default:
             break
         }
@@ -90,7 +96,7 @@ final class TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
         }
     }
 
-    private func childrenRenderers(state: TraceComponentState<Value>) -> [AnyRenderer<Void>] {
+    private func childrenRenderers(state: ComponentState) -> [AnyRenderer<Void>] {
         let result: [AnyRenderer<Void>]
         
         if state.options.contains(.collapseFinished) {
@@ -119,7 +125,7 @@ final class TraceComponent<Value>: ConsoleComponent, ContainerConsoleComponent {
             progressOverride = nil
         }
 
-        return TraceComponentRenderer().withState(state: .init(
+        return TraceComponentRenderer(clock: clock).withState(state: .init(
             childrenRenderers: childrenRenderers,
             progressOverride: progressOverride,
             traceState: state

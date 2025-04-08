@@ -54,8 +54,8 @@ struct TraceComponentState<Value> {
     var name: String
     var options: TraceOptions
     var operationState: TraceOperationState<Value>?
-    var startTime: CFAbsoluteTime?
-    var endTime: CFAbsoluteTime?
+    var startTime: TraceClock.Instant?
+    var endTime: TraceClock.Instant?
     var frame: Int = 0
     var frames: [String] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
 }
