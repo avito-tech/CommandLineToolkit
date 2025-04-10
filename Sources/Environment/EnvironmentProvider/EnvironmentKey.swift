@@ -103,6 +103,10 @@ public extension EnvironmentKey where Value == String {
     static var linterConfigurationPath: Self {
         .string("LINTER_CONFIGURATION_PATH")
     }
+    
+    static var User: Self {
+        .string("USER")
+    }
 }
 
 public extension EnvironmentKey where Value == Int {
