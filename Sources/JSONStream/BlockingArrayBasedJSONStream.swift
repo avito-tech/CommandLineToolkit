@@ -3,19 +3,20 @@ import Dispatch
 import Foundation
 
 public final class BlockingArrayBasedJSONStream: AppendableJSONStream {
-    private let readLock = NSLock()
+    private let lock = NSLock()
     private let writeLock = DispatchSemaphore(value: 0)
     
-    private let storage = AtomicValue<[UInt8]>([])
+    private var storage = [UInt8]()
     
     private var willProvideMoreData = true
     
     public init() {}
     
     public func append(bytes: [UInt8]) {
-        storage.withExclusiveAccess {
-            $0.insert(contentsOf: bytes.reversed(), at: 0)
-        }
+        lock.lock()
+        defer { lock.unlock() }
+
+        storage.insert(contentsOf: bytes.reversed(), at: 0)
         onNewData()
     }
     
@@ -30,30 +31,33 @@ public final class BlockingArrayBasedJSONStream: AppendableJSONStream {
     }
     
     public func close() {
+        lock.lock()
+        defer { lock.unlock() }
+
         willProvideMoreData = false
         onStreamClose()
     }
     
     private func lastByte(delete: Bool) -> UInt8? {
-        readLock.lock()
-        defer {
-            readLock.unlock()
-        }
-        
-        if storage.currentValue().isEmpty {
+        lock.lock()
+        if storage.isEmpty {
             if willProvideMoreData {
+                lock.unlock()
+                // It stil may suffer from data races in the edge case of closing this stream
+                // TODO: use conditiona variable
                 waitForNewDataOrStreamCloseEvent()
+                lock.lock()
             } else {
+                lock.unlock()
                 return nil
             }
         }
         
-        return storage.withExclusiveAccess {
-            if delete {
-                return $0.popLast()
-            } else {
-                return $0.last
-            }
+        defer { lock.unlock() }
+        if delete {
+            return storage.popLast()
+        } else {
+            return storage.last
         }
     }
     
