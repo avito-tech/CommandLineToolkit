@@ -179,7 +179,7 @@ public final class DefaultProcessController: ProcessController, CustomStringConv
                 }
                 listenerWrapper.listener(strongSelf, signal, unsubscriber)
             }
-            kill(-strongSelf.processId, signal)
+            kill(strongSelf.processId, signal)
         }
     }
     
