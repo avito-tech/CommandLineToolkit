@@ -19,7 +19,7 @@ struct MockLogSink: LogSink {
 
     }
 
-    func append(lines: [String]) {
+    func replace(line: String) {
 
     }
 

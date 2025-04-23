@@ -37,8 +37,13 @@ final class LogStreamComponent: ConsoleComponent {
             .withState(state: state)
     }
 
-    func append(lines: [String]) {
-        state.lines.append(contentsOf: lines)
+    func append(line: String) {
+        state.lines.append(line)
+    }
+
+    func replace(line: String) {
+        state.lines.removeLast()
+        state.lines.append(line)
     }
 
     func finish(result: Result<Void, LogStreamError>, cancelled: Bool) {
@@ -49,7 +54,7 @@ final class LogStreamComponent: ConsoleComponent {
 
 public protocol LogSink {
     func append(line: String)
-    func append(lines: [String])
+    func replace(line: String)
     func finish(result: Result<Void, LogStreamError>, cancelled: Bool)
 }
 
@@ -67,11 +72,11 @@ final class ComponentLogSink: LogSink {
     }
 
     func append(line: String) {
-        component.append(lines: [line])
+        component.append(line: line)
     }
 
-    func append(lines: [String]) {
-        component.append(lines: lines)
+    func replace(line: String) {
+        component.replace(line: line)
     }
 
     func finish(result: Result<Void, LogStreamError>, cancelled: Bool) {
@@ -83,7 +88,7 @@ struct NoOpLogSink: LogSink {
     func append(line: String) {
     }
 
-    func append(lines: [String]) {
+    func replace(line: String) {
     }
 
     func finish(result: Result<Void, LogStreamError>, cancelled: Bool) {
@@ -106,8 +111,8 @@ struct LogHandlerSink: LogSink {
         )
     }
     
-    func append(lines: [String]) {
-        lines.forEach(self.append(line:))
+    func replace(line: String) {
+        append(line: line)
     }
     
     func finish(result: Result<Void, LogStreamError>, cancelled: Bool) {

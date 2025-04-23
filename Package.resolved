@@ -75,10 +75,10 @@
     {
       "identity" : "yams",
       "kind" : "remoteSourceControl",
-      "location" : "ssh://git@stash.msk.avito.ru:7999/iedm/Yams.git",
+      "location" : "https://github.com/jpsim/Yams.git",
       "state" : {
-        "revision" : "9ff1cc9327586db4e0c8f46f064b6a82ec1566fa",
-        "version" : "4.0.6"
+        "revision" : "b4b8042411dc7bbb696300a34a4bf3ba1b7ad19b",
+        "version" : "5.3.1"
       }
     }
   ],

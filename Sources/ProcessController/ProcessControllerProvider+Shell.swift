@@ -153,8 +153,12 @@ public struct OutputStreaming: ExpressibleByArrayLiteral {
     public static var rawOutput: OutputStreaming {
         let stdoutStream = MessageStream { message in
             print(message)
+        } replaceLine: { message in
+            print(message)
         }
         let stderrStream = MessageStream { message in
+            print(message)
+        } replaceLine: { message in
             print(message)
         }
         return OutputStreaming { data in
@@ -180,9 +184,13 @@ public struct OutputStreaming: ExpressibleByArrayLiteral {
         
         let stdoutStream = MessageStream { message in
             sink.append(line: message)
+        } replaceLine: { message in
+            sink.replace(line: message)
         }
         let stderrStream = MessageStream { message in
             sink.append(line: message)
+        } replaceLine: { message in
+            sink.replace(line: message)
         }
         
         return Console.withEscapingContext { continuation in
@@ -208,54 +216,37 @@ public struct OutputStreaming: ExpressibleByArrayLiteral {
 
 private struct MessageStream {
     @AtomicValue
-    private var stringStream = ""
-    private let flushMessage: (String) -> ()
-    
+    private var stringStream: Substring = ""
+
+    @AtomicValue
+    private var lastControlCharacter: Character = "\n"
+
+    private let addLine: (String) -> ()
+    private let replaceLine: (String) -> ()
+
     init(
-        flushMessage: @escaping (String) -> ()
+        addLine: @escaping (String) -> (),
+        replaceLine: @escaping (String) -> ()
     ) {
-        self.flushMessage = flushMessage
+        self.addLine = addLine
+        self.replaceLine = replaceLine
     }
     
     func append(data: Data) {
-        let stringComponents = Array(
-            string(data: data).split(
-                omittingEmptySubsequences: false,
-                whereSeparator: { $0 == "\n" }
-            ).map { String($0) } // Unfortunately, `Logger` doesn't work with substrings, and it is easier anyway to just use strings
-        )
-        
-        if stringComponents.isEmpty {
-            // Impossible case for result of split, not worth properly handling like throwing and error
-            flushMessage("String components count of the result of split is: \(stringComponents.count). This case has to be impossible, or something is horribly wrong.")
-        } else if stringComponents.count == 1 {
-            // String is not split into components by new line => Data has no new line, can't log it,
-            // because we don't want to have extra newlines when there aren't newlines in `data`
-            let singleComponent = stringComponents[0]
-            stringStream += singleComponent
-        } else {
-            // stringComponents.count >= 1
-            
-            // Flush buffer with new component, as it has corresponding newline character
-            let firstComponent = stringComponents[0]
-            stringStream.append(firstComponent)
-            flushMessageAndClearStringStream()
-            
-            // For every component with new line, flush it and don't use buffer
-            if stringComponents.count > 2 {
-                for index in 1..<(stringComponents.count - 1) {
-                    let intermediateComponent = stringComponents[index]
-                    flushMessage(intermediateComponent)
-                }
-            }
-            
-            // Last component has no corresponding newline character and needs to be added to buffer
-            if stringComponents.count > 1 {
-                let lastComponent = stringComponents[stringComponents.count - 1]
-                
-                stringStream.append(lastComponent)
-            }
+        var dataString = stringStream + string(data: data)[...]
+
+        while let firstControlCharacterIndex = firstControlCharacterIndex(for: dataString) {
+            let message = String(dataString[..<firstControlCharacterIndex])
+            flushMessage(message)
+            lastControlCharacter = dataString[firstControlCharacterIndex]
+            dataString = dataString[dataString.index(after: firstControlCharacterIndex)...]
         }
+
+        stringStream = dataString
+    }
+
+    private func firstControlCharacterIndex(for substring: Substring) -> String.Index? {
+        substring.firstIndex { $0 == "\n" || $0 == "\r" }
     }
     
     func flushMessageIfMessageIsNotEmpty() {
@@ -265,8 +256,19 @@ private struct MessageStream {
     }
     
     private func flushMessageAndClearStringStream() {
-        flushMessage(stringStream)
+        flushMessage(String(stringStream))
         stringStream = ""
+    }
+
+    private func flushMessage(_ message: String) {
+        switch lastControlCharacter {
+        case "\n":
+            addLine(message)
+        case "\r":
+            replaceLine(message)
+        default:
+            addLine(message)
+        }
     }
     
     private func string(data: Data) -> String {

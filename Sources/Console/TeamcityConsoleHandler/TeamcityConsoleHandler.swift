@@ -206,10 +206,8 @@ private struct TeamcityLogSink: LogSink {
         log(line)
     }
 
-    func append(lines: [String]) {
-        for line in lines {
-            log(line)
-        }
+    func replace(line: String) {
+        append(line: line)
     }
 
     func finish(result: Result<Void, LogStreamError>, cancelled: Bool) {
