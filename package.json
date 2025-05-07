@@ -82,7 +82,8 @@
       "FoundationNetworking",
       "Glibc",
       "Network",
-      "XCTest"
+      "XCTest",
+      "System"
     ]
   },
   "name" : "CommandLineToolkit",

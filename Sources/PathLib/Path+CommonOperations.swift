@@ -1,4 +1,5 @@
 import Foundation
+import System
 
 extension Path {
     public init(_ fileUrl: URL) {
@@ -129,5 +130,11 @@ extension Path {
     
     public init(stringLiteral: String) {
         self.init(stringLiteral)
+    }
+}
+
+extension FilePath {
+    public init(_ path: Path) {
+        self.init(stringLiteral: path.pathString)
     }
 }
