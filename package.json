@@ -4,7 +4,7 @@
         "BlueSignals": {
             "url": "https://github.com/IBM-Swift/BlueSignals.git",
             "version": {
-                "exact": "1.0.21"
+                "from": "1.0.21"
             },
             "targetNames": [
                 "Signals"
@@ -23,7 +23,7 @@
         "Glob": {
             "url": "https://github.com/Bouke/Glob",
             "version": {
-                "exact": "1.0.5"
+                "from": "1.0.5"
             },
             "targetNames": [
                 "Glob"
@@ -50,7 +50,7 @@
         "BlueSocket": {
             "url": "https://github.com/Kitura/BlueSocket.git",
             "version": {
-                "exact": "1.0.52"
+                "from": "1.0.52"
             },
             "targetNames": [
                 "Socket"
@@ -68,7 +68,7 @@
         "Alamofire": {
             "url": "https://github.com/Alamofire/Alamofire",
             "version": {
-              "exact": "5.5.0"
+              "from": "5.5.0"
             },
             "targetNames": [
               "Alamofire"
