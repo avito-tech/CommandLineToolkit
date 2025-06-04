@@ -2,6 +2,7 @@ import PathLib
 
 public protocol ImageValidator {
     func validateFormat(path: AbsolutePath) -> FormatValidationResult
+    func validateSize(path: AbsolutePath) -> SizeValidationResult
     func validatePathToRemove(path: AbsolutePath) -> RemovingValidationResult
 }
 
@@ -19,6 +20,16 @@ public enum FormatValidationResult: Equatable {
             return true
         }
         return false
+    }
+}
+
+public enum SizeValidationResult: Equatable {
+    case success
+    case error(Error)
+    
+    public enum Error: Equatable {
+        case isNotFile
+        case tooLarge(String)
     }
 }
 
