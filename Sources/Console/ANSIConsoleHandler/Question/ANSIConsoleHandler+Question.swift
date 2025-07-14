@@ -5,6 +5,7 @@ extension ANSIConsoleHandler {
     ///   - defaultAnswer: default answer, yser can just hit enter
     /// - Returns: boolean answer
     public func question(
+        id: String?,
         title: String,
         defaultAnswer: Bool,
         help: String?,

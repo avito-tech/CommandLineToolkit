@@ -55,12 +55,14 @@ extension Console {
 
 extension Console {
     public func input(
+        id: String? = nil,
         title: String,
         defaultValue: String? = nil,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws -> String {
         return try await handler.input(
+            id: id,
             title: title,
             defaultValue: defaultValue,
             file: file,
@@ -73,6 +75,7 @@ extension Console {
 
 extension Console {
     public func question(
+        id: String? = nil,
         title: String,
         defaultAnswer: Bool = true,
         help: String? = nil,
@@ -80,6 +83,7 @@ extension Console {
         line: UInt = #line
     ) async throws -> Bool {
         return try await handler.question(
+            id: id,
             title: title,
             defaultAnswer: defaultAnswer,
             help: help,
@@ -103,6 +107,7 @@ extension Console {
     ///   - options: possible selection options
     /// - Returns: array of selected values
     public func select<Value>(
+        id: String? = nil,
         title: String,
         values: [Selectable<Value>],
         minSelections: Int = 1,
@@ -112,13 +117,14 @@ extension Console {
         line: UInt = #line
     ) async throws -> [Value] {
         try await handler.select(
+            id: id,
             title: title,
             values: values,
             mode: .multiple(min: minSelections, max: maxSelections),
             options: options,
             file: file,
             line: line
-        )
+        ).map { $0.value }
     }
 
     /// Select values from a list
@@ -128,6 +134,7 @@ extension Console {
     ///   - options: possible selection options
     /// - Returns: array of selected values
     public func select<Value: CustomStringConvertible>(
+        id: String? = nil,
         title: String,
         values: [Value],
         minSelections: Int = 1,
@@ -137,13 +144,14 @@ extension Console {
         line: UInt = #line
     ) async throws -> [Value] {
         return try await handler.select(
+            id: id,
             title: title,
             values: values.map { .init(title: $0.description, value: $0) },
             mode: .multiple(min: minSelections, max: maxSelections),
             options: options,
             file: file,
             line: line
-        )
+        ).map { $0.value }
     }
 
     /// Select one value from a list
@@ -152,6 +160,7 @@ extension Console {
     ///   - values: list of possible values
     /// - Returns: selected value
     public func selectOne<Value>(
+        id: String? = nil,
         title: String,
         values: [Selectable<Value>],
         options: SelectionOptions = .init(),
@@ -159,6 +168,7 @@ extension Console {
         line: UInt = #line
     ) async throws -> Value {
         let selections = try await handler.select(
+            id: id,
             title: title,
             values: values,
             mode: .single,
@@ -171,7 +181,7 @@ extension Console {
             throw SelectionError.nothingSelected
         }
 
-        return selection
+        return selection.value
     }
 
     /// Select one value from a list
@@ -180,6 +190,7 @@ extension Console {
     ///   - values: list of possible values
     /// - Returns: selected value
     public func selectOne<Value: CustomStringConvertible>(
+        id: String? = nil,
         title: String,
         values: [Value],
         options: SelectionOptions = .init(),
@@ -187,6 +198,7 @@ extension Console {
         line: UInt = #line
     ) async throws -> Value {
         return try await selectOne(
+            id: id,
             title: title,
             values: values.map { .init(title: $0.description, value: $0) },
             options: options,
@@ -212,6 +224,7 @@ extension Console {
     @discardableResult
     public func trace<Value: Sendable>(
         level: Logger.Level = .info,
+        id: String? = nil,
         name: String,
         options: TraceOptions = [],
         file: StaticString = #file,
@@ -220,6 +233,7 @@ extension Console {
     ) async throws -> Value {
         try await handler.trace(
             level: level,
+            id: id,
             name: name,
             options: options,
             file: file,
@@ -239,6 +253,7 @@ extension Console {
     @discardableResult
     public func trace<Value: Sendable>(
         level: Logger.Level = .info,
+        id: String? = nil,
         name: String,
         options: TraceOptions = [],
         file: StaticString = #file,
@@ -247,6 +262,7 @@ extension Console {
     ) async throws -> Value {
         try await handler.trace(
             level: level,
+            id: id,
             name: name,
             options: options,
             file: file,
@@ -294,7 +310,7 @@ extension Console {
     ///   }
     /// }
     /// ```
-    /// 
+    ///
     /// - Parameter operation: Operation to be ran with captured `ConsoleContext`
     /// - Returns: Value returned by operation
     public static func withEscapingContext<Value>(_ operation: (ContextContinuation) throws -> Value) rethrows -> Value {

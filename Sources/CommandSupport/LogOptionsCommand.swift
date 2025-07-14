@@ -68,7 +68,9 @@ extension ParsableCommand {
         switch logOptions.logFormat {
         case .interactive:
             ConsoleSystem.bootstrap {
-                ANSIConsoleHandler(verbositySettings: .init(logLevel: logLevel, verbose: logOptions.verbose), backing: config.consoleBacking)
+                TrackingConsoleHandler(
+                    upstream: ANSIConsoleHandler(verbositySettings: .init(logLevel: logLevel, verbose: logOptions.verbose), backing: config.consoleBacking)
+                )
             }
             systemLogHandlerFactory = { label in
                 [ConsoleLogHandler(label: label)] + config.additionalSystem
@@ -79,10 +81,12 @@ extension ParsableCommand {
                 let messageRenderer = try DiContext.current.resolve() as TeamcityMessageRenderer
 
                 ConsoleSystem.bootstrap {
-                    TeamcityConsoleHandler(
-                        verbositySettings: .init(logLevel: logLevel, verbose: logOptions.verbose),
-                        messageGenerator: messageGenerator,
-                        messageRenderer: messageRenderer
+                    TrackingConsoleHandler(
+                        upstream: TeamcityConsoleHandler(
+                            verbositySettings: .init(logLevel: logLevel, verbose: logOptions.verbose),
+                            messageGenerator: messageGenerator,
+                            messageRenderer: messageRenderer
+                        )
                     )
                 }
                 systemLogHandlerFactory = { label in

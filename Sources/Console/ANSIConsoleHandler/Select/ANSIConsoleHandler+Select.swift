@@ -8,13 +8,14 @@ extension ANSIConsoleHandler {
     ///   - options: possible selection options
     /// - Returns: array of selected values
     public func select<Value>(
+        id: String?,
         title: String,
         values: [Selectable<Value>],
         mode: SelectionMode,
         options: SelectionOptions,
         file: StaticString,
         line: UInt
-    ) async throws -> [Value] {
+    ) async throws -> [Selectable<Value>] {
         try Task.checkCancellation()
 
         guard isAtTTY else {
@@ -38,7 +39,7 @@ extension ANSIConsoleHandler {
         title: String,
         values: [Selectable<Value>],
         options: SelectionOptions = .init()
-    ) throws -> [Value] {
+    ) throws -> [Selectable<Value>] {
         let indent = indentString()
         terminal.writeln(indent, "\(title) (comma separated string)")
         for (offset, value) in values.enumerated() {
@@ -55,6 +56,6 @@ extension ANSIConsoleHandler {
 
         terminal.writeln(indent, "Selected: \(selectedValues.map(\.title).joined(separator: ", "))")
 
-        return selectedValues.map(\.value)
+        return selectedValues
     }
 }

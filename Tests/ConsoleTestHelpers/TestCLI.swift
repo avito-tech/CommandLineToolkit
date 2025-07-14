@@ -39,6 +39,7 @@ public final class MockCLIHandler: ConsoleHandler {
     public var traceProgressUpdates: [String: [Progress]] = [:]
     public func trace<Value>(
         level: Logger.Level,
+        id: String?,
         name: String,
         options: TraceOptions,
         file: StaticString,
@@ -50,14 +51,15 @@ public final class MockCLIHandler: ConsoleHandler {
 
     public var selectionResults: [String: [Any]] = [:]
     public func select<Value>(
+        id: String?,
         title: String,
         values: [Selectable<Value>],
         mode: SelectionMode,
         options: SelectionOptions,
         file: StaticString,
         line: UInt
-    ) async throws -> [Value] {
-        guard let selection = selectionResults[title] as? [Value] else {
+    ) async throws -> [Selectable<Value>] {
+        guard let selection = selectionResults[title] as? [Selectable<Value>] else {
             throw MockCLIError.noStubbedInput(title: title)
         }
         return selection
@@ -65,6 +67,7 @@ public final class MockCLIHandler: ConsoleHandler {
 
     public var inputs: [String: String] = [:]
     public func input(
+        id: String?,
         title: String,
         defaultValue: String?,
         file: StaticString,
@@ -78,6 +81,7 @@ public final class MockCLIHandler: ConsoleHandler {
 
     public var questionAnswers: [String: Bool] = [:]
     public func question(
+        id: String?,
         title: String,
         defaultAnswer: Bool,
         help: String?,

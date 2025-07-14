@@ -10,14 +10,14 @@ final class SelectComponent<Value>: ConsoleComponent {
         self.state = state
     }
 
-    var result: Result<[Value], Error>? {
+    var result: Result<[Selectable<Value>], Error>? {
         switch state.result {
         case nil:
             return nil
         case .cancelled:
             return .failure(CancellationError())
         case let .selected(values):
-            return .success(values.map(\.value))
+            return .success(values)
         }
     }
 

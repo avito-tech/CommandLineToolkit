@@ -45,6 +45,7 @@ public final class TeamcityConsoleHandler: ConsoleHandler {
     }
 
     public func input(
+        id: String?,
         title: String,
         defaultValue: String?,
         file: StaticString,
@@ -54,6 +55,7 @@ public final class TeamcityConsoleHandler: ConsoleHandler {
     }
     
     public func question(
+        id: String?,
         title: String,
         defaultAnswer: Bool,
         help: String?,
@@ -64,18 +66,20 @@ public final class TeamcityConsoleHandler: ConsoleHandler {
     }
     
     public func select<Value>(
+        id: String?,
         title: String,
         values: [Selectable<Value>],
         mode: SelectionMode,
         options: SelectionOptions,
         file: StaticString,
         line: UInt
-    ) async throws -> [Value] {
+    ) async throws -> [Selectable<Value>] {
         throw ConsoleError(reason: .unsupportedOperation, file: file, line: line)
     }
     
     public func trace<Value: Sendable>(
         level: Logging.Logger.Level,
+        id: String?,
         name: String,
         options: TraceOptions,
         file: StaticString,

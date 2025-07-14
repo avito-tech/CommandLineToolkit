@@ -1,5 +1,6 @@
 extension ANSIConsoleHandler {
     public func input(
+        id: String?,
         title: String,
         defaultValue: String? = nil,
         file: StaticString,

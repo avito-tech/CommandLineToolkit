@@ -12,6 +12,7 @@ public protocol ConsoleHandler {
     ///   - defaultValue: default value, user can hit enter to select it
     /// - Returns: User's input
     func input(
+        id: String?,
         title: String,
         defaultValue: String?,
         file: StaticString,
@@ -24,6 +25,7 @@ public protocol ConsoleHandler {
     ///   - defaultAnswer: default answer, yser can just hit enter
     /// - Returns: boolean answer
     func question(
+        id: String?,
         title: String,
         defaultAnswer: Bool,
         help: String?,
@@ -38,13 +40,14 @@ public protocol ConsoleHandler {
     ///   - options: possible selection options
     /// - Returns: array of selected values
     func select<Value>(
+        id: String?,
         title: String,
         values: [Selectable<Value>],
         mode: SelectionMode,
         options: SelectionOptions,
         file: StaticString,
         line: UInt
-    ) async throws -> [Value]
+    ) async throws -> [Selectable<Value>]
 
     /// Runs a chunk of work in a separate Console trace
     ///
@@ -58,6 +61,7 @@ public protocol ConsoleHandler {
     /// - Returns: Value returned form `work` closure
     func trace<Value: Sendable>(
         level: Logger.Level,
+        id: String?,
         name: String,
         options: TraceOptions,
         file: StaticString,

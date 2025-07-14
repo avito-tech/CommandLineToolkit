@@ -21,6 +21,7 @@ extension ANSIConsoleHandler {
     @discardableResult
     public func trace<Value: Sendable>(
         level: Logger.Level,
+        id: String?,
         name: String,
         options: TraceOptions,
         file: StaticString,

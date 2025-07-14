@@ -1,1 +1,1 @@
-typealias TraceClock = ContinuousClock
+public typealias TraceClock = ContinuousClock
