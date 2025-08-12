@@ -531,7 +531,6 @@ struct ConsoleRender {
 
 extension ProcessInfo {
     fileprivate var isRunningInXcode: Bool {
-        // Xcode doesn't set these vars
         environment["__XCODE_BUILT_PRODUCTS_DIR_PATHS"] != nil
     }
 }
