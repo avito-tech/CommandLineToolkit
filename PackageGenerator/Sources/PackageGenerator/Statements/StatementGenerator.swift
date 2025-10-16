@@ -265,8 +265,8 @@ public final class StatementGenerator {
     
     private func defaultMirrorsFilePathIfExists(generatablePackage: GeneratablePackage) -> String? {
         let allDirectoriesFromPackageToRoot = sequence(first: generatablePackage.location.standardizedFileURL) {
-            let next = $0.deletingLastPathComponent()
-            return next == URL(fileURLWithPath: "/..", isDirectory: true) ? nil : next
+            guard $0 != URL(fileURLWithPath: "/", isDirectory: true) else { return nil }
+            return $0.deletingLastPathComponent()
         }
         
         let defaultMirrorsFilePath = allDirectoriesFromPackageToRoot
