@@ -1,5 +1,7 @@
 import Foundation
+#if canImport(System)
 import System
+#endif
 
 extension Path {
     public init(_ fileUrl: URL) {
@@ -133,8 +135,10 @@ extension Path {
     }
 }
 
+#if canImport(System)
 extension FilePath {
     public init(_ path: Path) {
         self.init(stringLiteral: path.pathString)
     }
 }
+#endif
