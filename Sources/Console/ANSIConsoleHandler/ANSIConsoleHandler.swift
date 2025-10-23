@@ -104,17 +104,25 @@ public final class ANSIConsoleHandler: ConsoleHandler {
     /// Tick delay in nanoseconds
     static let tickDelayNs: UInt64 = tickDelayMs * 1_000_000
 
+    static let isAtTTY: Bool = {
+        isatty(STDOUT_FILENO) > 0 && isatty(STDIN_FILENO) > 0
+    }()
+
+    static let isInteractive: Bool = {
+        isAtTTY && !ProcessInfo.processInfo.isRunningInXcode && ProcessInfo.processInfo.isTermDefined
+    }()
+
     /// Backing log handler for all messages.
     let backing: LogHandler?
     
     let terminal: ANSITerminal
 
     public var isAtTTY: Bool {
-        return isatty(STDOUT_FILENO) > 0
+        Self.isAtTTY
     }
 
     public var isInteractive: Bool {
-        isAtTTY && !ProcessInfo.processInfo.isRunningInXcode
+        Self.isInteractive
     }
 
     public var verbositySettings: ConsoleVerbositySettings
@@ -532,5 +540,9 @@ struct ConsoleRender {
 extension ProcessInfo {
     fileprivate var isRunningInXcode: Bool {
         environment["__XCODE_BUILT_PRODUCTS_DIR_PATHS"] != nil
+    }
+
+    fileprivate var isTermDefined: Bool {
+        environment["TERM"] ?? "dumb" != "dumb"
     }
 }
