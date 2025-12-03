@@ -47,6 +47,7 @@ public final class LazySocketConnection {
         do {
             try socket.write(from: data)
         } catch {
+            lazySocket?.close()
             lazySocket = nil
 
             if tryNumber < retriesLimit {
