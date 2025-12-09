@@ -19,4 +19,14 @@ public final class FileCreatorImpl: FileCreator {
             throw FileCreatorError(path: path)
         }
     }
+    
+    public func createExucatableFile(path: AbsolutePath, data: Data?) throws {
+        if !fileManager.createFile(
+            atPath: path.pathString,
+            contents: data,
+            attributes: [.posixPermissions: 0o755]
+        ) {
+            throw FileCreatorError(path: path)
+        }
+    }
 }

@@ -105,6 +105,16 @@ public final class LocalFileSystem: FileSystem {
         )
     }
     
+    public func createExucatableFile(
+        path: AbsolutePath,
+        data: Data?
+    ) throws {
+        try fileCreator.createExucatableFile(
+            path: path,
+            data: data
+        )
+    }
+    
     public func createDirectory(
         path: AbsolutePath,
         withIntermediateDirectories: Bool

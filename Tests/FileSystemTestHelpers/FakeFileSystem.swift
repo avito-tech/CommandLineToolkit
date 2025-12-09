@@ -42,6 +42,10 @@ open class FakeFileSystem: FileSystem, FileReader, DataWriter {
     public func createFile(path: AbsolutePath, data: Data?) throws {
         try onCreateFile(path, data)
     }
+        
+    public func createExucatableFile(path: PathLib.AbsolutePath, data: Data?) throws {
+        try onCreateFile(path, data)
+    }
     
     public var onCopy: (AbsolutePath, AbsolutePath) throws -> () = { _, _ in }
     

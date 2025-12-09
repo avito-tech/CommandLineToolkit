@@ -7,4 +7,9 @@ public protocol FileCreator {
         path: AbsolutePath,
         data: Data?
     ) throws
+    
+    func createExucatableFile(
+        path: AbsolutePath,
+        data: Data?
+    ) throws
 }
