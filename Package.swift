@@ -494,19 +494,6 @@ targets.append(
         path: "Sources/MetricsUtils"
     )
 )
-// MARK: MutualTLS
-targets.append(
-    .target(
-        name: "MutualTLS",
-        dependencies: [
-            "DI",
-            "Environment",
-            "PathLib",
-            "ProcessController",
-        ],
-        path: "Sources/MutualTLS"
-    )
-)
 // MARK: PathLib
 targets.append(
     .target(
@@ -933,7 +920,6 @@ let package = Package(
         .library(name: "MetricsRecording", targets: ["MetricsRecording"]),
         .library(name: "MetricsTestHelpers", targets: ["MetricsTestHelpers"]),
         .library(name: "MetricsUtils", targets: ["MetricsUtils"]),
-        .library(name: "MutualTLS", targets: ["MutualTLS"]),
         .library(name: "PathLib", targets: ["PathLib"]),
         .library(name: "PlistLib", targets: ["PlistLib"]),
         .library(name: "ProcessController", targets: ["ProcessController"]),
