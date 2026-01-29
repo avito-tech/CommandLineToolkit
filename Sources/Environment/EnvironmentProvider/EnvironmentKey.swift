@@ -4,6 +4,11 @@ import PathLib
 public struct EnvironmentKey<Value> {
     public let key: String
     public let conversion: Conversion<String, Value>
+    
+    public init(key: String, conversion: Conversion<String, Value>) {
+        self.key = key
+        self.conversion = conversion
+    }
 }
 
 extension EnvironmentKey {
@@ -17,7 +22,7 @@ extension EnvironmentKey {
     }
 }
 
-enum EnvironmentError: Error {
+public enum EnvironmentError: Error {
     case failedToTransform(value: String, type: Any.Type)
 }
 
