@@ -49,7 +49,7 @@ public extension ProcessController {
     func startAndListenUntilProcessDies() async throws {
         try Task.checkCancellation()
         try start()
-        try await withTaskCancellationHandler {
+        await withTaskCancellationHandler {
             await waitForProcessToDieAsync()
         } onCancel: {
             send(signal: SIGINT)

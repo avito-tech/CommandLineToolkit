@@ -7,7 +7,7 @@ import Foundation
 import FoundationNetworking
 #endif
 
-public final class FakeURLSession: URLSession {
+public final class FakeURLSession: URLSession, @unchecked Sendable {
     let session = URLSession.shared
     
     public var providedDownloadTasks = [FakeDownloadTask]()
@@ -39,7 +39,7 @@ public final class FakeURLSession: URLSession {
     }
 }
 
-public class FakeDownloadTask: URLSessionDownloadTask {
+public class FakeDownloadTask: URLSessionDownloadTask, @unchecked Sendable {
     public var originalTask: URLSessionTask
     public var completionHandler: (URL?, URLResponse?, Error?) -> ()
     
@@ -55,7 +55,7 @@ public class FakeDownloadTask: URLSessionDownloadTask {
 #endif
 }
 
-public class FakeDataTask: URLSessionDataTask {
+public class FakeDataTask: URLSessionDataTask, @unchecked Sendable {
     public var originalTask: URLSessionTask
     public var completionHandler: (Data?, URLResponse?, Error?) -> ()
     

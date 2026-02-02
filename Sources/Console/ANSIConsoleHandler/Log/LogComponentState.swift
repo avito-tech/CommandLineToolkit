@@ -10,13 +10,13 @@ struct LogComponentState: Hashable {
     let line: UInt
 }
 
-extension Logger.Message: Hashable {
+extension Logger.Message: @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(description)
     }
 }
 
-extension Logger.MetadataValue: Hashable {
+extension Logger.MetadataValue: @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
         switch self {
         case .string(let string):

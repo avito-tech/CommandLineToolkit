@@ -345,7 +345,7 @@ private extension Task where Success == Never, Failure == Never {
         await withCheckedContinuation { continuation in
             DispatchQueue.global().asyncAfter(
                 deadline: .now() + .nanoseconds(Int(nanoseconds)),
-                execute: continuation.resume
+                execute: { continuation.resume() }
             )
         }
     }

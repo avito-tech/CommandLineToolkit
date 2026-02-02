@@ -123,4 +123,4 @@ extension ParsableCommand {
     }
 }
 
-extension Logger.Level: ExpressibleByArgument {}
+extension Logger.Level: @retroactive ExpressibleByArgument {}
