@@ -3,12 +3,11 @@ build_and_deploy_executable_to_local_path() {
     local destination_path=$2 # exact file path or folder
     local archs_to_build=("${@:3}") # architectures to build into fat binary
 
-    if [ ${#archs_to_build[@]} -eq 1 ]; then
-        # binaries for single architecture are built into this folder
+    if [ ${#archs_to_build[@]} -le 1 ]; then
+        # Single architecture or default (which is now single arch)
         local executable_path="$PROJECT_DIR/.build/release/$executable_name"
     else
-        # fat binaries are built into this folder
-        # if archs_to_build is empty, we build fat binary for all available architectures
+        # Multiple architectures explicitly specified
         local executable_path="$PROJECT_DIR/.build/apple/Products/Release/$executable_name"
     fi
     
@@ -22,7 +21,8 @@ prepare_executable_and_deploy_to_local_path() {
     local destination_path=$2
 
     strip "$executable_path"
-    /usr/bin/codesign --force --sign - --timestamp=none "$executable_path"
+    /usr/bin/codesign --force --sign - --timestamp=none "$executable_path" >/dev/null 2>&1
+    mkdir -p "$(dirname "$destination_path")"
     mv -f "$executable_path" "$destination_path"
 }
 
