@@ -15,7 +15,13 @@ public struct KnownImageCategoriesMock: KnownImageCategories {
         "mockAssetContentFileName"
     }
     public var assetsPath: RelativePath {
-        RelativePath(components: ["mock/assets/path"])
+        assetsPathByScope[.ru] ?? RelativePath(components: ["mock/ru/assets/path"])
+    }
+    public var assetsPathByScope: [ImageTargetScope: RelativePath] {
+        [
+            .ru: RelativePath(components: ["mock/ru/assets/path"]),
+            .global: RelativePath(components: ["mock/global/assets/path"])
+        ]
     }
     public var imageFactoryPath: RelativePath {
         RelativePath(components: ["mockImageFactoryPath"])
@@ -30,11 +36,11 @@ public struct KnownImageCategoriesMock: KnownImageCategories {
         [
             KnownImageCategory(
                 name: "MockCategory1",
-                path: "\(assetsPath)/MockCategory1"
+                path: RelativePath("MockCategory1")
             ),
             KnownImageCategory(
                 name: "MockCategory2",
-                path: "\(assetsPath)/MockCategory2"
+                path: RelativePath("MockCategory2")
             )
         ]
     }

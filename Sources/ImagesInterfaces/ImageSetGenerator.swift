@@ -6,7 +6,8 @@ public protocol ImageSetGenerator {
         selectedCategory: KnownImageCategory,
         selectedRenderingMode: ImageRenderingMode,
         isVector: Bool,
-        knownImageCategories: KnownImageCategories
+        knownImageCategories: KnownImageCategories,
+        targetScope: ImageTargetScope
     ) throws
 }
 

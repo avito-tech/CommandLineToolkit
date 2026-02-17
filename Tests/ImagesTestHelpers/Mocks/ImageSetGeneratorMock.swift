@@ -8,13 +8,22 @@ public final class ImageSetGeneratorMock: ImageSetGenerator {
         public let inputSelectedRenderingMode: ImageRenderingMode
         public let inputIsVector: Bool
         public let inputKnownImageCategories: [KnownImageCategory]
+        public let inputTargetScope: ImageTargetScope
         
-        public init(inputSource: ImageSource, inputSelectedCategory: KnownImageCategory, inputSelectedRenderingMode: ImageRenderingMode, inputIsVector: Bool, inputKnownImageCategories: [KnownImageCategory]) {
+        public init(
+            inputSource: ImageSource,
+            inputSelectedCategory: KnownImageCategory,
+            inputSelectedRenderingMode: ImageRenderingMode,
+            inputIsVector: Bool,
+            inputKnownImageCategories: [KnownImageCategory],
+            inputTargetScope: ImageTargetScope
+        ) {
             self.inputSource = inputSource
             self.inputSelectedCategory = inputSelectedCategory
             self.inputSelectedRenderingMode = inputSelectedRenderingMode
             self.inputIsVector = inputIsVector
             self.inputKnownImageCategories = inputKnownImageCategories
+            self.inputTargetScope = inputTargetScope
         }
     }
     public var input: Input?
@@ -29,7 +38,8 @@ public final class ImageSetGeneratorMock: ImageSetGenerator {
         selectedCategory: KnownImageCategory,
         selectedRenderingMode: ImageRenderingMode,
         isVector: Bool,
-        knownImageCategories: KnownImageCategories
+        knownImageCategories: KnownImageCategories,
+        targetScope: ImageTargetScope
     ) throws {
         if shouldThrowException {
             throw ImageError(exceptionMessage)
@@ -39,7 +49,8 @@ public final class ImageSetGeneratorMock: ImageSetGenerator {
             inputSelectedCategory: selectedCategory,
             inputSelectedRenderingMode: selectedRenderingMode,
             inputIsVector: isVector,
-            inputKnownImageCategories: knownImageCategories.all
+            inputKnownImageCategories: knownImageCategories.all,
+            inputTargetScope: targetScope
         )
     }
 }
