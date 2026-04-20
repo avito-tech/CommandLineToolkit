@@ -15,11 +15,11 @@ final class ProcessControllerProviderBashTests: XCTestCase {
         filePropertiesProvider: FilePropertiesProviderImpl()
     )
     
-    func test__stdout() throws {
+    func test__stdout() async throws {
         try tempFolder.createFile(filename: "hello")
         
         let capturedOutput = CapturedOutputStreams()
-        try processControllerProvider.subprocess(
+        try await processControllerProvider.subprocessAsync(
             arguments: ["/bin/ls"],
             currentWorkingDirectory: tempFolder.absolutePath,
             outputStreaming: capturedOutput.outputStreaming
@@ -30,11 +30,11 @@ final class ProcessControllerProviderBashTests: XCTestCase {
         )
     }
     
-    func test__stderr() throws {
+    func test__stderr() async throws {
         let uniqueString = ProcessInfo.processInfo.globallyUniqueString
         let capturedOutput = CapturedOutputStreams()
-        assertThrows {
-            try processControllerProvider.subprocess(
+        await assertThrows {
+            try await processControllerProvider.subprocessAsync(
                 arguments: ["/bin/ls", uniqueString],
                 currentWorkingDirectory: tempFolder.absolutePath,
                 outputStreaming: capturedOutput.outputStreaming
