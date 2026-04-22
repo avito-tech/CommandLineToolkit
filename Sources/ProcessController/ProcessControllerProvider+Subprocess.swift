@@ -2,28 +2,6 @@ import Foundation
 import PathLib
 
 public extension ProcessControllerProvider {
-    @available(*, deprecated, message: "Use async version")
-    func subprocess(
-        arguments: [String],
-        environment: Environment = .current,
-        currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
-        outputStreaming: OutputStreaming? = nil,
-        automaticManagement: AutomaticManagement = .noManagement,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) throws {
-        let processController = try createSubprocessController(
-            arguments: arguments,
-            environment: environment,
-            currentWorkingDirectory: currentWorkingDirectory,
-            outputStreaming: outputStreaming,
-            automaticManagement: automaticManagement,
-            file: file,
-            line: line
-        )
-        try processController.startAndWaitForSuccessfulTermination()
-    }
-    
     func subprocessAsync(
         arguments: [String],
         environment: Environment = .current,

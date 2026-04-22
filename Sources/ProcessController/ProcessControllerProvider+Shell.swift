@@ -15,8 +15,8 @@ extension ProcessControllerProvider {
         currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
         outputStreaming: OutputStreaming = .restream,
         automaticManagement: AutomaticManagement = .noManagement
-    ) throws {
-        try bashOrZsh(
+    ) async throws {
+        try await bashOrZsh(
             command,
             interpreterPath: "/bin/bash",
             isLoginShell: isLoginShell,
@@ -33,10 +33,10 @@ extension ProcessControllerProvider {
         currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
         automaticManagement: AutomaticManagement = .noManagement,
         command: () -> String
-    ) throws -> String {
+    ) async throws -> String {
         let streams = CapturedOutputStreams()
         
-        try bash(
+        try await bash(
             command(),
             isLoginShell: isLoginShell,
             environment: environment,
@@ -55,8 +55,8 @@ extension ProcessControllerProvider {
         currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
         outputStreaming: OutputStreaming = .restream,
         automaticManagement: AutomaticManagement = .noManagement
-    ) throws {
-        try bashOrZsh(
+    ) async throws {
+        try await bashOrZsh(
             command,
             interpreterPath: "/bin/zsh",
             isLoginShell: isLoginShell,
@@ -73,10 +73,10 @@ extension ProcessControllerProvider {
         currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
         automaticManagement: AutomaticManagement = .noManagement,
         command: () -> String
-    ) throws -> String {
+    ) async throws -> String {
         let streams = CapturedOutputStreams()
         
-        try zsh(
+        try await zsh(
             command(),
             isLoginShell: isLoginShell,
             environment: environment,
@@ -97,7 +97,7 @@ extension ProcessControllerProvider {
         currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
         outputStreaming: OutputStreaming = .restream,
         automaticManagement: AutomaticManagement = .noManagement
-    ) throws {
+    ) async throws {
         var arguments = [interpreterPath.pathString]
         
         if isLoginShell {
@@ -106,7 +106,7 @@ extension ProcessControllerProvider {
         
         arguments.append(contentsOf: ["-c", command])
         
-        try subprocess(
+        try await subprocessAsync(
             arguments: arguments,
             environment: environment,
             currentWorkingDirectory: currentWorkingDirectory,
