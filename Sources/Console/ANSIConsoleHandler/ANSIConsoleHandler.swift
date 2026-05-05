@@ -156,6 +156,9 @@ public final class ANSIConsoleHandler: ConsoleHandler {
         var lastRenderCursorPos: Position
         var frame: Int = 0
         let frames: [String] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+        var lastFrameTime: UInt64 = 0
+        var nextFrameDeadline: UInt64 = 0
+        var smoothedFps: Double = Double(ANSIConsoleHandler.targetFps)
     }
 
     func run<Value, Component: ConsoleComponent<Value>>(
@@ -175,7 +178,7 @@ public final class ANSIConsoleHandler: ConsoleHandler {
                 return try result.get()
             }
 
-            return try await ConsoleContext.current.stateHolder.performInInteractiveMode(file: file, line: line) {
+            return try await ConsoleContext.current.stateHolder.performInInteractiveMode(file: file, line: line) { @MainActor in
                 var state: RenderingState = .init(
                     lastRender: .empty,
                     lastRenderedLines: 0,
@@ -199,9 +202,9 @@ public final class ANSIConsoleHandler: ConsoleHandler {
                             state.terminalSize = terminal.size
                             render(component: renderer.render(preferredSize: state.terminalSize), state: &state)
                         }
-                        
+
                         if case .tick = event {
-                            await Task.nonThrowingSleep(nanoseconds: ANSIConsoleHandler.tickDelayNs)
+                            await sleepUntilNextFrame(state: &state)
                         }
                     } while component.isUnfinished
                 }
@@ -300,7 +303,13 @@ public final class ANSIConsoleHandler: ConsoleHandler {
             }
         }
         let frame = state.frames[Int((Double(state.frame) / Double(ANSIConsoleHandler.targetFps)) * Double(state.frames.count)) % state.frames.count]
-        terminal.write(Task.isCancelled ? "Завершаем задачу \(frame)" : frame)
+        if Task.isCancelled {
+            terminal.write("Завершаем задачу \(frame)")
+        } else if verbositySettings.verbose {
+            terminal.write("\(frame) \(Int(state.smoothedFps.rounded())) fps")
+        } else {
+            terminal.write(frame)
+        }
         terminal.clearBelow()
 
         state.lastRenderCursorPos.row += -state.lastRenderedLines + linesToRender
@@ -314,6 +323,37 @@ public final class ANSIConsoleHandler: ConsoleHandler {
             terminal.moveUp(linesToRender - position.row + (newActualLines - linesToRender))
             terminal.moveToColumn(position.col)
             terminal.cursorOn()
+        }
+    }
+
+    private static let fpsAlpha: Double = 0.15
+
+    private static func monotonicNanos() -> UInt64 {
+        var time = timespec()
+        clock_gettime(CLOCK_MONOTONIC, &time)
+        return UInt64(time.tv_sec) * 1_000_000_000 + UInt64(time.tv_nsec)
+    }
+
+    private func sleepUntilNextFrame(state: inout RenderingState) async {
+        if state.nextFrameDeadline == 0 {
+            state.nextFrameDeadline = Self.monotonicNanos() + Self.tickDelayNs
+        }
+
+        let now = Self.monotonicNanos()
+        if now < state.nextFrameDeadline {
+            await Task.nonThrowingSleep(nanoseconds: state.nextFrameDeadline - now)
+        }
+
+        let afterSleep = Self.monotonicNanos()
+        if state.lastFrameTime > 0 {
+            let instantFps = Double(1_000_000_000) / Double(afterSleep - state.lastFrameTime)
+            state.smoothedFps = Self.fpsAlpha * instantFps + (1.0 - Self.fpsAlpha) * state.smoothedFps
+        }
+        state.lastFrameTime = afterSleep
+
+        state.nextFrameDeadline += Self.tickDelayNs
+        if state.nextFrameDeadline < afterSleep {
+            state.nextFrameDeadline = afterSleep + Self.tickDelayNs
         }
     }
 
@@ -341,11 +381,14 @@ public final class ANSIConsoleHandler: ConsoleHandler {
 }
 
 private extension Task where Success == Never, Failure == Never {
-    static func nonThrowingSleep(nanoseconds: UInt64) async {
+    @MainActor
+    static func nonThrowingSleep(queue: DispatchQueue = .main, nanoseconds: UInt64) async {
         await withCheckedContinuation { continuation in
-            DispatchQueue.global().asyncAfter(
+            queue.asyncAfter(
                 deadline: .now() + .nanoseconds(Int(nanoseconds)),
-                execute: { continuation.resume() }
+                execute: {
+                    continuation.resume()
+                }
             )
         }
     }
