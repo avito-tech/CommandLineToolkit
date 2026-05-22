@@ -7,11 +7,12 @@ public struct RelativePath:
     Comparable,
     ExpressibleByStringLiteral,
     ExpressibleByArrayLiteral,
-    ExpressibleByStringInterpolation
+    ExpressibleByStringInterpolation,
+    Sendable
 {
     public let components: [String] // source value
     public let pathString: String // precomputed value
-    
+
     public static let current = RelativePath(components: [String]())
 
     /// Builds a relative paths from given components. If components is empty, relative path will be equal to the current directory (`./`).
@@ -19,7 +20,7 @@ public struct RelativePath:
         self.components = StringPathParsing.slashSeparatedComponents(paths: components)
         self.pathString = Self.pathString(components: self.components)
     }
-    
+
     /// Returns a `RelativePath` only if `string` has a value that looks like a relative path - does not begin with `/`
     /// - Parameter string: String representation of relative path.
     /// - Throws: Error when `string` doesn't seem to be a relative path
@@ -30,16 +31,16 @@ public struct RelativePath:
         }
         return RelativePath(string)
     }
-    
+
     public static func isRelative<S: StringProtocol>(path: S) -> Bool {
         !path.hasPrefix("/")
     }
-    
+
     private static func pathString<S: StringProtocol>(components: [S]) -> String {
         guard !components.isEmpty else {
             return "./"
         }
-        
+
         return components.joined(separator: "/")
     }
 
