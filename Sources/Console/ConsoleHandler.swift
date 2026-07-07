@@ -1,5 +1,10 @@
 import Logging
 
+public enum ConsoleOutputStream {
+    case stdout
+    case stderr
+}
+
 /// Should be used all over the tool to provide consistent CLI experience
 public protocol ConsoleHandler {
     var isAtTTY: Bool { get }

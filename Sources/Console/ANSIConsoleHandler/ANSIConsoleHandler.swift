@@ -104,35 +104,30 @@ public final class ANSIConsoleHandler: ConsoleHandler {
     /// Tick delay in nanoseconds
     static let tickDelayNs: UInt64 = tickDelayMs * 1_000_000
 
-    static let isAtTTY: Bool = {
-        isatty(STDOUT_FILENO) > 0 && isatty(STDIN_FILENO) > 0
-    }()
-
-    static let isInteractive: Bool = {
-        isAtTTY && !ProcessInfo.processInfo.isRunningInXcode && ProcessInfo.processInfo.isTermDefined
-    }()
-
     /// Backing log handler for all messages.
     let backing: LogHandler?
     
     let terminal: ANSITerminal
+    let output: ANSITerminalOutput
 
     public var isAtTTY: Bool {
-        Self.isAtTTY
+        output.isTTY && terminal.isInputTTY
     }
 
     public var isInteractive: Bool {
-        Self.isInteractive
+        isAtTTY && !ProcessInfo.processInfo.isRunningInXcode && ProcessInfo.processInfo.isTermDefined
     }
 
     public var verbositySettings: ConsoleVerbositySettings
     
     public init(
         terminal: ANSITerminal = .shared,
+        outputStream: ConsoleOutputStream = .stdout,
         verbositySettings: ConsoleVerbositySettings = .default,
         backing: LogHandler? = nil
     ) {
         self.terminal = terminal
+        self.output = terminal.output(to: outputStream)
         self.verbositySettings = verbositySettings
         self.backing = backing
     }
@@ -183,7 +178,7 @@ public final class ANSIConsoleHandler: ConsoleHandler {
                     lastRender: .empty,
                     lastRenderedLines: 0,
                     terminalSize: terminal.size,
-                    lastRenderCursorPos: terminal.readCursorPos()
+                    lastRenderCursorPos: output.readCursorPos()
                 )
 
                 if isInteractive {
@@ -233,7 +228,7 @@ public final class ANSIConsoleHandler: ConsoleHandler {
 
     private func cleanLastRender(state: RenderingState) {
         moveToRenderStart(state: state)
-        terminal.clearBelow()
+        output.clearBelow()
     }
 
     private func moveToRenderStart(state: RenderingState) {
@@ -245,9 +240,9 @@ public final class ANSIConsoleHandler: ConsoleHandler {
         }
 
         if linesToMoveUp > 0 {
-            terminal.moveUp(linesToMoveUp)
+            output.moveUp(linesToMoveUp)
         }
-        terminal.moveToColumn(1)
+        output.moveToColumn(1)
     }
 
     private func getControlEvent(state: inout RenderingState) -> ConsoleControlEvent? {
@@ -284,7 +279,7 @@ public final class ANSIConsoleHandler: ConsoleHandler {
     }
 
     private func render(component: ConsoleRender, state: inout RenderingState) {
-        terminal.cursorOff()
+        output.cursorOff()
         moveToRenderStart(state: state)
 
         let newActualLines = component.lines.count
@@ -295,22 +290,22 @@ public final class ANSIConsoleHandler: ConsoleHandler {
             let lineToRender = component.lines[line]
             let oldLine = state.lastRenderedLines - state.lastRender.lines.count + line
             if state.lastRender.lines.indices.contains(oldLine) && lineToRender == state.lastRender.lines[oldLine] && !state.fullRender {
-                terminal.moveDown()
+                output.moveDown()
             } else {
-                terminal.write(lineToRender.trimmed(to: state.terminalSize.cols).terminalStylize())
-                terminal.clearToEndOfLine()
-                terminal.writeln()
+                output.write(lineToRender.trimmed(to: state.terminalSize.cols).terminalStylize())
+                output.clearToEndOfLine()
+                output.writeln()
             }
         }
         let frame = state.frames[Int((Double(state.frame) / Double(ANSIConsoleHandler.targetFps)) * Double(state.frames.count)) % state.frames.count]
         if Task.isCancelled {
-            terminal.write("Завершаем задачу \(frame)")
+            output.write("Завершаем задачу \(frame)")
         } else if verbositySettings.verbose {
-            terminal.write("\(frame) \(Int(state.smoothedFps.rounded())) fps")
+            output.write("\(frame) \(Int(state.smoothedFps.rounded())) fps")
         } else {
-            terminal.write(frame)
+            output.write(frame)
         }
-        terminal.clearBelow()
+        output.clearBelow()
 
         state.lastRenderCursorPos.row += -state.lastRenderedLines + linesToRender
         state.lastRenderCursorPos.row = min(state.terminalSize.rows, state.lastRenderCursorPos.row)
@@ -320,9 +315,9 @@ public final class ANSIConsoleHandler: ConsoleHandler {
         state.frame = (state.frame + 1) % Int(ANSIConsoleHandler.targetFps)
 
         if let position = component.cursorPosition {
-            terminal.moveUp(linesToRender - position.row + (newActualLines - linesToRender))
-            terminal.moveToColumn(position.col)
-            terminal.cursorOn()
+            output.moveUp(linesToRender - position.row + (newActualLines - linesToRender))
+            output.moveToColumn(position.col)
+            output.cursorOn()
         }
     }
 
@@ -360,9 +355,9 @@ public final class ANSIConsoleHandler: ConsoleHandler {
     func renderNonInteractive(component: ConsoleRender) {
         for line in component.lines {
             if isInteractive {
-                terminal.writeln(line.terminalStylize())
+                output.writeln(line.terminalStylize())
             } else {
-                terminal.writeln(line.description)
+                output.writeln(line.description)
             }
             backing?.log(
                 level: verbositySettings.logLevel,
@@ -375,7 +370,7 @@ public final class ANSIConsoleHandler: ConsoleHandler {
             )
         }
         if isInteractive {
-            terminal.cursorOn()
+            output.cursorOn()
         }
     }
 }

@@ -6,7 +6,7 @@ enum CursorStyle: UInt8 {
     case bar   = 5
 }
 
-extension ANSITerminal {
+extension ANSITerminalOutput {
     func setCursorStyle(_ style: CursorStyle, blinking: Bool = true) {
         if blinking {
             write(.CSI, "\(style.rawValue) q")
@@ -113,12 +113,12 @@ extension ANSITerminal {
 
     func cursorOff() {
         write(.CSI, "?25l")
-        isCursorVisible = false
+        terminal.isCursorVisible = false
     }
 
     func cursorOn() {
         write(.CSI, "?25h")
-        isCursorVisible = true
+        terminal.isCursorVisible = true
     }
 
     // swiftlint:disable force_unwrapping

@@ -41,12 +41,12 @@ extension ANSIConsoleHandler {
         options: SelectionOptions = .init()
     ) throws -> [Selectable<Value>] {
         let indent = indentString()
-        terminal.writeln(indent, "\(title) (comma separated string)")
+        output.writeln(indent, "\(title) (comma separated string)")
         for (offset, value) in values.enumerated() {
-            terminal.writeln(indent, "\(offset): \(value.title) (\(value.help ?? ""))")
+            output.writeln(indent, "\(offset): \(value.title) (\(value.help ?? ""))")
         }
 
-        terminal.write(indent, "> ")
+        output.write(indent, "> ")
 
         let input = readLine(strippingNewline: true) ?? ""
         let selectedValues = input
@@ -54,7 +54,7 @@ extension ANSIConsoleHandler {
             .compactMap(Int.init)
             .map { values[$0] }
 
-        terminal.writeln(indent, "Selected: \(selectedValues.map(\.title).joined(separator: ", "))")
+        output.writeln(indent, "Selected: \(selectedValues.map(\.title).joined(separator: ", "))")
 
         return selectedValues
     }

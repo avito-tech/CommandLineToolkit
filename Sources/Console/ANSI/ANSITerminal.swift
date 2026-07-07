@@ -16,6 +16,47 @@ extension String {
     static let FORV = ESC + "f"  // Word Forward
 }
 
+struct ANSITerminalOutput {
+    let terminal: ANSITerminal
+    let stream: ConsoleOutputStream
+
+    private var stdioOutput: StdioOutputStream {
+        terminal.stdioOutput(for: stream)
+    }
+
+    var isTTY: Bool {
+        terminal.isTTY(outputStream: stream)
+    }
+
+    func ansiRequest(_ command: String, endChar: Character) -> String {
+        terminal.ansiRequest(command, endChar: endChar, outputStream: stream)
+    }
+
+    /// Direct write to selected standard output stream
+    func write(_ text: String) {
+        stdioOutput.write(text)
+    }
+
+    private func write(_ text: [String]) {
+        write(text.joined())
+    }
+
+    /// Direct write to selected standard output stream
+    func write(_ text: String...) {
+        write(text)
+    }
+
+    /// Direct write to selected standard output stream with new line
+    func writeln(_ text: String...) {
+        write(text + ["\n"])
+    }
+
+    /// Direct write to selected standard output stream only new line
+    func writeln() {
+        write("\n")
+    }
+}
+
 public final class ANSITerminal {
     public static let shared: ANSITerminal = .init()
 
@@ -23,9 +64,6 @@ public final class ANSITerminal {
     private(set) var isNonBlockingMode = false
     private(set) var isNonBlockingExitSetUp = false
     var isCursorVisible = true
-
-    private let stdoutStream: StdioOutputStream = .stdout
-    private let stderrStream: StdioOutputStream = .stderr
 
     private let lock: ReadWriteLock = .init()
     private(set) var size: Size = .init(rows: 0, cols: 0)
@@ -73,14 +111,31 @@ public final class ANSITerminal {
         return res < 0 ? 0 : key
     }
 
+    func isTTY(outputStream: ConsoleOutputStream) -> Bool {
+        switch outputStream {
+        case .stdout:
+            isatty(STDOUT_FILENO) > 0
+        case .stderr:
+            isatty(STDERR_FILENO) > 0
+        }
+    }
+
+    var isInputTTY: Bool {
+        isatty(STDIN_FILENO) > 0
+    }
+
     /// Request terminal info using ansi esc command and return the response value
-    func ansiRequest(_ command: String, endChar: Character) -> String {
+    func ansiRequest(
+        _ command: String,
+        endChar: Character,
+        outputStream: ConsoleOutputStream = .stdout
+    ) -> String {
         // store current input mode
         let nonBlock = isNonBlockingMode
         if !nonBlock { enableNonBlockingTerminal() }
 
         // send request
-        write(command)
+        stdioOutput(for: outputStream).write(command)
 
         // read response
         var res: String = ""
@@ -97,7 +152,7 @@ public final class ANSITerminal {
 
     /// Direct write to standard output
     func write(_ text: String) {
-        stdoutStream.write(text)
+        stdioOutput(for: .stdout).write(text)
     }
 
     /// Direct write to standard output
@@ -120,10 +175,25 @@ public final class ANSITerminal {
         write("\n")
     }
 
+    fileprivate func stdioOutput(for outputStream: ConsoleOutputStream) -> StdioOutputStream {
+        switch outputStream {
+        case .stdout:
+            return .stdout
+        case .stderr:
+            return .stderr
+        }
+    }
+
     private func getSize() -> Size {
         var winsz = winsize()
         _ = ioctl(0, UInt(TIOCGWINSZ), &winsz)
         return Size(rows: Int(winsz.ws_row), cols: Int(winsz.ws_col))
+    }
+}
+
+extension ANSITerminal {
+    func output(to stream: ConsoleOutputStream = .stdout) -> ANSITerminalOutput {
+        ANSITerminalOutput(terminal: self, stream: stream)
     }
 }
 

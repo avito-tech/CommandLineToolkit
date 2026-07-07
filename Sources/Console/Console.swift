@@ -32,6 +32,26 @@ extension Console {
 // MARK: - LogStream extensions
 
 extension Console {
+    public func log(
+        level: Logger.Level = .info,
+        _ message: Logger.Message,
+        metadata: Logger.Metadata = [:],
+        source: String = "",
+        file: String = #fileID,
+        function: String = #function,
+        line: UInt = #line
+    ) {
+        handler.log(
+            level: level,
+            message: message,
+            metadata: metadata,
+            source: source,
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
     /// Creates a log sink and allows to stream logs from underlying command line instrument
     ///
     /// Should always run in a trace

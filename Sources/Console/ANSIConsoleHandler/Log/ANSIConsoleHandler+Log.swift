@@ -11,17 +11,19 @@ extension ANSIConsoleHandler {
         function: String,
         line: UInt
     ) {
-        let state = LogComponentState(level: level, message: message, metadata: metadata, source: source, file: file, function: function, line: line)
+        ConsoleContext.$current.withUpdated(key: \.verbositySettings, value: verbositySettings) {
+            let state = LogComponentState(level: level, message: message, metadata: metadata, source: source, file: file, function: function, line: line)
 
-        guard isInteractive else {
-            return nonInteractiveLog(state: state)
-        }
+            guard isInteractive else {
+                return nonInteractiveLog(state: state)
+            }
 
-        let component = LogComponent(state: state)
-        if let activeContainer = ConsoleContext.current.activeContainer {
-            activeContainer.add(child: component)
-        } else {
-            renderNonInteractive(component: component.renderer().render(preferredSize: nil))
+            let component = LogComponent(state: state)
+            if let activeContainer = ConsoleContext.current.activeContainer {
+                activeContainer.add(child: component)
+            } else if component.isVisible {
+                renderNonInteractive(component: component.renderer().render(preferredSize: nil))
+            }
         }
     }
 
@@ -29,6 +31,7 @@ extension ANSIConsoleHandler {
         let indent = indentString()
 
         let component = LogComponent(state: state)
+        guard component.isVisible else { return }
 
         let renderedComponent = component.renderer().render(preferredSize: nil)
 
