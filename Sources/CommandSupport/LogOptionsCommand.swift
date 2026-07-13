@@ -13,10 +13,10 @@ public struct LogOptions: ParsableArguments {
     @Flag(name: .shortAndLong, help: "Verbose logging")
     public var verbose: Bool = false
 
-    @Option(help: "\(Logger.Level.allValueStrings.joined(separator: ", "))")
+    @Option(help: "Level of logging applied to output")
     public var logLevel: Logger.Level = .info
 
-    @Option(help: "\(LogFormat.allValueStrings.joined(separator: ", "))")
+    @Option(help: "Logs output format")
     public var logFormat: LogFormat = .interactive
 
     public init() {}
@@ -46,23 +46,23 @@ public struct ParsableCommandLogConfiguration {
         self.consoleBacking = consoleBacking
         self.additionalSystem = additionalSystem
     }
-    
+
     let consoleBacking: LogHandler?
     let additionalSystem: [LogHandler]
-    
+
     public static let `default` = ParsableCommandLogConfiguration(consoleBacking: nil, additionalSystem: [])
 }
 
 extension ParsableCommand {
-    
+
     public var logOptions: LogOptions {
         (self as? LogOptionsCommand)?.logOptions ?? .default
     }
-    
+
     public var logLevel: Logger.Level {
         logOptions.verbose ? .trace : logOptions.logLevel
     }
-    
+
     public func bootstrapLogger(with config: ParsableCommandLogConfiguration = .default) {
         let systemLogHandlerFactory: (String) -> [any LogHandler]
         switch logOptions.logFormat {
