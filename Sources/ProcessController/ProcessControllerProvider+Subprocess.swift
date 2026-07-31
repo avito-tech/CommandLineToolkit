@@ -11,15 +11,28 @@ public extension ProcessControllerProvider {
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
+        let outputStreaming = outputStreaming ?? .restream(
+            name: arguments.joined(separator: " "),
+            file: file,
+            line: line
+        )
         let processController = try createSubprocessController(
             arguments: arguments,
             environment: environment,
             currentWorkingDirectory: currentWorkingDirectory,
             outputStreaming: outputStreaming,
-            automaticManagement: automaticManagement,
-            file: file,
-            line: line
+            automaticManagement: automaticManagement
         )
+
+        defer {
+            switch processController.processStatus() {
+            case .notStarted, .stillRunning:
+                outputStreaming.finish(1, Task.isCancelled)
+            case .terminated(exitCode: let code):
+                outputStreaming.finish(code, Task.isCancelled)
+            }
+        }
+
         try await processController.startAndWaitForSuccessfulTerminationAsync()
     }
 
@@ -27,10 +40,8 @@ public extension ProcessControllerProvider {
         arguments: [String],
         environment: Environment = .current,
         currentWorkingDirectory: AbsolutePath = FileManager().currentAbsolutePath,
-        outputStreaming: OutputStreaming? = nil,
-        automaticManagement: AutomaticManagement = .noManagement,
-        file: StaticString = #file,
-        line: UInt = #line
+        outputStreaming: OutputStreaming,
+        automaticManagement: AutomaticManagement = .noManagement
     ) throws -> ProcessController {
         let subprocess = Subprocess(
             arguments: arguments,
@@ -38,27 +49,10 @@ public extension ProcessControllerProvider {
             automaticManagement: automaticManagement,
             workingDirectory: currentWorkingDirectory
         )
-        
-        let outputStreaming = outputStreaming ?? .restream(
-            name: arguments.joined(separator: " "),
-            file: file,
-            line: line
-        )
-        
-        return try withUnsafeCurrentTask { task in
-            let processController = try createProcessController(subprocess: subprocess)
-            processController.onStdout { _, data, _ in outputStreaming.stdout(data) }
-            processController.onStderr { _, data, _ in outputStreaming.stderr(data) }
-            processController.onTermination { controller, _ in
-                switch controller.processStatus() {
-                case .notStarted, .stillRunning:
-                    assertionFailure("process controller is still running")
-                    outputStreaming.finish(1, task?.isCancelled ?? false)
-                case .terminated(exitCode: let code):
-                    outputStreaming.finish(code, task?.isCancelled ?? false)
-                }
-            }
-            return processController
-        }
+
+        let processController = try createProcessController(subprocess: subprocess)
+        processController.onStdout { _, data, _ in outputStreaming.stdout(data) }
+        processController.onStderr { _, data, _ in outputStreaming.stderr(data) }
+        return processController
     }
 }

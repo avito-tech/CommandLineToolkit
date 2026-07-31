@@ -117,6 +117,31 @@ extension ProcessControllerProvider {
 }
 
 public struct OutputStreaming: ExpressibleByArrayLiteral {
+    /// Defines how `restream` handles output hidden by the current log level.
+    public enum HiddenOutputPolicy: Sendable {
+        /// Discards output while its log level is hidden.
+        case discard
+
+        /// Buffers selected output and replays it when the process finishes with a nonzero status.
+        ///
+        /// - Parameters:
+        ///   - capture: The subprocess streams to buffer.
+        ///   - maxBufferedBytes: The positive maximum number of bytes retained per process. Oldest bytes are discarded first.
+        case replayOnFailure(
+            capture: OutputCapture,
+            maxBufferedBytes: Int
+        )
+    }
+
+    /// Selects subprocess streams to buffer for a failure replay.
+    public enum OutputCapture: Sendable, Equatable {
+        /// Buffers only the standard error stream.
+        case stderr
+
+        /// Buffers both standard output and standard error in callback delivery order.
+        case stdoutAndStderr
+    }
+
     public let stdout: (Data) -> ()
     public let stderr: (Data) -> ()
     public let finish: (_ status: Int32, _ isCancelled: Bool) -> ()
@@ -171,15 +196,107 @@ public struct OutputStreaming: ExpressibleByArrayLiteral {
         }
     }
 
+    /// Streams process output through `Console`.
+    ///
+    /// Output below the active log level is handled according to `hiddenOutput`.
+    ///
+    /// - Parameters:
+    ///   - level: The level used to render process output.
+    ///   - name: The display name of the process output stream.
+    ///   - renderTail: The number of trailing lines rendered while an interactive process is running.
+    ///   - hiddenOutput: The policy applied when `level` is hidden by current verbosity settings.
+    ///   - ignoreNonZeroStatusCode: Whether a nonzero process status should be rendered as success.
+    ///   - file: The source file that created the stream.
+    ///   - line: The source line that created the stream.
+    /// - Returns: Output callbacks suitable for a `ProcessController`.
     public static func restream(
         level: Logger.Level = .debug,
         name: String,
         renderTail: Int = 3,
+        hiddenOutput: HiddenOutputPolicy = .discard,
         ignoreNonZeroStatusCode: Bool = false,
         file: StaticString = #file,
         line: UInt = #line
     ) -> OutputStreaming {
         let console = Console()
+
+        switch hiddenOutput {
+        case .discard:
+            break
+        case let .replayOnFailure(capture, maxBufferedBytes):
+            precondition(maxBufferedBytes > 0, "maxBufferedBytes must be greater than zero")
+
+            if !console.isLogEnabled(at: level) {
+                return Console.withEscapingContext { continuation in
+                    failureReplay(
+                        capture: capture,
+                        maxBufferedBytes: maxBufferedBytes,
+                        ignoreNonZeroStatusCode: ignoreNonZeroStatusCode
+                    ) { data, wasTruncated, status in
+                        continuation.yield {
+                            renderFailureReplay(
+                                data: data,
+                                wasTruncated: wasTruncated,
+                                maxBufferedBytes: maxBufferedBytes,
+                                status: status,
+                                console: console,
+                                name: name,
+                                renderTail: renderTail,
+                                file: file,
+                                line: line
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        return liveRestream(
+            level: level,
+            name: name,
+            renderTail: renderTail,
+            ignoreNonZeroStatusCode: ignoreNonZeroStatusCode,
+            console: console,
+            file: file,
+            line: line
+        )
+    }
+
+    static func failureReplay(
+        capture: OutputCapture,
+        maxBufferedBytes: Int,
+        ignoreNonZeroStatusCode: Bool,
+        replay: @escaping (_ data: Data, _ wasTruncated: Bool, _ status: Int32) -> ()
+    ) -> OutputStreaming {
+        precondition(maxBufferedBytes > 0, "maxBufferedBytes must be greater than zero")
+
+        let buffer = BoundedOutputBuffer(maxBufferedBytes: maxBufferedBytes)
+
+        return OutputStreaming { data in
+            if capture == .stdoutAndStderr {
+                buffer.append(data)
+            }
+        } stderr: { data in
+            buffer.append(data)
+        } finish: { status, cancelled in
+            guard status != 0, !ignoreNonZeroStatusCode, !cancelled else {
+                return
+            }
+
+            let snapshot = buffer.snapshot()
+            replay(snapshot.data, snapshot.wasTruncated, status)
+        }
+    }
+
+    private static func liveRestream(
+        level: Logger.Level,
+        name: String,
+        renderTail: Int,
+        ignoreNonZeroStatusCode: Bool,
+        console: Console,
+        file: StaticString,
+        line: UInt
+    ) -> OutputStreaming {
         let sink = console.logStream(level: level, name: name, renderTail: renderTail, file: file, line: line)
         
         let stdoutStream = MessageStream { message in
@@ -211,6 +328,76 @@ public struct OutputStreaming: ExpressibleByArrayLiteral {
                 }
             }
         }
+    }
+
+    private static func renderFailureReplay(
+        data: Data,
+        wasTruncated: Bool,
+        maxBufferedBytes: Int,
+        status: Int32,
+        console: Console,
+        name: String,
+        renderTail: Int,
+        file: StaticString,
+        line: UInt
+    ) {
+        guard wasTruncated || !data.isEmpty else {
+            return
+        }
+
+        let sink = console.logStream(level: .error, name: name, renderTail: renderTail, file: file, line: line)
+
+        if wasTruncated {
+            sink.append(line: "Output truncated; showing the last \(maxBufferedBytes) bytes")
+        }
+
+        let replayStream = MessageStream { message in
+            sink.append(line: message)
+        } replaceLine: { message in
+            sink.replace(line: message)
+        }
+
+        let validUTF8Data = Data(String(decoding: data, as: UTF8.self).utf8)
+        replayStream.append(data: validUTF8Data)
+        replayStream.flushMessageIfMessageIsNotEmpty()
+        sink.finish(result: .failure(.init(statusCode: status)), cancelled: false)
+    }
+}
+
+private final class BoundedOutputBuffer {
+    struct Snapshot {
+        var data: Data
+        var wasTruncated: Bool
+    }
+
+    private let maxBufferedBytes: Int
+    private let storage = AtomicValue(Snapshot(data: Data(), wasTruncated: false))
+
+    init(maxBufferedBytes: Int) {
+        self.maxBufferedBytes = maxBufferedBytes
+    }
+
+    func append(_ newData: Data) {
+        storage.withExclusiveAccess { state in
+            if newData.count >= maxBufferedBytes {
+                let discardedBytes = !state.data.isEmpty || newData.count > maxBufferedBytes
+                state.data = Data(newData.suffix(maxBufferedBytes))
+                state.wasTruncated = state.wasTruncated || discardedBytes
+                return
+            }
+
+            state.data.append(newData)
+
+            let overflow = state.data.count - maxBufferedBytes
+            if overflow > 0 {
+                state.data.removeFirst(overflow)
+                state.wasTruncated = true
+            }
+        }
+    }
+
+    func snapshot() -> Snapshot {
+        storage.currentValue()
     }
 }
 

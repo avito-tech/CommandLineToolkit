@@ -27,6 +27,15 @@ extension Console {
     public var isInteractive: Bool {
         handler.isInteractive
     }
+
+    /// Returns whether a log message at the given level is enabled by the current verbosity settings.
+    ///
+    /// - Parameter level: The severity level to check.
+    /// - Returns: `true` when the level is enabled or verbose logging is active.
+    public func isLogEnabled(at level: Logger.Level) -> Bool {
+        let settings = handler.verbositySettings
+        return settings.verbose || level >= settings.logLevel
+    }
 }
 
 // MARK: - LogStream extensions
