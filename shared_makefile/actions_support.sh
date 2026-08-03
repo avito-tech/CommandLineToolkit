@@ -11,7 +11,7 @@ build_and_deploy_executable_to_local_path() {
         local executable_path="$PROJECT_DIR/.build/apple/Products/Release/$executable_name"
     fi
     
-    action___build ${archs_to_build[@]+"${archs_to_build[@]}"}
+    action___build ${archs_to_build[@]+"${archs_to_build[@]}"} || return $?
 
     prepare_executable_and_deploy_to_local_path "$executable_path" "$destination_path"
 }
