@@ -8,6 +8,7 @@ struct InputComponentState: Hashable {
     var title: String
     var input: String = ""
     var defaultValue: String?
+    var help: String?
     var cursorIndex: Int = 0
     
     private(set) var result: InputResult?

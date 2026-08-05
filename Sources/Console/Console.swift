@@ -87,6 +87,7 @@ extension Console {
         id: String? = nil,
         title: String,
         defaultValue: String? = nil,
+        help: String? = nil,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws -> String {
@@ -94,6 +95,7 @@ extension Console {
             id: id,
             title: title,
             defaultValue: defaultValue,
+            help: help,
             file: file,
             line: line
         )

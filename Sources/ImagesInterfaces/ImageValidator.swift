@@ -1,5 +1,21 @@
 import PathLib
 
+public enum ImageAssetKind: Equatable {
+    case vector
+    case raster
+
+    public init?(fileExtension: String) {
+        switch fileExtension.lowercased() {
+        case "pdf", "svg":
+            self = .vector
+        case "png", "jpg", "jpeg":
+            self = .raster
+        default:
+            return nil
+        }
+    }
+}
+
 public protocol ImageValidator {
     func validateFormat(path: AbsolutePath) -> FormatValidationResult
     func validateSize(path: AbsolutePath) -> SizeValidationResult

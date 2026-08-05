@@ -1,7 +1,7 @@
 import PathLib
 
 public enum ImageTargetScope: String, CaseIterable {
-    case ru
+    case avito
     case global
 }
 

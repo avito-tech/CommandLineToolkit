@@ -38,7 +38,7 @@ extension ANSIConsoleHandler {
             case "N", "n":
                 return false
             default:
-                output.writeln(indent, "Wrong input, try again")
+                output.writeln(indent, "Ожидалось y, n или Enter. Попробуйте ещё раз.")
                 continue
             }
         }

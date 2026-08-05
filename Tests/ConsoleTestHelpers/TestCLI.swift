@@ -70,6 +70,7 @@ public final class MockCLIHandler: ConsoleHandler {
         id: String?,
         title: String,
         defaultValue: String?,
+        help: String?,
         file: StaticString,
         line: UInt
     ) async throws -> String {

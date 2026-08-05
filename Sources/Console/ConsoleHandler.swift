@@ -15,11 +15,13 @@ public protocol ConsoleHandler {
     /// - Parameters:
     ///   - title: question to ask
     ///   - defaultValue: default value, user can hit enter to select it
+    ///   - help: additional explanation shown before the input prompt
     /// - Returns: User's input
     func input(
         id: String?,
         title: String,
         defaultValue: String?,
+        help: String?,
         file: StaticString,
         line: UInt
     ) async throws -> String

@@ -24,12 +24,12 @@ public final class TrackingConsoleHandler: ConsoleHandler {
         upstream.verbositySettings
     }
 
-    public func input(id: String?, title: String, defaultValue: String?, file: StaticString, line: UInt) async throws -> String {
+    public func input(id: String?, title: String, defaultValue: String?, help: String?, file: StaticString, line: UInt) async throws -> String {
         guard let id else {
-            return try await upstream.input(id: id, title: title, defaultValue: defaultValue, file: file, line: line)
+            return try await upstream.input(id: id, title: title, defaultValue: defaultValue, help: help, file: file, line: line)
         }
         let result = await catching {
-            try await upstream.input(id: id, title: title, defaultValue: defaultValue, file: file, line: line)
+            try await upstream.input(id: id, title: title, defaultValue: defaultValue, help: help, file: file, line: line)
         }
         await ConsoleActionStorage.current.add(action: .input(id: id, result:  result))
         return try result.get()

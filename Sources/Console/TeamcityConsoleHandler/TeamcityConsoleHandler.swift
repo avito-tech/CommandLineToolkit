@@ -48,6 +48,7 @@ public final class TeamcityConsoleHandler: ConsoleHandler {
         id: String?,
         title: String,
         defaultValue: String?,
+        help: String?,
         file: StaticString,
         line: UInt
     ) async throws -> String {

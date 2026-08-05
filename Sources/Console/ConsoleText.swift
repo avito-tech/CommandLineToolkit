@@ -17,6 +17,35 @@ extension String {
         let style = ConsoleStyle(color: color, background: background, attributes: attributes)
         return consoleText(style)
     }
+
+    func wrapped(to maximumLength: Int) -> [String] {
+        guard maximumLength > 0 else { return [self] }
+
+        return components(separatedBy: .newlines).flatMap { line in
+            guard line.count > maximumLength else { return [line] }
+
+            var result: [String] = []
+            var current = ""
+            for originalWord in line.split(separator: " ") {
+                var word = String(originalWord)
+                if !current.isEmpty, current.count + word.count + 1 > maximumLength {
+                    result.append(current)
+                    current = ""
+                }
+                while word.count > maximumLength {
+                    result.append(String(word.prefix(maximumLength)))
+                    word.removeFirst(maximumLength)
+                }
+                if !word.isEmpty {
+                    current += (current.isEmpty ? "" : " ") + word
+                }
+            }
+            if !current.isEmpty {
+                result.append(current)
+            }
+            return result.isEmpty ? [""] : result
+        }
+    }
 }
 
 /// A collection of `ConsoleTextFragment`s. Represents stylized text that can be outputted
