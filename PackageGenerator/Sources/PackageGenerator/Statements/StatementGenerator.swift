@@ -25,6 +25,9 @@ public final class StatementGenerator {
         
         output.append("// swift-tools-version:" + generatablePackage.packageJsonFile.swiftToolsVersion)
         output.append("import PackageDescription")
+        if packageTargets.contains(where: { $0.settings.isMacro == true }) {
+            output.append("import CompilerPluginSupport")
+        }
         output.append("")
         
         output.append("var targets = [Target]()")
@@ -37,6 +40,8 @@ public final class StatementGenerator {
             let targetMethodName: String
             if target.isTest {
                 targetMethodName = ".testTarget("
+            } else if target.settings.isMacro == true {
+                targetMethodName = ".macro("
             } else if isExecutableTarget(target: target, products: packageProducts) {
                 targetMethodName = ".executableTarget("
             } else {
@@ -354,7 +359,7 @@ public final class StatementGenerator {
             return products
         case .productForEachTarget:
             let packageTargets = try obtainPackageTargets(generatablePackage: generatablePackage)
-            return packageTargets.filter { !$0.isTest }.map { packageTarget in
+            return packageTargets.filter { !$0.isTest && $0.settings.isMacro != true }.map { packageTarget in
                 PackageProduct(
                     name: packageTarget.name,
                     productType: .library,

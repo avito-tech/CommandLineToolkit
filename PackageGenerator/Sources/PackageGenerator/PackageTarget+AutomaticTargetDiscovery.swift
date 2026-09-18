@@ -124,7 +124,7 @@ public extension PackageTarget {
         
         return try PackageTarget(
             name: moduleName,
-            dependencies: importedModules(url: url),
+            dependencies: importedModules(url: url).union(targetSettings.additionalDependencies),
             path: String(path),
             isTest: isTest,
             settings: targetSettings,

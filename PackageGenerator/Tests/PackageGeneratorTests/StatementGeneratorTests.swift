@@ -79,6 +79,97 @@ final class StatementGeneratorTests: XCTestCase {
         )
     }
     
+    func test___macro_target() throws {
+        let contents = try statementGenerator.generatePackageSwiftCode(
+            generatablePackage: GeneratablePackage(
+                location: URL(fileURLWithPath: NSTemporaryDirectory()),
+                packageJsonFile: PackageJsonFile(
+                    swiftToolsVersion: "5.9",
+                    name: "TestPackage",
+                    platforms: [
+                        PackagePlatform(name: "macOS", version: "13")
+                    ],
+                    products: PackageProducts.productForEachTarget,
+                    dependencies: PackageDependencies(
+                        implicitSystemModules: [],
+                        external: [:],
+                        mirrorsFilePath: nil
+                    ),
+                    targets: .multiple(
+                        [
+                            PackageTargets.single(
+                                PackageTarget(
+                                    name: "MacroImpl",
+                                    dependencies: [],
+                                    path: "Sources/MacroImpl",
+                                    isTest: false,
+                                    settings: TargetSpecificSettings(isMacro: true),
+                                    conditionalCompilationTargetRequirement: nil
+                                )
+                            ),
+                            PackageTargets.single(
+                                PackageTarget(
+                                    name: "TargetA",
+                                    dependencies: ["MacroImpl"],
+                                    path: "Sources/TargetA",
+                                    isTest: false,
+                                    settings: TargetSpecificSettings(),
+                                    conditionalCompilationTargetRequirement: nil
+                                )
+                            ),
+                        ]
+                    )
+                )
+            )
+        )
+        
+        let expectedContents = """
+        // swift-tools-version:5.9
+        import PackageDescription
+        import CompilerPluginSupport
+
+        var targets = [Target]()
+        // MARK: MacroImpl
+        targets.append(
+            .macro(
+                name: "MacroImpl",
+                dependencies: [
+                ],
+                path: "Sources/MacroImpl"
+            )
+        )
+        // MARK: TargetA
+        targets.append(
+            .target(
+                name: "TargetA",
+                dependencies: [
+                    "MacroImpl",
+                ],
+                path: "Sources/TargetA"
+            )
+        )
+
+        let package = Package(
+            name: "TestPackage",
+            platforms: [
+                .macOS(.v13),
+            ],
+            products: [
+                .library(name: "TargetA", targets: ["TargetA"]),
+            ],
+            dependencies: [
+            ],
+            targets: targets
+        )
+
+        """
+        
+        XCTAssertEqual(
+            contents.first!.contents,
+            expectedContents
+        )
+    }
+    
     func test___multiple_targets() throws {
         let contents = try statementGenerator.generatePackageSwiftCode(
             generatablePackage: GeneratablePackage(
