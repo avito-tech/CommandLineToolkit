@@ -94,7 +94,7 @@ public extension PackageTarget {
         var result = [PackageTarget]()
 
         while let moduleFolderUrl = enumerator.nextObject() as? URL {
-            let isTestHelper = moduleFolderUrl.path.hasSuffix("TestHelpers")
+            let isTestHelper = moduleFolderUrl.path.hasSuffix("TestHelpers") || moduleFolderUrl.path.hasSuffix("TestSupport")
             result.append(
                 try generateTarget(
                     moduleName: moduleFolderUrl.lastPathComponent,
