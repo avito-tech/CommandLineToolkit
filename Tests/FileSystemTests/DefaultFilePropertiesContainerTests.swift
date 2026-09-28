@@ -10,6 +10,24 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
     private lazy var temporaryFolder = assertDoesNotThrow { try TemporaryFolder(deleteOnDealloc: true) }
     private lazy var filePropertiesContainer = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
 
+    func test___snapshot_without_following_links___returns_link_kind_and_accepts_broken_links() throws {
+        let target = try temporaryFolder.createFile(filename: "target")
+        let link = try temporaryFolder.createSymbolicLink(at: "link", destination: target)
+        let broken = try temporaryFolder.createSymbolicLink(at: "broken", destination: RelativePath("missing"))
+        let directory = try temporaryFolder.createDirectory(components: ["directory"])
+        let directoryLink = try temporaryFolder.createSymbolicLink(at: "directory_link", destination: directory)
+        for path in [link, broken, directoryLink] {
+            XCTAssertEqual(try DefaultFilePropertiesContainer(path: path).snapshot(followSymbolicLinks: false).kind, .symbolicLink)
+        }
+        XCTAssertEqual(try DefaultFilePropertiesContainer(path: target).snapshot(followSymbolicLinks: false).kind, .regularFile)
+        XCTAssertEqual(try DefaultFilePropertiesContainer(path: temporaryFolder.absolutePath).snapshot(followSymbolicLinks: false).kind, .directory)
+    }
+
+    func test___snapshot___preserves_nanosecond_timestamp() throws {
+        try filePropertiesContainer.modificationDate.set(Date(timeIntervalSince1970: 1_000.125))
+        XCTAssertEqual(try filePropertiesContainer.snapshot(followSymbolicLinks: false).modificationTimeNanoseconds, 1_000_125_000_000)
+    }
+
     func test___snapshot___contains_type_size_and_modification_date() throws {
         temporaryFile.fileHandleForWriting.write(Data([1, 2, 3]))
         let date = Date(timeIntervalSince1970: 1_000.125)

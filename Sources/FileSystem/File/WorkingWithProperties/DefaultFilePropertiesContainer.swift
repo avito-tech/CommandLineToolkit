@@ -1,11 +1,6 @@
 import Foundation
 import PathLib
 import Types
-#if canImport(Darwin)
-import Darwin
-#elseif canImport(Glibc)
-import Glibc
-#endif
 
 public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     private let path: AbsolutePath
@@ -16,29 +11,12 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     }
 
     public func snapshot() throws -> FilePropertiesSnapshot {
-        var info = stat()
-        guard stat(path.pathString, &info) == 0 else {
-            throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno), userInfo: [NSFilePathErrorKey: path.pathString])
-        }
-        let kind: FilePropertiesSnapshot.Kind
-        switch info.st_mode & mode_t(S_IFMT) {
-        case mode_t(S_IFREG):
-            kind = .regularFile
-        case mode_t(S_IFDIR):
-            kind = .directory
-        default:
-            kind = .other
-        }
-        #if canImport(Darwin)
-        let modified = info.st_mtimespec
-        #else
-        let modified = info.st_mtim
-        #endif
-        return FilePropertiesSnapshot(
-            kind: kind,
-            modificationDate: Date(timeIntervalSince1970: Double(modified.tv_sec) + Double(modified.tv_nsec) / 1_000_000_000),
-            size: Int(info.st_size)
-        )
+        try snapshot(followSymbolicLinks: true)
+    }
+
+    /// With `false`, symbolic links (including broken links) have kind `.symbolicLink`.
+    public func snapshot(followSymbolicLinks: Bool) throws -> FilePropertiesSnapshot {
+        try FilePropertiesSnapshot.read(path: path.pathString, followSymbolicLinks: followSymbolicLinks)
     }
     
     // MARK: - Resource values (read-write)

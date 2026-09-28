@@ -3,6 +3,7 @@ import PathLib
 
 public protocol FileSystem:
     FileSystemEnumeratorFactory,
+    FileSystemEntrySequenceFactory,
     DirectoryCreator,
     FileCreator,
     PathCopier,

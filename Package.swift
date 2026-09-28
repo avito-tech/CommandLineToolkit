@@ -290,6 +290,7 @@ targets.append(
         name: "FileSystemTests",
         dependencies: [
             "FileSystem",
+            "FileSystemTestHelpers",
             "PathLib",
             "TestHelpers",
             "Tmp",

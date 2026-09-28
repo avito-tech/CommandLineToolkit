@@ -4,6 +4,7 @@ public struct AbsolutePath:
     Path,
     Codable,
     Hashable,
+    Sendable,
     Comparable,
     ExpressibleByStringLiteral,
     ExpressibleByStringInterpolation,

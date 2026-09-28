@@ -133,6 +133,14 @@ public final class LocalFileSystem: FileSystem {
         commonlyUsedPathsProviderFactory.commonlyUsedPathsProvider
     }
     
+    public func entries(
+        at root: AbsolutePath,
+        traversal: FileSystemTraversal,
+        descendingInto: @escaping @Sendable (FileSystemEntry) -> Bool
+    ) -> FileSystemEntrySequence {
+        .local(at: root, traversal: traversal, descendingInto: descendingInto)
+    }
+
     public func glob(pattern: GlobPattern) -> FileSystemEnumerator {
         fileSystemEnumeratorFactory.glob(pattern: pattern)
     }

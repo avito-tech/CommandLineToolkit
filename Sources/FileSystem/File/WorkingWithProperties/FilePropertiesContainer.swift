@@ -4,6 +4,7 @@ import Types
 
 public protocol FilePropertiesContainer {
     func snapshot() throws -> FilePropertiesSnapshot
+    func snapshot(followSymbolicLinks: Bool) throws -> FilePropertiesSnapshot
 
     // Non-modifiable
     var existence: FileExistence { get }
@@ -29,6 +30,13 @@ public protocol FilePropertiesContainer {
 }
 
 extension FilePropertiesContainer {
+    public func snapshot(followSymbolicLinks: Bool) throws -> FilePropertiesSnapshot {
+        if !followSymbolicLinks, try isSymbolicLink {
+            return try FilePropertiesSnapshot(kind: .symbolicLink, modificationDate: modificationDate.get(), size: fileSize)
+        }
+        return try snapshot()
+    }
+
     public func snapshot() throws -> FilePropertiesSnapshot {
         let kind: FilePropertiesSnapshot.Kind
         if try isRegularFile || isSymbolicLinkToFile {

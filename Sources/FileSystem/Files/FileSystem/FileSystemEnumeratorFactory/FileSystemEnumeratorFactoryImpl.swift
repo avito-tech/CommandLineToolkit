@@ -1,7 +1,7 @@
 import Foundation
 import PathLib
 
-public final class FileSystemEnumeratorFactoryImpl: FileSystemEnumeratorFactory {
+public final class FileSystemEnumeratorFactoryImpl: FileSystemEnumeratorFactory, FileSystemEntrySequenceFactory {
     private let filePropertiesProvider: FilePropertiesProvider
     
     public init(
@@ -21,6 +21,14 @@ public final class FileSystemEnumeratorFactoryImpl: FileSystemEnumeratorFactory 
         }
     }
     
+    public func entries(
+        at root: AbsolutePath,
+        traversal: FileSystemTraversal,
+        descendingInto: @escaping @Sendable (FileSystemEntry) -> Bool
+    ) -> FileSystemEntrySequence {
+        .local(at: root, traversal: traversal, descendingInto: descendingInto)
+    }
+
     public func glob(pattern: GlobPattern) -> FileSystemEnumerator {
         GlobFileSystemEnumerator(pattern: pattern)
     }
