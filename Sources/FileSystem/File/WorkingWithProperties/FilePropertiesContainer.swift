@@ -3,6 +3,8 @@ import PathLib
 import Types
 
 public protocol FilePropertiesContainer {
+    func snapshot() throws -> FilePropertiesSnapshot
+
     // Non-modifiable
     var existence: FileExistence { get }
     
@@ -27,6 +29,20 @@ public protocol FilePropertiesContainer {
 }
 
 extension FilePropertiesContainer {
+    public func snapshot() throws -> FilePropertiesSnapshot {
+        let kind: FilePropertiesSnapshot.Kind
+        if try isRegularFile || isSymbolicLinkToFile {
+            kind = .regularFile
+        } else if try isDirectory || isSymbolicLinkToDirectory {
+            kind = .directory
+        } else if try isBrokenSymbolicLink {
+            throw CocoaError(.fileReadNoSuchFile)
+        } else {
+            kind = .other
+        }
+        return try FilePropertiesSnapshot(kind: kind, modificationDate: modificationDate.get(), size: fileSize)
+    }
+
     public func touch() throws {
         try modificationDate.set(Date())
     }

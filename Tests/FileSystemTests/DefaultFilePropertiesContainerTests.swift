@@ -9,6 +9,41 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
     private lazy var temporaryFile = assertDoesNotThrow { try TemporaryFile(deleteOnDealloc: true) }
     private lazy var temporaryFolder = assertDoesNotThrow { try TemporaryFolder(deleteOnDealloc: true) }
     private lazy var filePropertiesContainer = DefaultFilePropertiesContainer(path: temporaryFile.absolutePath)
+
+    func test___snapshot___contains_type_size_and_modification_date() throws {
+        temporaryFile.fileHandleForWriting.write(Data([1, 2, 3]))
+        let date = Date(timeIntervalSince1970: 1_000.125)
+        try filePropertiesContainer.modificationDate.set(date)
+
+        let snapshot = try filePropertiesContainer.snapshot()
+
+        XCTAssertEqual(snapshot.kind, .regularFile)
+        XCTAssertEqual(snapshot.size, 3)
+        XCTAssertEqual(snapshot.modificationDate, date)
+        XCTAssertEqual(try DefaultFilePropertiesContainer(path: temporaryFolder.absolutePath).snapshot().kind, .directory)
+    }
+
+    func test___snapshot___follows_symbolic_links_and_refreshes_target_metadata() throws {
+        let target = try temporaryFolder.createFile(filename: "target")
+        let link = try temporaryFolder.createSymbolicLink(at: "link", destination: RelativePath("target"))
+        let properties = DefaultFilePropertiesContainer(path: link)
+        XCTAssertEqual(try properties.snapshot().size, 0)
+
+        try Data([1, 2, 3]).write(to: target.fileUrl)
+        XCTAssertEqual(try properties.snapshot().size, 3)
+        XCTAssertEqual(try properties.snapshot().kind, .regularFile)
+
+        let directory = try temporaryFolder.createDirectory(components: ["directory"])
+        let directoryLink = try temporaryFolder.createSymbolicLink(at: "directory_link", destination: directory)
+        XCTAssertEqual(try DefaultFilePropertiesContainer(path: directoryLink).snapshot().kind, .directory)
+    }
+
+    func test___snapshot___throws_for_missing_files_and_broken_links() throws {
+        let missing = temporaryFolder.absolutePath.appending("missing")
+        let broken = try temporaryFolder.createSymbolicLink(at: "broken", destination: missing)
+        XCTAssertThrowsError(try DefaultFilePropertiesContainer(path: missing).snapshot())
+        XCTAssertThrowsError(try DefaultFilePropertiesContainer(path: broken).snapshot())
+    }
     
     func test___modificationDate() {
         XCTAssertEqual(

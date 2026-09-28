@@ -1,6 +1,11 @@
 import Foundation
 import PathLib
 import Types
+#if canImport(Darwin)
+import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#endif
 
 public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     private let path: AbsolutePath
@@ -8,6 +13,32 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
     
     public init(path: AbsolutePath) {
         self.path = path
+    }
+
+    public func snapshot() throws -> FilePropertiesSnapshot {
+        var info = stat()
+        guard stat(path.pathString, &info) == 0 else {
+            throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno), userInfo: [NSFilePathErrorKey: path.pathString])
+        }
+        let kind: FilePropertiesSnapshot.Kind
+        switch info.st_mode & mode_t(S_IFMT) {
+        case mode_t(S_IFREG):
+            kind = .regularFile
+        case mode_t(S_IFDIR):
+            kind = .directory
+        default:
+            kind = .other
+        }
+        #if canImport(Darwin)
+        let modified = info.st_mtimespec
+        #else
+        let modified = info.st_mtim
+        #endif
+        return FilePropertiesSnapshot(
+            kind: kind,
+            modificationDate: Date(timeIntervalSince1970: Double(modified.tv_sec) + Double(modified.tv_nsec) / 1_000_000_000),
+            size: Int(info.st_size)
+        )
     }
     
     // MARK: - Resource values (read-write)
@@ -230,15 +261,15 @@ public final class DefaultFilePropertiesContainer: FilePropertiesContainer {
 }
 
 private final class AttributeThrowingProperty<T, U>: ThrowingProperty {
-    public typealias RawPropertyType = T
-    public typealias PropertyType = U
+    typealias RawPropertyType = T
+    typealias PropertyType = U
     
     private let fileManager: FileManager
     private let path: AbsolutePath
     private let key: FileAttributeKey
     private let readingTransform: (RawPropertyType) -> PropertyType
     
-    public init(
+    init(
         fileManager: FileManager,
         path: AbsolutePath,
         key: FileAttributeKey,
@@ -250,7 +281,7 @@ private final class AttributeThrowingProperty<T, U>: ThrowingProperty {
         self.readingTransform = readingTransform
     }
     
-    public func get() throws -> PropertyType {
+    func get() throws -> PropertyType {
         let attributes = try fileManager.attributesOfItem(atPath: path.pathString)
         
         guard let value = attributes[key] else {
@@ -272,7 +303,7 @@ private final class AttributeThrowingProperty<T, U>: ThrowingProperty {
         return readingTransform(number)
     }
     
-    public func set(_ value: PropertyType) throws {
+    func set(_ value: PropertyType) throws {
         try fileManager.setAttributes([key: value], ofItemAtPath: path.pathString)
     }
 }
@@ -281,7 +312,7 @@ private final class ResourceValueThrowingProperty<T>: GettableResourceValueThrow
     private let path: AbsolutePath
     private let keyPath: WritableKeyPath<URLResourceValues, PropertyType?>
     
-    public init(
+    init(
         path: AbsolutePath,
         key: URLResourceKey,
         keyPath: WritableKeyPath<URLResourceValues, PropertyType?>
@@ -296,7 +327,7 @@ private final class ResourceValueThrowingProperty<T>: GettableResourceValueThrow
         )
     }
     
-    public func set(_ value: PropertyType) throws {
+    func set(_ value: PropertyType) throws {
         var values = URLResourceValues()
         
         values[keyPath: keyPath] = value
@@ -308,13 +339,13 @@ private final class ResourceValueThrowingProperty<T>: GettableResourceValueThrow
 }
 
 private class GettableResourceValueThrowingProperty<T>: GettableThrowingProperty {
-    public typealias PropertyType = T
+    typealias PropertyType = T
     
     private let path: AbsolutePath
     private let key: URLResourceKey
     private let keyPath: KeyPath<URLResourceValues, PropertyType?>
     
-    public init(
+    init(
         path: AbsolutePath,
         key: URLResourceKey,
         keyPath: KeyPath<URLResourceValues, PropertyType?>
@@ -324,7 +355,7 @@ private class GettableResourceValueThrowingProperty<T>: GettableThrowingProperty
         self.keyPath = keyPath
     }
     
-    public func get() throws -> PropertyType {
+    func get() throws -> PropertyType {
         let values = try path.fileUrl.resourceValues(forKeys: [key])
         guard let value = values[keyPath: keyPath] else {
             throw FilePropertiesContainerError.emptyValue(
