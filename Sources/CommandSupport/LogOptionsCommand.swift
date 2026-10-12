@@ -55,21 +55,21 @@ public struct ParsableCommandLogConfiguration {
 
 extension ParsableCommand {
 
-    public var logOptions: LogOptions {
+    public var resolvedLogOptions: LogOptions {
         (self as? LogOptionsCommand)?.logOptions ?? .default
     }
 
     public var logLevel: Logger.Level {
-        logOptions.verbose ? .trace : logOptions.logLevel
+        resolvedLogOptions.verbose ? .trace : resolvedLogOptions.logLevel
     }
 
     public func bootstrapLogger(with config: ParsableCommandLogConfiguration = .default) {
         let systemLogHandlerFactory: (String) -> [any LogHandler]
-        switch logOptions.logFormat {
+        switch resolvedLogOptions.logFormat {
         case .interactive:
             ConsoleSystem.bootstrap {
                 TrackingConsoleHandler(
-                    upstream: ANSIConsoleHandler(verbositySettings: .init(logLevel: logLevel, verbose: logOptions.verbose), backing: config.consoleBacking)
+                    upstream: ANSIConsoleHandler(verbositySettings: .init(logLevel: logLevel, verbose: resolvedLogOptions.verbose), backing: config.consoleBacking)
                 )
             }
             systemLogHandlerFactory = { label in
@@ -83,7 +83,7 @@ extension ParsableCommand {
                 ConsoleSystem.bootstrap {
                     TrackingConsoleHandler(
                         upstream: TeamcityConsoleHandler(
-                            verbositySettings: .init(logLevel: logLevel, verbose: logOptions.verbose),
+                            verbositySettings: .init(logLevel: logLevel, verbose: resolvedLogOptions.verbose),
                             messageGenerator: messageGenerator,
                             messageRenderer: messageRenderer
                         )
