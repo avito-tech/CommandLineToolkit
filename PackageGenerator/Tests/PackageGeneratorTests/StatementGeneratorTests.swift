@@ -4,6 +4,45 @@ import XCTest
 // swiftlint:disable force_unwrapping
 final class StatementGeneratorTests: XCTestCase {
     private lazy var statementGenerator = StatementGenerator()
+
+    func test___binary_targets_are_available_as_same_package_dependencies() throws {
+        let url = "https://example.com/RemoteModule.zip"
+        let checksum = String(repeating: "a", count: 64)
+        let package = GeneratablePackage(
+            location: URL(fileURLWithPath: NSTemporaryDirectory()),
+            packageJsonFile: PackageJsonFile(
+                swiftToolsVersion: "5.9",
+                name: "TestPackage",
+                platforms: [PackagePlatform(name: "macOS", version: "13")],
+                products: .productForEachTarget,
+                dependencies: PackageDependencies(
+                    implicitSystemModules: [],
+                    external: [:],
+                    mirrorsFilePath: nil,
+                    binaryTargets: [
+                        "LocalModule": .local(path: "Dependencies/LocalModule.xcframework"),
+                        "RemoteModule": .remote(url: url, checksum: checksum)
+                    ]
+                ),
+                targets: .single(
+                    PackageTarget(
+                        name: "TargetA",
+                        dependencies: ["LocalModule", "RemoteModule"],
+                        path: "Sources/TargetA",
+                        isTest: false,
+                        settings: TargetSpecificSettings(),
+                        conditionalCompilationTargetRequirement: nil
+                    )
+                )
+            )
+        )
+
+        let contents = try XCTUnwrap(statementGenerator.generatePackageSwiftCode(generatablePackage: package).first?.contents)
+        XCTAssertTrue(contents.contains(#".binaryTarget(name: "LocalModule", path: "Dependencies/LocalModule.xcframework")"#))
+        XCTAssertTrue(contents.contains(#".binaryTarget(name: "RemoteModule", url: "\#(url)", checksum: "\#(checksum)")"#))
+        XCTAssertTrue(contents.contains("\"LocalModule\","))
+        XCTAssertTrue(contents.contains("\"RemoteModule\","))
+    }
     
     func test() throws {
         let contents = try statementGenerator.generatePackageSwiftCode(

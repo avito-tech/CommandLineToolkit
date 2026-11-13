@@ -3,6 +3,32 @@ import PackageGenerator
 import XCTest
 
 final class PackageJsonTests: XCTestCase {
+    func test___binary_targets_decode_local_and_remote_locations() throws {
+        let checksum = "Supplied-Checksum"
+        let json = """
+        {
+            "implicitSystemModules": [],
+            "external": {},
+            "binaryTargets": {
+                "LocalModule": "Dependencies/LocalModule.xcframework",
+                "RemoteModule": {
+                    "url": "https://example.com/RemoteModule.zip",
+                    "checksum": "\(checksum)"
+                }
+            }
+        }
+        """
+
+        let dependencies = try JSONDecoder().decode(PackageDependencies.self, from: Data(json.utf8))
+
+        XCTAssertEqual(dependencies.binaryTargets, [
+            "LocalModule": .local(path: "Dependencies/LocalModule.xcframework"),
+            "RemoteModule": .remote(url: "https://example.com/RemoteModule.zip", checksum: checksum)
+        ])
+        let encoded = try JSONEncoder().encode(dependencies)
+        XCTAssertEqual(try JSONDecoder().decode(PackageDependencies.self, from: encoded), dependencies)
+    }
+
     func test___basic() throws {
         let jsonFile = PackageJsonFile(
             swiftToolsVersion: "swift-version",

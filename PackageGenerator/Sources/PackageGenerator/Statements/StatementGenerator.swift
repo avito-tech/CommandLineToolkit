@@ -31,6 +31,17 @@ public final class StatementGenerator {
         output.append("")
         
         output.append("var targets = [Target]()")
+        let binaryTargets = generatablePackage.packageJsonFile.dependencies.binaryTargets ?? [:]
+        for (name, location) in binaryTargets.sorted(by: { $0.key < $1.key }) {
+            let arguments: String
+            switch location {
+            case let .local(path):
+                arguments = "path: \(path.debugDescription)"
+            case let .remote(url, checksum):
+                arguments = "url: \(url.debugDescription), checksum: \(checksum.debugDescription)"
+            }
+            output.append("targets.append(.binaryTarget(name: \(name.debugDescription), \(arguments)))")
+        }
         let targetStatements: [String] = try packageTargets.flatMap { target -> [String] in
             var statements = [String]()
             if let conditionalCompilationTargetRequirement = target.conditionalCompilationTargetRequirement {
