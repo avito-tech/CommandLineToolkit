@@ -166,10 +166,10 @@ struct FileTreeCursor {
 }
 
 extension FileSystemEntrySequence {
-    static func local(
+    public static func local(
         at root: AbsolutePath,
-        traversal: FileSystemTraversal,
-        descendingInto: @escaping @Sendable (FileSystemEntry) -> Bool
+        traversal: FileSystemTraversal = .recursive,
+        descendingInto: @escaping @Sendable (FileSystemEntry) -> Bool = { _ in true }
     ) -> Self {
         Self {
             FileTreeCursor(

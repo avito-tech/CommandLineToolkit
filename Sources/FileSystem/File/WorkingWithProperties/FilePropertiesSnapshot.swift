@@ -1,4 +1,5 @@
 import Foundation
+import PathLib
 #if canImport(Darwin)
 import Darwin
 #elseif canImport(Glibc)
@@ -29,6 +30,16 @@ public struct FilePropertiesSnapshot: Sendable {
 }
 
 extension FilePropertiesSnapshot {
+    /// Reads the directory entry itself, including broken symbolic links.
+    public static func kindIfPresent(at path: AbsolutePath) throws -> Kind? {
+        do {
+            return try read(path: path.pathString, followSymbolicLinks: false).kind
+        } catch let error as NSError where error.domain == NSPOSIXErrorDomain
+            && (error.code == Int(ENOENT) || error.code == Int(ENOTDIR)) {
+            return nil
+        }
+    }
+
     static func read(path: String, followSymbolicLinks: Bool) throws -> Self {
         var info = stat()
         let result = followSymbolicLinks ? stat(path, &info) : lstat(path, &info)

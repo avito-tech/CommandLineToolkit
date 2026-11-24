@@ -18,7 +18,10 @@ final class DefaultFilePropertiesContainerTests: XCTestCase {
         let directoryLink = try temporaryFolder.createSymbolicLink(at: "directory_link", destination: directory)
         for path in [link, broken, directoryLink] {
             XCTAssertEqual(try DefaultFilePropertiesContainer(path: path).snapshot(followSymbolicLinks: false).kind, .symbolicLink)
+            XCTAssertEqual(try FilePropertiesSnapshot.kindIfPresent(at: path), .symbolicLink)
         }
+        XCTAssertNil(try FilePropertiesSnapshot.kindIfPresent(at: temporaryFolder.absolutePath.appending("missing")))
+        XCTAssertNil(try FilePropertiesSnapshot.kindIfPresent(at: target.appending("child")))
         XCTAssertEqual(try DefaultFilePropertiesContainer(path: target).snapshot(followSymbolicLinks: false).kind, .regularFile)
         XCTAssertEqual(try DefaultFilePropertiesContainer(path: temporaryFolder.absolutePath).snapshot(followSymbolicLinks: false).kind, .directory)
     }
